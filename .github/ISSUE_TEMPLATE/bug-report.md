@@ -1,8 +1,8 @@
 ---
 name: Bug Report
 about: Report a bug
-title: ''
-labels: ''
+title: '[bug/]'
+labels: 'bug'
 assignees: ''
 
 ---

@@ -1,8 +1,8 @@
 ---
 name: Feature Request
 about: Add a new feature
-title: ''
-labels: ''
+title: '[feature/]'
+labels: 'enhancement'
 assignees: ''
 
 ---
