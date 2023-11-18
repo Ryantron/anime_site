@@ -1,7 +1,7 @@
 ---
 name: Feature Request
 about: Add a new feature
-title: '[feature/]'
+title: 'feat():'
 labels: 'enhancement'
 assignees: ''
 
