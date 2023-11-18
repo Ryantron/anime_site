@@ -7,7 +7,7 @@ assignees: ''
 
 ---
 
-**What core or extra feature does this satisfy?**
+**What feature does this satisfy?**
 
 **Describe the feature**
 - [ ] Task 1
@@ -15,5 +15,11 @@ assignees: ''
 - [ ] Task 3
 
 **Additional context**
+
 Recommended/suggested endpoints (please modify as you see fit when working on the issue):
 ENDPOINT1 - `/`
+
+Blocked by:
+- Issue1
+
+
