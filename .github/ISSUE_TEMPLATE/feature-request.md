@@ -1,7 +1,7 @@
 ---
 name: Feature Request
 about: Add a new feature
-title: 'feat(backend/frontend/fullstack/devops):'
+title: 'feat(backend/frontend/devops/docs):'
 labels: 'enhancement'
 assignees: ''
 
