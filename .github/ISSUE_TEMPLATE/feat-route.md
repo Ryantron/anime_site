@@ -1,7 +1,7 @@
 ---
 name: Feature Request
-about: Add a new feature
-title: 'feat(backend/frontend/devops/docs):'
+about: Add a new route
+title: 'feat(route):'
 labels: 'enhancement'
 assignees: ''
 
@@ -15,7 +15,7 @@ assignees: ''
 **Additional context**
 
 Recommended/suggested endpoints (please modify as you see fit when working on the issue):
-- GET `/`
+- POST `/`
 
 Blocked by:
 - Issue1

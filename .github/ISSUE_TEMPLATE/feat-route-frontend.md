@@ -1,7 +1,7 @@
 ---
 name: Feature Request
-about: Add a new feature
-title: 'feat(backend/frontend/devops/docs):'
+about: Add a new page
+title: 'feat(route/frontend):'
 labels: 'enhancement'
 assignees: ''
 
