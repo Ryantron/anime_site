@@ -1,5 +1,5 @@
 ---
-name: Feature Request
+name: Feature Request (route/frontend)
 about: Add a new page
 title: 'feat(route/frontend):'
 labels: 'enhancement'

@@ -1,5 +1,5 @@
 ---
-name: Feature Request
+name: Feature Request (data)
 about: Add a new data function feature
 title: 'feat(data):'
 labels: 'enhancement'

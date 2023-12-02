@@ -1,5 +1,5 @@
 ---
-name: Feature Request
+name: Feature Request (route)
 about: Add a new route
 title: 'feat(route):'
 labels: 'enhancement'
