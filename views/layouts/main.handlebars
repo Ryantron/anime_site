@@ -12,8 +12,25 @@ don't forget to include your css and your client-side script file references in 
     <meta name='viewport' content='width=device-width, initial-scale=1.0' />
     <title>{{{title}}}</title>
     <link rel='stylesheet' href='/public/css/styles.css' />
+    <link
+      rel='stylesheet'
+      href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'
+    />
   </head>
   <body>
+    <nav id='navbar'>
+      <h2 id='navbar__title'><a href='/'>OtakuOracle</a></h2>
+      <div>
+        {{#if navbar?.user}}
+          <p>{{navbar.user.username}}</p>
+        {{else}}
+          <a href='/login'>Login</a>
+        {{/if}}
+        <button id='navbar__menu-button' class='btn'><i
+            class='fa fa-bars'
+          ></i></button>
+      </div>
+    </nav>
     {{{body}}}
   </body>
 </html>
