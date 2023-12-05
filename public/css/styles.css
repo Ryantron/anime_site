@@ -1,7 +1,10 @@
 :root {
   --primary-color: #0006d8;
   --secondary-color: #d8d200;
+
 }
+
+
 
 .flex-column {
   display: flex;
