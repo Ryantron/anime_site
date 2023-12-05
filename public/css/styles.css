@@ -1,5 +1,56 @@
-.center {
+:root {
+  --primary-color: #0006d8;
+  --secondary-color: #d8d200;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.flex-center {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.flex-space-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.primary-text-color {
+  color: white;
+}
+
+.primary-bg-color {
+  background-color: var(--primary-color);
+}
+
+.secondary-text-color {
+  color: black;
+}
+
+.secondary-bg-color {
+  background-color: var(--secondary-color);
+}
+
+.no-underline {
+  text-decoration: none;
+}
+
+.no-bullet {
+  list-style-type: none;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-l {
+  font-size: 1.5rem;
+}
+
+.text-xl {
+  font-size: 1.8rem;
 }

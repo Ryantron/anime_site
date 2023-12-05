@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __rootDirectory = path.dirname(path.dirname(__filename));
 const __publicPath = path.join(__rootDirectory, '/public');
 const __viewPath = path.join(__rootDirectory, '/views');
-const expressPublicPath = express.static(path.join(__rootDirectory, '/public'));
+const expressPublicPath = express.static(__publicPath);
 
 const handlebarsInstance = exphbs.create({
   defaultLayout: 'main',
@@ -23,7 +23,7 @@ const handlebarsInstance = exphbs.create({
 });
 
 const app = express();
-app.use(__publicPath, expressPublicPath);
+app.use('/public', expressPublicPath);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
