@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import helpers from "../helpers.js";
+import validation from "../helpers.js";
 import { changeUserInfo } from "../data/users.js";
 
 router.route("/").get(async (req, res) => {
@@ -16,23 +16,28 @@ router.route("/aboutus").get(async (req, res) => {
 });
 
 router.route("/accounts/reset").patch(async (req, res) => {
-  // No pfp change yet
-  /*
-  Only when logged in? req.session would help
-  -> Would fill in rest of details if only updating 1 at a time
-  -> https://www.jotform.com/blog/wp-content/uploads/2022/03/jotform-profile-new-email-address.png
-  Or update more than 1 at a time...
-  */
+  // TODO: pfp change implementation
+  // Update exactly 1 field (username, email, password, or pfp)
   let userInfo = req.body;
+  let fieldCode = undefined;
+  let newField = undefined;
   try {
     if (userInfo.username) {
-      helpers.usernameValidation(userInfo.username);
-    }
-    if (userInfo.emailAddress) {
-      helpers.emailValidation(userInfo.emailAddress);
-    }
-    if (userInfo.password) {
-      helpers.passwordValidation(userInfo.password);
+      validation.usernameValidation(userInfo.username);
+      newField = userInfo.username;
+      fieldCode = 0;
+    } else if (userInfo.emailAddress) {
+      validation.emailValidation(userInfo.emailAddress);
+      newField = userInfo.emailAddress;
+      fieldCode = 1;
+    } else if (userInfo.password) {
+      validation.passwordValidation(userInfo.password);
+      newField = userInfo.password;
+      fieldCode = 2;
+    } else {
+      validation.pfpValidation(userInfo.pfp);
+      newField = userInfo.pfp;
+      fieldCode = 3;
     }
   } catch (e) {
     // Client-side validation should prevent this
@@ -43,19 +48,23 @@ router.route("/accounts/reset").patch(async (req, res) => {
     });
   }
 
-  /*
-  Another problem: any 1 (or more?) parameter in req.body
-  Then changeUserInfo needs to be changed
-  */
   try {
-    await changeUserInfo(
-      userInfo.username,
-      userInfo.emailAddress,
-      userInfo.password,
+    const update = await changeUserInfo(
+      req.session.user.emailAddress,
+      newField,
+      fieldCode,
     );
-    res.redirect("accounts");
+    if (!update) {
+      res.status(500).render("errors", {
+        errorStatus: 500,
+        title: "Error",
+        errorMessage: "Internal server error",
+      });
+    } else {
+      res.redirect("accounts");
+    }
   } catch (e) {
-    return res.status(400).render("errors", {
+    res.status(400).render("errors", {
       errorStatus: 400,
       title: "Error",
       errorMessage: e,

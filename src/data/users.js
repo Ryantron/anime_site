@@ -30,14 +30,15 @@ export const registerUser = async (username, emailAddress, password) => {
   return { insertedUser: true };
 };
 
-export const loginUser = async (username, password) => {
-  if (!username || !password) {
-    throw "You must provide both an username and a password";
+export const loginUser = async (emailAddress, password) => {
+  if (!emailAddress || !password) {
+    throw "You must provide both an email and a password";
   }
-  username = username.toLowerCase();
+  emailAddress = validation.emailValidation(emailAddress);
+  emailAddress = emailAddress.toLowerCase();
   password = validation.passwordValidation(password);
   const usersCollection = await users();
-  const user = await usersCollection.findOne({ username: username });
+  const user = await usersCollection.findOne({ emailAddress: emailAddress });
   if (user === null) {
     throw "Either the username or password is invalid";
   }
@@ -52,32 +53,36 @@ export const loginUser = async (username, password) => {
   };
 };
 
-export const changeUserInfo = async (username, emailAddress, password) => {
-  if (!emailAddress) {
-    throw "You must provide your account's email address to modify username/password";
-  }
-  if (!username || !password) {
-    throw "You must provide a username and password to modify.";
-  }
-  username = username.toLowerCase();
-  password = validation.passwordValidation(password);
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
+// TODO: newPfp implementation and pfpValidation()
+export const changeUserInfo = async (emailAddress, newInfo, fieldCode) => {
+  // fieldCode: 0=newUsername, 1=newEmail, 2=newPassword, 3=newPfp
   const usersCollection = await users();
-  const user = await usersCollection.findOne({ emailAddress: emailAddress });
-  if (user === null) {
-    throw "No user with provided email found.";
+  switch (fieldCode) {
+    case 0: // Update username
+      newInfo = validation.usernameValidation(newInfo);
+      await usersCollection.findOneAndUpdate(
+        { emailAddress: emailAddress }, // Filter
+        { $set: { username: newInfo } }, // Update
+        { returnDocument: "after" }, // Options
+      );
+    case 1: // Update email
+      newInfo = validation.emailValidation(newInfo);
+      newInfo = newInfo.toLowerCase();
+      await usersCollection.findOneAndUpdate(
+        { emailAddress: emailAddress }, // Filter
+        { $set: { emailAddress: newInfo } }, // Update
+        { returnDocument: "after" }, // Options
+      );
+    case 2: // Update password
+      newInfo = validation.passwordValidation(newInfo);
+      const hashedPassword = await bcrypt.hash(newInfo, saltRounds);
+      await usersCollection.findOneAndUpdate(
+        { emailAddress: emailAddress }, // Filter
+        { $set: { hashedPassword: hashedPassword } }, // Update
+        { returnDocument: "after" }, // Options
+      );
+    // case 3: // Update pfp
+    //   validation.pfpValidation(newInfo);
   }
-  const updatedUser = {
-    username: username,
-    emailAddress: emailAddress,
-    hashedPassword: hashedPassword,
-  };
-
-  const updatedInfo = await usersCollection.updateOne(
-    { emailAddress: emailAddress },
-    { $set: updatedUser },
-    { returnDocument: "after" },
-  );
-
-  return { emailAddress: emailAddress, username: username };
+  return { changedUser: true };
 };
