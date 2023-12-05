@@ -2,11 +2,9 @@
 
 ## Description
 
-
 ## Getting Started
 
 ### Installing
-
 
 ### Executing program
 
