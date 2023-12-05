@@ -9,7 +9,7 @@ const navbarUsername = document.querySelector('#navbar__username');
 // Create Menu Popup Element
 
 const createLi = (aHref, aId, aContent) => `
-<li class='no-bullet py-2'>
+<li class='no-bullet py-2 flex-center'>
   <a href='${aHref}' id='${aId}' class='no-underline secondary-text-color'>
     ${aContent}
   </a>
@@ -23,7 +23,9 @@ const accountsItemHTML = createLi(
 );
 
 const menuHTML = `
-<ul id='navbar_menu-popup' class='position-absolute end-0 top-100 secondary-bg-color flex-center flex-column px-2'>
+<ul 
+  id='navbar_menu-popup' 
+  class='position-absolute end-0 top-100 secondary-bg-color flex-center flex-column px-2 flex-align-stretch border-bottom border-dark'>
   ${createLi('/main', 'navbar_main-anchor', 'Main')}
   ${createLi('/entries', 'navbar_entries_anchor', 'Entries')}
   ${navbarUsername === undefined ? '' : accountsItemHTML}

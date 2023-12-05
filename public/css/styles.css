@@ -13,11 +13,18 @@
   align-items: center;
 }
 
-.flex-space-between {
+.flex-justify-space-between {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
+.flex-align-stretch {
+  display: flex;
+  align-items: stretch;
+}
+
+
 
 .primary-text-color {
   color: white;
