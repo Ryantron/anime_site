@@ -1,10 +1,7 @@
 :root {
   --primary-color: #0006d8;
   --secondary-color: #d8d200;
-
 }
-
-
 
 .flex-column {
   display: flex;
@@ -37,7 +34,6 @@
   display: flex;
   align-items: stretch;
 }
-
 
 .primary-text-color {
   color: white;
@@ -105,4 +101,10 @@
 
 .width-100p {
   width: 100%;
+}
+
+/*Imitate Google Chrome focus*/
+#navbar__menu-button:focus {
+  outline: 1px dotted #212121;
+  outline: 5px auto -webkit-focus-ring-color;
 }
