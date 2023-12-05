@@ -22,6 +22,7 @@ don't forget to include your css and your client-side script file references in 
       integrity='sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL'
       crossorigin='anonymous'
     ></script>
+
     <script
       src='https://kit.fontawesome.com/643c2e6cd9.js'
       crossorigin='anonymous'
@@ -56,14 +57,22 @@ don't forget to include your css and your client-side script file references in 
             href='/signup'
             id='navbar__signup-anchor'
             class='primary-text-color no-underline'
+
           >Signup</a>
         {{/if}}
-        <button id='navbar__menu-button' class='btn pb-2'><i
+        <button id='navbar__menu-button' class='btn pb-2' title="navbar_menu-button" tabindex="0"
+        ><i
             class='fa-solid fa-bars'
             style='color: #ffffff;'
           ></i></button>
       </div>
     </nav>
-    {{{body}}}
+
+
+    <div class="width-100p flex-center">
+        <div class="secondary-bg-color flex-center flex-column inline-flex m-2 mb-3 p-2 box-shadow ">
+      {{{body}}}
+    </div>
+    </div>
   </body>
 </html>

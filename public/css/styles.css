@@ -4,6 +4,7 @@
 }
 
 .flex-column {
+  display: flex;
   flex-direction: column;
 }
 
@@ -19,12 +20,20 @@
   align-items: center;
 }
 
+.flex-justify-center {
+  display: flex;
+  justify-content: center;
+}
+
+.flex-align-center {
+  display: flex;
+  align-items: center;
+}
+
 .flex-align-stretch {
   display: flex;
   align-items: stretch;
 }
-
-
 
 .primary-text-color {
   color: white;
@@ -60,4 +69,42 @@
 
 .text-xl {
   font-size: 1.8rem;
+}
+
+.box-shadow {
+  box-shadow: 10px 10px gray;
+}
+
+.width-auto {
+  width: auto;
+}
+
+.min-width-200 {
+  min-width: 200;
+}
+
+.min-width-300 {
+  min-width: 300;
+}
+
+.max-width-500 {
+  max-width: 500px;
+}
+
+.max-width-700 {
+  max-width: 700px;
+}
+
+.inline-flex {
+  display: inline-flex;
+}
+
+.width-100p {
+  width: 100%;
+}
+
+/*Imitate Google Chrome focus*/
+#navbar__menu-button:focus {
+  outline: 1px dotted #212121;
+  outline: 5px auto -webkit-focus-ring-color;
 }
