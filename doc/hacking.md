@@ -1,6 +1,6 @@
 # Hacking
 
 ## CSS Guideline
-- Position are handled by bootstrap
-- Padding and margins are handled by bootstrap
+- Positions are handled by bootstrap
+- Paddings and margins are handled by bootstrap
 - Borders are handled by bootstrap
