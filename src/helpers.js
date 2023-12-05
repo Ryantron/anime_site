@@ -51,6 +51,19 @@ const exportedMethods = {
     emailAddress = this.emailValidation(emailAddress);
   },
 
+  usernameValidation(username) {
+    this.stringCheck(username);
+    if (/\s/.test(username)) {
+      throw "username cannot contain empty spaces";
+    }
+    username = username.trim();
+    const nameRegex = /^[A-Za-z0-9]{3}$/;
+    if (nameRegex.test(username)) {
+      throw "username must be at least 3 characters long and contain no special characters";
+    }
+    return username;
+  },
+
   emailValidation(email) {
     this.stringCheck(email);
     const emailCheck = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
