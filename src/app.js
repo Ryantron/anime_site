@@ -3,12 +3,14 @@
 import express from 'express';
 import routes from './routes/index.js';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import path from 'path';
 import exphbs from 'express-handlebars';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const pubPath = express.static(join(__dirname, '/public'));
+const __rootDirectory = path.dirname(path.dirname(__filename));
+const __publicPath = path.join(__rootDirectory, '/public');
+const __viewPath = path.join(__rootDirectory, '/views');
+const expressPublicPath = express.static(path.join(__rootDirectory, '/public'));
 
 const handlebarsInstance = exphbs.create({
   defaultLayout: 'main',
@@ -21,13 +23,13 @@ const handlebarsInstance = exphbs.create({
 });
 
 const app = express();
-app.use('/public', pubPath);
+app.use(__publicPath, expressPublicPath);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.engine('handlebars', handlebarsInstance.engine);
 app.set('view engine', 'handlebars');
-app.set('views', './views');
+app.set('views', __viewPath);
 
 routes(app);
 
