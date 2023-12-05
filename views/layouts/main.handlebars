@@ -11,9 +11,59 @@ don't forget to include your css and your client-side script file references in 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{{title}}}</title>
-    <link rel="stylesheet" href="/public/css/styles.css" />
+    <link
+      href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css'
+      rel='stylesheet'
+      integrity='sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN'
+      crossorigin='anonymous'
+    />
+    <script
+      src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js'
+      integrity='sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL'
+      crossorigin='anonymous'
+    ></script>
+    <script
+      src='https://kit.fontawesome.com/643c2e6cd9.js'
+      crossorigin='anonymous'
+    ></script>
+
+    <link rel='stylesheet' href='/public/css/styles.css' />
+    <script defer src='/public/js/navbar.js'></script>
   </head>
   <body>
+    <nav
+      id='navbar'
+      class='flex-justify-space-between primary-bg-color position-relative'
+    >
+      <a
+        href='/'
+        id='navbar__landing-anchor'
+        class='primary-text-color no-underline text-l ps-1 py-2'
+      >OtakuOracle</a>
+      <div id='navbar__right_wrapper'>
+        {{#if navbar?.user}}
+          <p
+            id='navbar__username'
+            class='primary-text-color'
+          >{{navbar.user.username}}</p>
+        {{else}}
+          <a
+            href='/login'
+            id='navbar__login-anchor'
+            class='primary-text-color no-underline me-3'
+          >Login</a>
+          <a
+            href='/signup'
+            id='navbar__signup-anchor'
+            class='primary-text-color no-underline'
+          >Signup</a>
+        {{/if}}
+        <button id='navbar__menu-button' class='btn pb-2'><i
+            class='fa-solid fa-bars'
+            style='color: #ffffff;'
+          ></i></button>
+      </div>
+    </nav>
     {{{body}}}
   </body>
 </html>
