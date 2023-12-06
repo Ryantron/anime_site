@@ -1,7 +1,11 @@
 import express from "express";
 const router = express.Router();
 import validation from "../helpers.js";
-import { changeUserInfo, linkMalAccount, unlinkMalAccount } from "../data/users.js";
+import {
+  changeUserInfo,
+  linkMalAccount,
+  unlinkMalAccount,
+} from "../data/users.js";
 
 router.route("/").get(async (req, res) => {
   return res.render("aboutus", {
@@ -15,15 +19,14 @@ router.route("/aboutus").get(async (req, res) => {
   });
 });
 
-router.route("/login").get(async(req, res) => {
+router.route("/login").get(async (req, res) => {
   return res.render("login", {
-    title: "Login"
-  })
+    title: "Login",
+  });
 });
 
-
 router.route("/accounts/mal/link/:malUsername").post(async (req, res) => {
-  const {emailAddress, malUsername} = req.body;
+  const { emailAddress, malUsername } = req.body;
   try {
     const updateInfo = await linkMalAccount(emailAddress, malUsername);
     if (!updateInfo.linkedAccount) {
@@ -44,7 +47,7 @@ router.route("/accounts/mal/link/:malUsername").post(async (req, res) => {
 });
 
 router.route("/accounts/mal/unlink").post(async (req, res) => {
-  const {emailAddress, malUsername} = req.body;
+  const { emailAddress, malUsername } = req.body;
   try {
     const updateInfo = await unlinkMalAccount(emailAddress, malUsername);
     if (!updateInfo.unlinkedAccount) {
@@ -101,7 +104,7 @@ router.route("/accounts/reset").patch(async (req, res) => {
     const update = await changeUserInfo(
       req.session.user.emailAddress,
       newField,
-      fieldCode,
+      fieldCode
     );
     if (!update) {
       res.status(500).render("errors", {
