@@ -1,0 +1,41 @@
+<header>
+  <h1 tabindex="0">Login</h1>
+</header>
+
+<main class="mx-5">
+  <form
+    action="/login"
+    method="post"
+    id="loginForm"
+    class="flex-center flex-column"
+  >
+    <div class="flex-center flex-column py-2">
+      <label for="emailAddressInput">Email Address</label>
+      <input name="emailAddressInput" id="emailAddressInput" type="email" />
+    </div>
+
+    <div class="flex-center flex-column py-2">
+      <label for="passwordInput">Password</label>
+      <input name="passwordInput" id="passwordInput" type="password" />
+    </div>
+
+    <div class="flex-center flex-column py-2">
+      <label for="submitInput">Submit</label>
+      <input
+        name="submitInput"
+        id="submitInput"
+        type="submit"
+        value="Login"
+        class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
+      />
+    </div>
+  </form>
+  {{#if wasErrored}}
+    <div class="serverErrorContainer">
+      <h2>{{errorStatus}}</h2>
+      <p>{{errorMessage}}</p>
+    </div>
+  {{/if}}
+</main>
+
+<script defer src="/public/js/auth.js"></script>
