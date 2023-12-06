@@ -120,8 +120,14 @@ export const linkMalAccount = async (emailAddress, malUsername) => {
         console.error('Error:', error)
     })
 
-    const usersCollection = await users();
-    const user = await usersCollection.findOne({ emailAddress: emailAddress });
+    let usersCollection = undefined;
+    let user = undefined;
+    try {
+      usersCollection = await users();
+      user = await usersCollection.findOne({ emailAddress: emailAddress });
+    } catch {
+      return {emailAddress: emailAddress, linkedAccount: false};
+    }
     if (user === null) {
         throw "Error: No user with provided email found.";
     }
@@ -134,7 +140,10 @@ export const linkMalAccount = async (emailAddress, malUsername) => {
         { $set: {malUsername: malUsername }},
         { returnDocument: "after" },
     );
-    if (updatedInfo.modifiedCount === 0) throw 'DB Error: Could not link account'
+    if (updatedInfo.modifiedCount === 0) {
+      // 'DB Error: Could not link account'
+      return {emailAddress: emailAddress, linkedAccount: false};
+    }
 
 
     return {emailAddress: emailAddress ,linkedAccount: true}
@@ -146,8 +155,14 @@ export const unlinkMalAccount = async (emailAddress, malUsername) =>{
     if(typeof malUsername !== 'string'){
         throw "Error: malUsername must be a string input"
     }
-    const usersCollection = await users();
-    const user = await usersCollection.findOne({ emailAddress: emailAddress });
+    let usersCollection = undefined;
+    let user = undefined;
+    try {
+      usersCollection = await users();
+      user = await usersCollection.findOne({ emailAddress: emailAddress });
+    } catch {
+      return {emailAddress: emailAddress, unlinkedAccount: false};
+    }
     if (user === null) {
         throw "Error: No user with provided email found.";
     }
@@ -160,7 +175,10 @@ export const unlinkMalAccount = async (emailAddress, malUsername) =>{
         { $unset: {malUsername: 1 }},
         { returnDocument: "after" },
     );
-    if (updatedInfo.modifiedCount === 0) throw 'DB Error: Could not unlink account'
+    if (updatedInfo.modifiedCount === 0) {
+      // 'DB Error: Could not unlink account'
+      return {emailAddress: emailAddress, unlinkedAccount: false};
+    }
 
 
     return {emailAddress: emailAddress , unlinkedAccount: true}
