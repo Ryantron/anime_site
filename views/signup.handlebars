@@ -40,11 +40,12 @@
         id="submitInput"
         type="submit"
         value="Sign Up"
+        class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
       />
     </div>
   </form>
   {{#if wasErrored}}
-    <div>
+    <div class="serverErrorContainer">
       <h2>{{errorStatus}}</h2>
       <p>{{errorMessage}}</p>
     </div>

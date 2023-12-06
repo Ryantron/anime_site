@@ -170,11 +170,11 @@ if (form.id === "loginForm") {
     if (typeof username === "object")
       errors.push("(Username) " + firstName.message);
     if (typeof emailAddress === "object")
-      errors.push("(Email Address) --> " + emailAddress.message);
+      errors.push("(Email Address) " + emailAddress.message);
     if (typeof password === "object")
-      errors.push("(Password) --> " + password.message);
+      errors.push("(Password) " + password.message);
     if (typeof confirmPassword === "object")
-      errors.push("(Confirm Password) --> " + confirmPassword.message);
+      errors.push("(Confirm Password) " + confirmPassword.message);
     if (
       typeof password === "string" &&
       typeof confirmPassword === "string" &&
@@ -184,10 +184,8 @@ if (form.id === "loginForm") {
 
     if (errors.length > 0) {
       e.preventDefault();
-      const errEl = createErrorElement(
-        `The following errors occured: ${JSON.stringify(errors)}`
-      );
-      document.body.appendChild(errEl);
+      const errLi = createErrorList(errors);
+      main.appendChild(errLi);
     }
   });
 }
