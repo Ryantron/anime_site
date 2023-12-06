@@ -31,16 +31,21 @@ export const registerUser = async (username, emailAddress, password) => {
   return { insertedUser: true };
 };
 
-export const loginUser = async (username, password) => {
-  if (!username || !password) {
-    throw "You must provide both an username and a password";
+export const loginUser = async (emailAddress, password) => {
+  if (!emailAddress || !password) {
+    throw "You must provide both an email and a password";
   }
+
   if(typeof username !== "string" || typeof password !== "string"){throw 'Both username and password must be string inputs'}
  
   username = username.toLowerCase();
+
+  emailAddress = validation.emailValidation(emailAddress);
+  emailAddress = emailAddress.toLowerCase();
+
   password = validation.passwordValidation(password);
   const usersCollection = await users();
-  const user = await usersCollection.findOne({ username: username });
+  const user = await usersCollection.findOne({ emailAddress: emailAddress });
   if (user === null) {
     throw "Either the username or password is invalid";
   }
@@ -88,6 +93,7 @@ export const changeUserInfo = async (username, emailAddress, password) => {
     );
 
     return { emailAddress: emailAddress, username: username };
+
 };
 
 export const linkMalAccount = async (emailAddress, malUsername) => {

@@ -5,6 +5,7 @@ import routes from "./routes/index.js";
 import { fileURLToPath } from "url";
 import path from "path";
 import exphbs from "express-handlebars";
+import session from "express-session";
 
 const __filename = fileURLToPath(import.meta.url);
 const __rootDirectory = path.dirname(path.dirname(__filename));
@@ -26,6 +27,16 @@ const app = express();
 app.use('/public', expressPublicPath);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Middlewares
+app.use(
+  session({
+    name: "AuthState",
+    secret: "some secret string!",
+    resave: false,
+    saveUninitialized: false,
+  }),
+);
 
 app.engine("handlebars", handlebarsInstance.engine);
 app.set("view engine", "handlebars");
