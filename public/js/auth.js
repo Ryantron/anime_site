@@ -123,12 +123,10 @@ const deleteError = () => {
 };
 
 const form = document.querySelector("form");
-const firstNameInput = document.querySelector("#firstNameInput");
-const lastNameInput = document.querySelector("#lastNameInput");
+const usernameInput = document.querySelector("#usernameInput");
 const emailAddressInput = document.querySelector("#emailAddressInput");
 const passwordInput = document.querySelector("#passwordInput");
 const confirmPasswordInput = document.querySelector("#confirmPasswordInput");
-const roleInput = document.querySelector("#roleInput");
 const submitInput = document.querySelector("#submitInput");
 
 if (form.id === "loginForm") {
@@ -152,44 +150,37 @@ if (form.id === "loginForm") {
     }
   });
 } else if (form.id === "signupForm") {
-  // form.addEventListener("submit", (e) => {
-  //   deleteError();
-  //   const errors = [];
-  //   const firstName = stringVerification(firstNameInput.value, {
-  //     minLen: 2,
-  //     maxLen: 25,
-  //   });
-  //   const lastName = stringVerification(lastNameInput.value, {
-  //     minLen: 2,
-  //     maxLen: 25,
-  //   });
-  //   const emailAddress = emailVerification(emailAddressInput.value);
-  //   const password = passwordVerification(passwordInput.value);
-  //   const confirmPassword = passwordVerification(confirmPasswordInput.value);
-  //   const role = stringVerification(roleInput.value);
-  //   if (typeof firstName === "object")
-  //     errors.push("firstName --> " + firstName.message);
-  //   if (typeof lastName === "object")
-  //     errors.push("lastName --> " + lastName.message);
-  //   if (typeof emailAddress === "object")
-  //     errors.push("emailAddress --> " + emailAddress.message);
-  //   if (typeof password === "object")
-  //     errors.push("password --> " + password.message);
-  //   if (typeof confirmPassword === "object")
-  //     errors.push("confirmPassword --> " + confirmPassword.message);
-  //   if (typeof role === "object") errors.push("role --> " + role.message);
-  //   if (
-  //     typeof password === "string" &&
-  //     typeof confirmPassword === "string" &&
-  //     password !== confirmPassword
-  //   )
-  //     errors.push("password and confirmPassword are not equal");
-  //   if (errors.length > 0) {
-  //     e.preventDefault();
-  //     const errEl = createErrorElement(
-  //       `The following errors occured: ${JSON.stringify(errors)}`
-  //     );
-  //     document.body.appendChild(errEl);
-  //   }
-  // });
+  form.addEventListener("submit", (e) => {
+    deleteError();
+    const errors = [];
+    const username = stringVerification(usernameInput.value, {
+      minLen: 2,
+      maxLen: 25,
+    });
+    const emailAddress = emailVerification(emailAddressInput.value);
+    const password = passwordVerification(passwordInput.value);
+    const confirmPassword = passwordVerification(confirmPasswordInput.value);
+    if (typeof username === "object")
+      errors.push("(Username) " + firstName.message);
+    if (typeof emailAddress === "object")
+      errors.push("(Email Address) --> " + emailAddress.message);
+    if (typeof password === "object")
+      errors.push("(Password) --> " + password.message);
+    if (typeof confirmPassword === "object")
+      errors.push("(Confirm Password) --> " + confirmPassword.message);
+    if (
+      typeof password === "string" &&
+      typeof confirmPassword === "string" &&
+      password !== confirmPassword
+    )
+      errors.push("Password and Confirm Password do not match.");
+
+    if (errors.length > 0) {
+      e.preventDefault();
+      const errEl = createErrorElement(
+        `The following errors occured: ${JSON.stringify(errors)}`
+      );
+      document.body.appendChild(errEl);
+    }
+  });
 }

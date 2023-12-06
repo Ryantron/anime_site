@@ -54,7 +54,7 @@ app.get("/login", (req, res, next) => {
   res.redirect("/main");
 });
 
-app.get("/register", (req, res, next) => {
+app.get("/signup", (req, res, next) => {
   if (!req.session.user) return next();
   res.redirect("/main");
 });

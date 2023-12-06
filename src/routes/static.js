@@ -25,6 +25,12 @@ router.route("/login").get(async (req, res) => {
   });
 });
 
+router.route("/signup").get(async (req, res) => {
+  return res.render("signup", {
+    title: "Signup",
+  });
+});
+
 router.route("/accounts/mal/link/:malUsername").post(async (req, res) => {
   const { emailAddress, malUsername } = req.body;
   try {
