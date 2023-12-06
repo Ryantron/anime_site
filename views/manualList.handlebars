@@ -1,0 +1,14 @@
+<h1>Manual Entry Test Placeholder</h1>
+{{#if NoResult}}
+<p>We're sorry, but no recomendations were found for your query.</p>
+{{else}}
+<ol>
+    {{#each Result}}
+        <li>{{this}}</li>
+        <!--{{#this}} (this section will be used in the final as the recommendation lists are object lists. the above line is just placeholder)
+            <li>{{name}}</li>
+        {{/this}} (It will be expanded in the final to include anime names, pngs, etc-->
+    {{/each}}
+</ol>
+{{/if}}
+<a href "/main">Return to Main placeholder</a>
