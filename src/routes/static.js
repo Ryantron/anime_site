@@ -1,7 +1,7 @@
 import express from "express";
 const router = express.Router();
 import validation from "../helpers.js";
-import { changeUserInfo } from "../data/users.js";
+import { changeUserInfo, linkMalAccount, unlinkMalAccount } from "../data/users.js";
 
 router.route("/").get(async (req, res) => {
   return res.render("aboutus", {
@@ -13,6 +13,48 @@ router.route("/aboutus").get(async (req, res) => {
   return res.render("aboutus", {
     title: "About Us",
   });
+});
+
+router.route("/accounts/mal/link/:malUsername").post(async (req, res) => {
+  const {emailAddress, malUsername} = req.body;
+  try {
+    const updateInfo = await linkMalAccount(emailAddress, malUsername);
+    if (!updateInfo.linkedAccount) {
+      return res.status(500).render("errors", {
+        errorStatus: 500,
+        title: "Error",
+        errorMessage: "Internal server error",
+      });
+    }
+    res.redirect("/accounts");
+  } catch (e) {
+    res.status(400).render("errors", {
+      errorStatus: 400,
+      title: "Error",
+      errorMessage: e,
+    });
+  }
+});
+
+router.route("/accounts/mal/unlink").post(async (req, res) => {
+  const {emailAddress, malUsername} = req.body;
+  try {
+    const updateInfo = await unlinkMalAccount(emailAddress, malUsername);
+    if (!updateInfo.unlinkedAccount) {
+      return res.status(500).render("errors", {
+        errorStatus: 500,
+        title: "Error",
+        errorMessage: "Internal server error",
+      });
+    }
+    res.redirect("/accounts");
+  } catch (e) {
+    res.status(400).render("errors", {
+      errorStatus: 400,
+      title: "Error",
+      errorMessage: e,
+    });
+  }
 });
 
 router.route("/accounts/reset").patch(async (req, res) => {
