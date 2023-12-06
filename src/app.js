@@ -9,8 +9,8 @@ import session from "express-session";
 
 const __filename = fileURLToPath(import.meta.url);
 const __rootDirectory = path.dirname(path.dirname(__filename));
-const __publicPath = path.join(__rootDirectory, '/public');
-const __viewPath = path.join(__rootDirectory, '/views');
+const __publicPath = path.join(__rootDirectory, "/public");
+const __viewPath = path.join(__rootDirectory, "/views");
 const expressPublicPath = express.static(__publicPath);
 
 const handlebarsInstance = exphbs.create({
@@ -24,7 +24,7 @@ const handlebarsInstance = exphbs.create({
 });
 
 const app = express();
-app.use('/public', expressPublicPath);
+app.use("/public", expressPublicPath);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -37,6 +37,11 @@ app.use(
     saveUninitialized: false,
   }),
 );
+
+app.use("/accounts", (req, res, next) => {
+  if (req.session.user) return next();
+  res.redirect("/login");
+});
 
 app.engine("handlebars", handlebarsInstance.engine);
 app.set("view engine", "handlebars");
