@@ -107,21 +107,29 @@ const passwordVerification = (
   return password;
 };
 
-const createErrorElement = (message) => {
-  const tag = document.createElement("p");
-  tag.classList.add("clienterror");
-  tag.textContent = message;
-  return tag;
+const createErrorList = (errors) => {
+  const ul = document.createElement("ul");
+  ul.classList.add("clienterror");
+  for (const error of errors) {
+    const errorLi = document.createElement("li");
+    errorLi.classList.add("no-bullet");
+    const errorP = document.createElement("p");
+    errorP.textContent = error;
+    errorLi.appendChild(errorP);
+    ul.appendChild(errorLi);
+  }
+  return ul;
 };
 
 const deleteError = () => {
-  const errorEl = document.querySelector(".clienterror");
-  if (errorEl) errorEl.remove();
+  const errorLi = document.querySelector(".clienterror");
+  if (errorLi) errorLi.remove();
   // Also check for server generated errors
   const serverErrorEl = document.querySelector(".serverErrorContainer");
   if (serverErrorEl) serverErrorEl.remove();
 };
 
+const main = document.querySelector("main");
 const form = document.querySelector("form");
 const usernameInput = document.querySelector("#usernameInput");
 const emailAddressInput = document.querySelector("#emailAddressInput");
@@ -143,10 +151,9 @@ if (form.id === "loginForm") {
 
     if (errors.length > 0) {
       e.preventDefault();
-      const errEl = createErrorElement(
-        `The following errors occured: ${JSON.stringify(errors)}`
-      );
-      document.body.appendChild(errEl);
+      console.log(errors);
+      const errLi = createErrorList(errors);
+      main.appendChild(errLi);
     }
   });
 } else if (form.id === "signupForm") {
