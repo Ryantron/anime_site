@@ -15,6 +15,13 @@ router.route("/aboutus").get(async (req, res) => {
   });
 });
 
+router.route("/login").get(async(req, res) => {
+  return res.render("login", {
+    title: "Login"
+  })
+});
+
+
 router.route("/accounts/mal/link/:malUsername").post(async (req, res) => {
   const {emailAddress, malUsername} = req.body;
   try {
