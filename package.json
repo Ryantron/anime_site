@@ -5,6 +5,8 @@
   "main": "./src/app.js",
   "scripts": {
     "start": "node ./src/app.js",
+    "seed": "node ./tasks/seed.js",
+    "test": "node ./test/index.js",
     "format:check": "npx prettier --check .",
     "format:write": "npx prettier --write ."
   },
