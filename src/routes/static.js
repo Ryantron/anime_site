@@ -14,6 +14,106 @@ router.route("/aboutus").get(async (req, res) => {
     title: "About Us",
   });
 });
+//Everything commented out with / * * / on the left side always
+router.route("/main").get(async (req, res) =>{
+/*  if (req.session.user)
+  {
+    if (req.session.user["MALUsername"])
+    {
+      //Route ran if logged in + linked MAL Username
+*/      return res.render("main", {
+        title: "Main",
+        linkedRoute: "/main/recommendations",
+        linkMessage: "Search using your MyAnimeList recommendations",
+      });
+/*    }
+    else
+    {
+      //Route ran if logged in and not linked
+      return res.render("main", {
+        title: "Main",
+        linkedRoute: "/accounts",
+        linkMessage: "Link your MyAnimeList account to use MAL Functionality!",
+      });
+    }
+  }
+  else
+  {
+    //Route ran if not logged in
+    return res.render("main", {
+      title: "Main",
+      linkedRoute: "/login",
+      linkMessage: "Login to use MyAnimeList Functionality!",
+    });
+  }
+*/})
+.post(async (req, res) =>{
+  try
+  {
+    let animeInput = req.body['animeInput'].trim(); //trimming the initial input
+    if (animeInput === '') throw "Invalid input"; //Invalid input for empty strings/only spaces
+    let animeArr = animeInput.split(','); //splitting into an array
+    let finalAnimeArr = []; //the array that'll be used for comparing
+    for (let x of animeArr) //this entire for statement prunes the blank/space only inputs of the manual input
+    {
+      if (x.trim() != '')
+      { 
+        finalAnimeArr.push(x.trim());
+      }
+    }
+    if (finalAnimeArr.length === 0) throw "Invalid Input"; //If every single one was invalid, then errors, else goes with all other valid inputs
+/*  let newManList = placeholderManRecc(finalAnimeArr);  //Placeholder function that obtains the object list of recommendations
+    if (req.session.user)    //If section to add the manual list to the database is the user is logged in
+    {
+      let manObjectId = placeholderManAddDb(newManList);   //Placeholder function to add a manual list to the database, might need another parameter such as req.session.user[emailAddress] to work 
+      res.redirect("/recommendations/".concat(manObjectId));   //Redirects to that stored version of the manual list within the users' saved lists
+    }
+    else
+    {
+*/      return res.render("manualList", {  //Renders the manual list in its own screen, I realized that I don't actually need to use /entries and can just render it here in /main
+        NoResult: false,       //This variable will be used in a later potential check for if the function errors out if there's no results, below I'll catch that specific error and set this to true.
+        Result: finalAnimeArr, //This will be some form of the returned list/Object list instead in the final
+      });
+/*    }
+*/  }
+  //If the function errors out if no recommendations are found, I'll implement a case for that then.
+  catch (e)
+  {
+    res.render("errors", {
+      errorStatus: 400,
+      title: "Error",
+      errorMessage: "Bad request",
+    });
+  }
+});
+
+router.route("/main/recommendations").get(async (req,res) => {
+/*  if (req.session.user["MALUsername"])    //This should already be checked once you get here, but one more check doesn't hurt
+  {
+    try
+    {
+      let newReccs = malReccFunction(req.session.user["emailAddress"]);      //Placeholder function that returns the object id of a myanimelist recc list that is inserted into the db
+*/      res.redirect("/recommendations/".concat(newReccs));
+/*    }
+    //If the function errors out if no results are found, I'll implement a case for that then, probably a good idea to have.
+    catch (e)
+    {
+      res.render("errors", {
+        errorStatus: 400,
+        title: "Error",
+        errorMessage: "Bad request",
+      });
+    }
+  }
+  else    //Above case for function failure, below case for if somehow myanimelist is not linked.
+  {
+    res.render("errors", {
+      errorStatus: 400,
+      title: "Error",
+      errorMessage: "Bad request",
+    });
+  }
+*/});
 
 router.route("/accounts/mal/link/:malUsername").post(async (req, res) => {
   const {emailAddress, malUsername} = req.body;
