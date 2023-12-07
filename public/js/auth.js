@@ -1,7 +1,6 @@
-const errorConstructor = (message, errData) => {
+const errorConstructor = (message) => {
   return {
     message,
-    errData,
   };
 };
 
@@ -10,23 +9,19 @@ const errorConstructor = (message, errData) => {
  * @param {object} [param0]
  * @param {number} [param0.minLen]
  * @param {number} [param0.maxLen]
- * @param {any[]} [param0.errData]
  *
  */
-const stringVerification = (
-  str,
-  { minLen = 1, maxLen = Infinity, errData = [] } = {}
-) => {
+const stringValidation = (str, { minLen = 1, maxLen = Infinity } = {}) => {
   if (typeof str !== "string")
-    return errorConstructor(`${str} is not of type string`, errData);
+    return errorConstructor(`${str} is not of type string`);
 
   str = str.trim();
 
   if (minLen && str.length < minLen)
-    return errorConstructor(`Length is less than ${minLen}`, errData);
+    return errorConstructor(`Length is less than ${minLen}`);
 
   if (maxLen && str.length > maxLen)
-    return errorConstructor(`Length is more than ${maxLen}`, errData);
+    return errorConstructor(`Length is more than ${maxLen}`);
 
   return str;
 };
@@ -34,75 +29,29 @@ const stringVerification = (
 /**
  * @param {any} email
  * @param {object} [obj]
- * @param {any[]} [obj.errData]
  * @returns {string}
  */
-const emailVerification = (email, { errData = [] } = {}) => {
-  const res = stringVerification(email, { errData }).toLowerCase();
+const emailValidation = (email) => {
+  const res = stringValidation(email);
   if (typeof res === "object") return res;
-  const emailRegex = /^[A-Z0-9\.\-\&]+@[A-Z0-9]+\.[A-Z0-9]+$/i;
+  const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/i;
 
   if (emailRegex.test(res)) return res;
-  else
-    return errorConstructor(`emailVerification: Invalid email ${res}`, errData);
+  else return errorConstructor(`Invalid email ${res}`);
 };
 
-/**
- * @param {any} password
- * @param {object} [obj]
- * @param {any[]} [obj.errData]
- * @param {number} [obj.minLen]
- * @param {number} [obj.maxLen]
- * @param {boolean} [obj.banSpace]
- * @param {boolean} [obj.requireUpperCase]
- * @param {boolean} [obj.requireNumber]
- * @param {boolean} [obj.requireSpecial]
- * @returns {string}
- */
-const passwordVerification = (
-  password,
-  {
-    errData = [],
-    minLen = 8,
-    maxLen = Infinity,
-    banSpace = true,
-    requireUpperCase = true,
-    requireNumber = true,
-    requireSpecial = true,
-  } = {}
-) => {
-  password = stringVerification(password, { errData, minLen, maxLen });
-  if (typeof password === "object") return password;
-  if (banSpace && password.includes(" "))
-    return errorConstructor(`Password contains empty space`, errData);
-  if (
-    requireUpperCase &&
-    password
-      .split("")
-      .reduce((acc, char) => acc && (char < "A" || char > "Z"), true)
-  )
+const passwordValidation = (password) => {
+  if (/\s/.test(password)) {
+    return errorConstructor("Password cannot contain empty spaces");
+  }
+  password = password.trim();
+  const passRegex =
+    /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^\&*\)\(+=._-])[a-zA-Z0-9!@#\$%\^\&*\)\(+=._-]{8,}$/;
+  if (!passRegex.test(password)) {
     return errorConstructor(
-      `Password does not contain at least one uppercase letter`,
-      errData
+      "Password must be at least 8 characters long and contain 1 special character, number, and uppercase letter"
     );
-  if (
-    requireNumber &&
-    password.split("").reduce((acc, char) => acc && isNaN(char), true)
-  )
-    return errorConstructor(
-      `Password does not contain at least one number`,
-      errData
-    );
-  if (
-    requireSpecial &&
-    password
-      .split("")
-      .reduce((acc, char) => acc && char.match(/[^0-9a-z]/gi) === null, true)
-  )
-    return errorConstructor(
-      `Password does not contain at least one special character`,
-      errData
-    );
+  }
 
   return password;
 };
@@ -141,8 +90,8 @@ if (form.id === "loginForm") {
   form.addEventListener("submit", (e) => {
     deleteError();
     const errors = [];
-    const emailAddress = emailVerification(emailAddressInput.value);
-    const password = passwordVerification(passwordInput.value);
+    const emailAddress = emailValidation(emailAddressInput.value);
+    const password = passwordValidation(passwordInput.value);
 
     if (typeof emailAddress === "object")
       errors.push("(Email Address) " + emailAddress.message);
@@ -160,26 +109,21 @@ if (form.id === "loginForm") {
   form.addEventListener("submit", (e) => {
     deleteError();
     const errors = [];
-    const username = stringVerification(usernameInput.value, {
+    const username = stringValidation(usernameInput.value, {
       minLen: 2,
       maxLen: 25,
     });
-    const emailAddress = emailVerification(emailAddressInput.value);
-    const password = passwordVerification(passwordInput.value);
-    const confirmPassword = passwordVerification(confirmPasswordInput.value);
+    const emailAddress = emailValidation(emailAddressInput.value);
+    const password = passwordValidation(passwordInput.value);
+    console.log(emailAddress, password);
+    const confirmPassword = confirmPasswordInput.value.trim();
     if (typeof username === "object")
       errors.push("(Username) " + firstName.message);
     if (typeof emailAddress === "object")
       errors.push("(Email Address) " + emailAddress.message);
     if (typeof password === "object")
       errors.push("(Password) " + password.message);
-    if (typeof confirmPassword === "object")
-      errors.push("(Confirm Password) " + confirmPassword.message);
-    if (
-      typeof password === "string" &&
-      typeof confirmPassword === "string" &&
-      password !== confirmPassword
-    )
+    if (password !== confirmPassword)
       errors.push("Password and Confirm Password do not match.");
 
     if (errors.length > 0) {

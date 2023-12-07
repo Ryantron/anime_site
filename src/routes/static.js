@@ -3,6 +3,7 @@ const router = express.Router();
 import validation from "../helpers.js";
 import {
   changeUserInfo,
+  registerUser,
   linkMalAccount,
   unlinkMalAccount,
 } from "../data/users.js";
@@ -19,17 +20,43 @@ router.route("/aboutus").get(async (req, res) => {
   });
 });
 
-router.route("/login").get(async (req, res) => {
-  return res.render("login", {
-    title: "Login",
-  });
-});
+router
+  .route("/login")
+  .get(async (req, res) => {
+    return res.render("login", {
+      title: "Login",
+    });
+  })
+  .post(async (req, res) => {});
 
-router.route("/signup").get(async (req, res) => {
-  return res.render("signup", {
-    title: "Signup",
+router
+  .route("/signup")
+  .get(async (req, res) => {
+    return res.render("signup", {
+      title: "Signup",
+    });
+  })
+  .post(async (req, res) => {
+    const body = req.body;
+
+    try {
+      validation.inputCheck(
+        body.usernameInput,
+        body.emailAddressInput,
+        body.passwordInput
+      );
+    } catch (err) {
+      return res.redirect(`/errors?errorStatus=${400}&message=${err}`);
+    }
+
+    // Register User
+    registerUser(
+      body.usernameInput.trim(),
+      body.emailAddressInput.trim(),
+      body.passwordInput.trim()
+    );
+    return res.redirect("/login");
   });
-});
 
 router.route("/accounts/mal/link/:malUsername").post(async (req, res) => {
   const { emailAddress, malUsername } = req.body;
