@@ -20,20 +20,61 @@ router.route("/aboutus").get(async (req, res) => {
   });
 });
 
+router.route("/errors").get(async (req, res) => {
+  const errorStatus = Number.parseInt(req.query.errorStatus);
+  const errorMessage = req.query.message ?? "Internal Server Error";
+  return res.render("errors", {
+    title: "Errors",
+    errorStatus: Number.isNaN(errorStatus) ? 500 : errorStatus,
+    errorMessage,
+  });
+});
+
 router
   .route("/login")
   .get(async (req, res) => {
+    const wasErrored = req.query?.wasErrored ?? false;
+    const errorStatus = req.query?.errorStatus ?? 500;
+    const errorMessage = req.query?.errorMessage ?? "Internal Server Error";
     return res.render("login", {
       title: "Login",
+      wasErrored,
+      errorStatus,
+      errorMessage,
     });
   })
-  .post(async (req, res) => {});
+  .post(async (req, res) => {
+    const body = req.body;
+
+    try {
+      validation.emailValidation(body.emailAddressInput);
+      validation.passwordValidation(body.passwordInput);
+    } catch (err) {
+      return res.redirect(`/errors?errorStatus=${400}&message=${err}`);
+    }
+
+    try {
+      const user = loginUser(body.usernameInput, body.passwordInput);
+      req.session.user = user;
+      return res.redirect("/accounts");
+    } catch (err) {
+      return res.redirect(
+        `/login?wasErrored=${true}&errorStatus=${500}&errorMessage=${"Internal Server Error"}`
+      );
+    }
+  });
 
 router
   .route("/signup")
   .get(async (req, res) => {
+    const wasErrored = req.query?.wasErrored ?? false;
+    const errorStatus = req.query?.errorStatus ?? 500;
+    const errorMessage = req.query?.errorMessage ?? "Internal Server Error";
     return res.render("signup", {
       title: "Signup",
+      wasErrored,
+      errorStatus,
+      errorMessage,
     });
   })
   .post(async (req, res) => {
@@ -49,13 +90,18 @@ router
       return res.redirect(`/errors?errorStatus=${400}&message=${err}`);
     }
 
-    // Register User
-    registerUser(
-      body.usernameInput.trim(),
-      body.emailAddressInput.trim(),
-      body.passwordInput.trim()
-    );
-    return res.redirect("/login");
+    try {
+      registerUser(
+        body.usernameInput.trim(),
+        body.emailAddressInput.trim(),
+        body.passwordInput.trim()
+      );
+      return res.redirect("/login");
+    } catch (err) {
+      return res.redirect(
+        `/signup?wasErrored=${true}&errorStatus=${500}&errorMessage=${"Internal Server Error"}`
+      );
+    }
   });
 
 router.route("/accounts/mal/link/:malUsername").post(async (req, res) => {
