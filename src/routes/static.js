@@ -4,6 +4,7 @@ import validation from "../helpers.js";
 import {
   changeUserInfo,
   registerUser,
+  loginUser,
   linkMalAccount,
   unlinkMalAccount,
 } from "../data/users.js";
@@ -54,7 +55,7 @@ router
     }
 
     try {
-      const user = loginUser(body.usernameInput, body.passwordInput);
+      const user = await loginUser(body.emailAddressInput, body.passwordInput);
       req.session.user = user;
       return res.redirect("/accounts");
     } catch (err) {
@@ -91,7 +92,7 @@ router
     }
 
     try {
-      registerUser(
+      await registerUser(
         body.usernameInput.trim(),
         body.emailAddressInput.trim(),
         body.passwordInput.trim()
@@ -109,19 +110,13 @@ router.route("/accounts/mal/link/:malUsername").post(async (req, res) => {
   try {
     const updateInfo = await linkMalAccount(emailAddress, malUsername);
     if (!updateInfo.linkedAccount) {
-      return res.status(500).render("errors", {
-        errorStatus: 500,
-        title: "Error",
-        errorMessage: "Internal server error",
-      });
+      return res.redirect(
+        `/errors?errorStatus=${500}&message=${"Internal server error"}`
+      );
     }
-    res.redirect("/accounts");
+    return res.redirect("/accounts");
   } catch (e) {
-    res.status(400).render("errors", {
-      errorStatus: 400,
-      title: "Error",
-      errorMessage: e,
-    });
+    return res.redirect(`/errors?errorStatus=${400}&message=${e}`);
   }
 });
 
@@ -130,19 +125,13 @@ router.route("/accounts/mal/unlink").post(async (req, res) => {
   try {
     const updateInfo = await unlinkMalAccount(emailAddress, malUsername);
     if (!updateInfo.unlinkedAccount) {
-      return res.status(500).render("errors", {
-        errorStatus: 500,
-        title: "Error",
-        errorMessage: "Internal server error",
-      });
+      return res.render(
+        `/errors?errorStatus=${500}&message=${"Internal server error"}`
+      );
     }
     res.redirect("/accounts");
   } catch (e) {
-    res.status(400).render("errors", {
-      errorStatus: 400,
-      title: "Error",
-      errorMessage: e,
-    });
+    return res.render(`/errors?errorStatus=${400}&message=${e}`);
   }
 });
 

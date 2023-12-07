@@ -36,11 +36,11 @@ export const loginUser = async (emailAddress, password) => {
     throw "You must provide both an email and a password";
   }
 
-  if (typeof username !== "string" || typeof password !== "string") {
+  if (typeof emailAddress !== "string" || typeof password !== "string") {
     throw "Both username and password must be string inputs";
   }
 
-  username = username.toLowerCase();
+  emailAddress = emailAddress.toLowerCase();
 
   emailAddress = validation.emailValidation(emailAddress);
   emailAddress = emailAddress.toLowerCase();
