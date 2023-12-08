@@ -160,14 +160,11 @@ export const linkMalAccount = async (emailAddress, malUsername) => {
   return { emailAddress: emailAddress, linkedAccount: true };
 };
 
-export const unlinkMalAccount = async (emailAddress, malUsername) => {
-  if (!emailAddress || !malUsername) {
-    throw "You must provide both your email and malUsername";
+export const unlinkMalAccount = async (emailAddress) => {
+  if (!emailAddress) {
+    throw "You must provide your email";
   }
   emailAddress = validation.emailValidation(emailAddress);
-  if (typeof malUsername !== "string") {
-    throw "Error: malUsername must be a string input";
-  }
   let usersCollection = undefined;
   let user = undefined;
   try {
