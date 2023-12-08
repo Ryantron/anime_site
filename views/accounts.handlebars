@@ -1,0 +1,143 @@
+<header>
+  <h1 tabindex="0" class="text-center">Account</h1>
+</header>
+
+<main class="mx-5">
+  <ul class="list-group">
+    {{! Plaintext password not available }}
+    <img src="{{image}}" alt="Profile Picture" width="250" height="250" />
+    <li class="list-group-item">Username: {{username}}</li>
+    <li class="list-group-item">Email Address: {{email}}</li>
+    <li class="list-group-item">MyAnimeList Username: {{malUsername}}</li>
+    <li class="list-group-item">Friend count: {{friendCount}}</li>
+  </ul>
+  <h3 tabindex="0">Friend List:</h3>
+  <ul class="list-group">
+    {{#each friendList}}
+      <li class="list-group-item">{{this}}</li>
+    {{/each}}
+  </ul>
+
+  {{! Reset Account }}
+  <button
+    name="toggleReset"
+    id="toggleReset"
+    class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
+  >
+    Edit Account Info
+  </button>
+  <form
+    action="/accounts/reset"
+    method="post"
+    id="resetForm"
+    class="flex-center flex-column"
+  >
+    <div class="flex-center flex-column py-2">
+      <label for="usernameInput">Username</label>
+      <input
+        name="usernameInput"
+        id="usernameInput"
+        placeholder="{{username}}"
+        type="text"
+      />
+    </div>
+
+    <div class="flex-center flex-column py-2">
+      <label for="emailAddressInput">Email Address</label>
+      <input
+        name="emailAddressInput"
+        id="emailAddressInput"
+        placeholder="{{email}}"
+        type="email"
+      />
+    </div>
+
+    <div class="flex-center flex-column py-2">
+      <label for="passwordInput">Password</label>
+      <input name="passwordInput" id="passwordInput" type="password" />
+    </div>
+
+    {{! TODO: look at after pfp implementation }}
+    <div class="flex-center flex-column py-2">
+      <label for="pfpInput">Profile Picture</label>
+      <input name="pfpInput" id="pfpInput" type="text" />
+    </div>
+
+    <div class="flex-center flex-column py-2">
+      <button
+        name="submitResetInput"
+        id="submitResetInput"
+        class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
+      >
+        Update Account
+      </button>
+    </div>
+  </form>
+
+  {{#if wasErrored}}
+    <div class="serverErrorContainer flex-center flex-column">
+      <h2>{{errorStatus}}</h2>
+      <p>{{errorMessage}}</p>
+    </div>
+  {{/if}}
+
+  {{! Link MAL if not linked }}
+  {{#unless hasLinked}}
+  <button
+    name="toggleMalLink"
+    id="toggleMalLink"
+    class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
+  >
+    Link Your MyAnimeList Account
+  </button>
+  <form
+    action="/accounts/mal/link"
+    method="post"
+    id="malForm"
+    class="flex-center flex-column"
+  >
+    {{! Session provides the email }}
+    <div class="flex-center flex-column py-2">
+      <label for="malUsernameInput">MyAnimeList Username</label>
+      <input name="malUsernameInput" id="malUsernameInput" type="text" />
+    </div>
+
+    <div class="flex-center flex-column py-2">
+      <button
+        name="submitMalInput"
+        id="submitMalInput"
+        class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
+      >
+        Link MyAnimeList
+      </button>
+    </div>
+  </form>
+  {{/unless}}
+
+  {{! Unlink MAL }}
+  {{#if hasLinked}}
+  <button
+    name="unlinkMalButton"
+    id="unlinkMalButton"
+    class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
+  >
+    Unlink Your MyAnimeList Account
+  </button>
+  {{/if}}
+
+  {{! History of recommendation lists sorted by generated date (reverse inserted order) }}
+  <button
+    name="toggleRecHistory"
+    id="toggleRecHistory"
+    class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
+  >
+    Toggle Recommendation History
+  </button>
+  <ul id="rec-list">
+    {{#each recList}}
+      <li>{{this}}</li>
+    {{/each}}
+  </ul>
+</main>
+
+<script defer src="/public/js/accounts.js"></script>
