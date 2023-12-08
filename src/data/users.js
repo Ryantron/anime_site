@@ -21,6 +21,7 @@ export const registerUser = async (username, emailAddress, password) => {
     username: username,
     emailAddress: emailAddress,
     hashedPassword: hashedPassword,
+    recommendations: [],
   };
 
   const insertedInfo = await usersCollection.insertOne(newUser);
@@ -112,6 +113,7 @@ export const linkMalAccount = async (emailAddress, malUsername) => {
   const MAL_API_URL =
     "https://api.myanimelist.net/v2/users/" + malUsername + "/animelist";
   const MAL_CLIENT_ID = "1998d4dbe36d8e9b017e280329d92592";
+  // FIXME: Use axios instead of fetch
   fetch(MAL_API_URL, {
     method: "GET",
     headers: {
