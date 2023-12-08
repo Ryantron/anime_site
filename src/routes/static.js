@@ -205,7 +205,7 @@ router
     }
   });
 
-router.route("/accounts/mal/link/:malUsername").post(async (req, res) => {
+router.route("/accounts/mal/link").post(async (req, res) => {
   const { emailAddress, malUsername } = req.body;
   try {
     const updateInfo = await linkMalAccount(emailAddress, malUsername);

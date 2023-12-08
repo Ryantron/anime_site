@@ -38,7 +38,7 @@ const exportedMethods = {
     password = password.trim();
 
     const nameRegex = /^[A-Za-z0-9]{3}$/;
-    if (nameRegex.test(username)) {
+    if (!nameRegex.test(username)) {
       throw "username must be at least 3 characters long and contain no special characters";
     }
 
@@ -54,7 +54,7 @@ const exportedMethods = {
     }
     username = username.trim();
     const nameRegex = /^[A-Za-z0-9]{3}$/;
-    if (nameRegex.test(username)) {
+    if (!nameRegex.test(username)) {
       throw "username must be at least 3 characters long and contain no special characters";
     }
     return username;
