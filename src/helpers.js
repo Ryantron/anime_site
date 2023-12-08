@@ -13,15 +13,18 @@ const exportedMethods = {
     return arg.trim();
   },
 
-
   inputCheck(username, emailAddress, password) {
     if (!username || !emailAddress || !password) {
       throw "All inputs must be non-empty strings";
     }
 
-    if(typeof username !== "string" || typeof emailAddress !== "string" || typeof password !== "string"){
-      throw "All inputs must be a string"
-  }
+    if (
+      typeof username !== "string" ||
+      typeof emailAddress !== "string" ||
+      typeof password !== "string"
+    ) {
+      throw "All inputs must be a string";
+    }
 
     if (/\s/.test(username)) {
       throw "username cannot contain empty spaces";

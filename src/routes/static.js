@@ -1,7 +1,13 @@
 import express from "express";
 const router = express.Router();
 import validation from "../helpers.js";
-import { changeUserInfo, linkMalAccount, unlinkMalAccount } from "../data/users.js";
+import {
+  changeUserInfo,
+  registerUser,
+  loginUser,
+  linkMalAccount,
+  unlinkMalAccount,
+} from "../data/users.js";
 
 router.route("/").get(async (req, res) => {
   return res.render("aboutus", {
@@ -115,45 +121,117 @@ router.route("/main/recommendations").get(async (req,res) => {
   }
 */});
 
+router.route("/errors").get(async (req, res) => {
+  const errorStatus = Number.parseInt(req.query.errorStatus);
+  const errorMessage = req.query.message ?? "Internal Server Error";
+  return res.render("errors", {
+    title: "Errors",
+    errorStatus: Number.isNaN(errorStatus) ? 500 : errorStatus,
+    errorMessage,
+  });
+});
+
+router
+  .route("/login")
+  .get(async (req, res) => {
+    const wasErrored = req.query?.wasErrored ?? false;
+    const errorStatus = req.query?.errorStatus ?? 500;
+    const errorMessage = req.query?.errorMessage ?? "Internal Server Error";
+    return res.render("login", {
+      title: "Login",
+      wasErrored,
+      errorStatus,
+      errorMessage,
+    });
+  })
+  .post(async (req, res) => {
+    const body = req.body;
+
+    try {
+      validation.emailValidation(body.emailAddressInput);
+      validation.passwordValidation(body.passwordInput);
+    } catch (err) {
+      return res.redirect(`/errors?errorStatus=${400}&message=${err}`);
+    }
+
+    try {
+      const user = await loginUser(body.emailAddressInput, body.passwordInput);
+      req.session.user = user;
+      return res.redirect("/accounts");
+    } catch (err) {
+      return res.redirect(
+        `/login?wasErrored=${true}&errorStatus=${500}&errorMessage=${"Internal Server Error"}`
+      );
+    }
+  });
+
+router
+  .route("/signup")
+  .get(async (req, res) => {
+    const wasErrored = req.query?.wasErrored ?? false;
+    const errorStatus = req.query?.errorStatus ?? 500;
+    const errorMessage = req.query?.errorMessage ?? "Internal Server Error";
+    return res.render("signup", {
+      title: "Signup",
+      wasErrored,
+      errorStatus,
+      errorMessage,
+    });
+  })
+  .post(async (req, res) => {
+    const body = req.body;
+
+    try {
+      validation.inputCheck(
+        body.usernameInput,
+        body.emailAddressInput,
+        body.passwordInput
+      );
+    } catch (err) {
+      return res.redirect(`/errors?errorStatus=${400}&message=${err}`);
+    }
+
+    try {
+      await registerUser(
+        body.usernameInput.trim(),
+        body.emailAddressInput.trim(),
+        body.passwordInput.trim()
+      );
+      return res.redirect("/login");
+    } catch (err) {
+      return res.redirect(
+        `/signup?wasErrored=${true}&errorStatus=${500}&errorMessage=${"Internal Server Error"}`
+      );
+    }
+  });
+
 router.route("/accounts/mal/link/:malUsername").post(async (req, res) => {
-  const {emailAddress, malUsername} = req.body;
+  const { emailAddress, malUsername } = req.body;
   try {
     const updateInfo = await linkMalAccount(emailAddress, malUsername);
     if (!updateInfo.linkedAccount) {
-      return res.status(500).render("errors", {
-        errorStatus: 500,
-        title: "Error",
-        errorMessage: "Internal server error",
-      });
+      return res.redirect(
+        `/errors?errorStatus=${500}&message=${"Internal server error"}`
+      );
     }
-    res.redirect("/accounts");
+    return res.redirect("/accounts");
   } catch (e) {
-    res.status(400).render("errors", {
-      errorStatus: 400,
-      title: "Error",
-      errorMessage: e,
-    });
+    return res.redirect(`/errors?errorStatus=${400}&message=${e}`);
   }
 });
 
 router.route("/accounts/mal/unlink").post(async (req, res) => {
-  const {emailAddress, malUsername} = req.body;
+  const { emailAddress, malUsername } = req.body;
   try {
     const updateInfo = await unlinkMalAccount(emailAddress, malUsername);
     if (!updateInfo.unlinkedAccount) {
-      return res.status(500).render("errors", {
-        errorStatus: 500,
-        title: "Error",
-        errorMessage: "Internal server error",
-      });
+      return res.render(
+        `/errors?errorStatus=${500}&message=${"Internal server error"}`
+      );
     }
     res.redirect("/accounts");
   } catch (e) {
-    res.status(400).render("errors", {
-      errorStatus: 400,
-      title: "Error",
-      errorMessage: e,
-    });
+    return res.render(`/errors?errorStatus=${400}&message=${e}`);
   }
 });
 
@@ -194,7 +272,7 @@ router.route("/accounts/reset").patch(async (req, res) => {
     const update = await changeUserInfo(
       req.session.user.emailAddress,
       newField,
-      fieldCode,
+      fieldCode
     );
     if (!update) {
       res.status(500).render("errors", {

@@ -4,7 +4,9 @@
   "description": "",
   "main": "./src/app.js",
   "scripts": {
-    "start": "node ./src/app.js"
+    "start": "node ./src/app.js",
+    "format:check": "npx prettier --check .",
+    "format:write": "npx prettier --write ."
   },
   "keywords": [],
   "contributors": [

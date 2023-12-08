@@ -24,28 +24,42 @@ const handlebarsInstance = exphbs.create({
 });
 
 const app = express();
+
+// Middlewares START
+
 app.use("/public", expressPublicPath);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Middlewares
 app.use(
   session({
     name: "AuthState",
     secret: "some secret string!",
     resave: false,
     saveUninitialized: false,
-  }),
+  })
 );
+
+app.engine("handlebars", handlebarsInstance.engine);
+app.set("view engine", "handlebars");
+app.set("views", __viewPath);
 
 app.use("/accounts", (req, res, next) => {
   if (req.session.user) return next();
   res.redirect("/login");
 });
 
-app.engine("handlebars", handlebarsInstance.engine);
-app.set("view engine", "handlebars");
-app.set("views", __viewPath);
+app.use("/login", (req, res, next) => {
+  if (!req.session.user) return next();
+  res.redirect("/main");
+});
+
+app.use("/signup", (req, res, next) => {
+  if (!req.session.user) return next();
+  res.redirect("/main");
+});
+
+// Middlewares END
 
 routes(app);
 

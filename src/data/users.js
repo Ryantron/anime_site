@@ -36,9 +36,11 @@ export const loginUser = async (emailAddress, password) => {
     throw "You must provide both an email and a password";
   }
 
-  if(typeof username !== "string" || typeof password !== "string"){throw 'Both username and password must be string inputs'}
- 
-  username = username.toLowerCase();
+  if (typeof emailAddress !== "string" || typeof password !== "string") {
+    throw "Both username and password must be string inputs";
+  }
+
+  emailAddress = emailAddress.toLowerCase();
 
   emailAddress = validation.emailValidation(emailAddress);
   emailAddress = emailAddress.toLowerCase();
@@ -61,125 +63,134 @@ export const loginUser = async (emailAddress, password) => {
 };
 
 export const changeUserInfo = async (username, emailAddress, password) => {
-    if(typeof username !== "string" || typeof emailAddress !== "string" || typeof password !== "string"){
-        throw "All inputs must be a string"
-    }
-    if (!emailAddress) {
-        throw "You must provide your account's email address to modify username/password";
-    }
-    if (!username || !password) {
-        throw "You must provide a username and password to modify.";
-    }
+  if (
+    typeof username !== "string" ||
+    typeof emailAddress !== "string" ||
+    typeof password !== "string"
+  ) {
+    throw "All inputs must be a string";
+  }
+  if (!emailAddress) {
+    throw "You must provide your account's email address to modify username/password";
+  }
+  if (!username || !password) {
+    throw "You must provide a username and password to modify.";
+  }
 
-  
-    username = username.toLowerCase();
-    password = validation.passwordValidation(password);
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const usersCollection = await users();
-    const user = await usersCollection.findOne({ emailAddress: emailAddress });
-    if (user === null) {
-        throw "No user with provided email found.";
-    }
-    const updatedUser = {
-        username: username,
-        emailAddress: emailAddress,
-        hashedPassword: hashedPassword,
-    };
+  username = username.toLowerCase();
+  password = validation.passwordValidation(password);
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+  const usersCollection = await users();
+  const user = await usersCollection.findOne({ emailAddress: emailAddress });
+  if (user === null) {
+    throw "No user with provided email found.";
+  }
+  const updatedUser = {
+    username: username,
+    emailAddress: emailAddress,
+    hashedPassword: hashedPassword,
+  };
 
-    const updatedInfo = await usersCollection.updateOne(
-        { emailAddress: emailAddress },
-        { $set: updatedUser },
-        { returnDocument: "after" },
-    );
+  const updatedInfo = await usersCollection.updateOne(
+    { emailAddress: emailAddress },
+    { $set: updatedUser },
+    { returnDocument: "after" }
+  );
 
-    return { emailAddress: emailAddress, username: username };
-
+  return { emailAddress: emailAddress, username: username };
 };
 
 export const linkMalAccount = async (emailAddress, malUsername) => {
-    if(!emailAddress || !malUsername){throw 'You must provide both your email and malUsername'}
-    emailAddress = validation.emailValidation(emailAddress);
-    if(typeof malUsername !== 'string'){
-        throw "Error: malUsername must be a string input"
-    }
+  if (!emailAddress || !malUsername) {
+    throw "You must provide both your email and malUsername";
+  }
+  emailAddress = validation.emailValidation(emailAddress);
+  if (typeof malUsername !== "string") {
+    throw "Error: malUsername must be a string input";
+  }
 
-    const MAL_API_URL = 'https://api.myanimelist.net/v2/users/' + malUsername + '/animelist'
-    const MAL_CLIENT_ID = '1998d4dbe36d8e9b017e280329d92592'
-    fetch(MAL_API_URL, {
-        method: 'GET',
-        headers: {
-            'X-MAL-CLIENT-ID' : MAL_CLIENT_ID
-        }
+  const MAL_API_URL =
+    "https://api.myanimelist.net/v2/users/" + malUsername + "/animelist";
+  const MAL_CLIENT_ID = "1998d4dbe36d8e9b017e280329d92592";
+  fetch(MAL_API_URL, {
+    method: "GET",
+    headers: {
+      "X-MAL-CLIENT-ID": MAL_CLIENT_ID,
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(
+          `No user with provided username found. Status: ${response.status}`
+        );
+      }
     })
-    .then(response => {
-        if(!response.ok){
-            throw new Error(`No user with provided username found. Status: ${response.status}`)
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error)
-    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
 
-    let usersCollection = undefined;
-    let user = undefined;
-    try {
-      usersCollection = await users();
-      user = await usersCollection.findOne({ emailAddress: emailAddress });
-    } catch {
-      return {emailAddress: emailAddress, linkedAccount: false};
-    }
-    if (user === null) {
-        throw "Error: No user with provided email found.";
-    }
+  let usersCollection = undefined;
+  let user = undefined;
+  try {
+    usersCollection = await users();
+    user = await usersCollection.findOne({ emailAddress: emailAddress });
+  } catch {
+    return { emailAddress: emailAddress, linkedAccount: false };
+  }
+  if (user === null) {
+    throw "Error: No user with provided email found.";
+  }
 
-    if(user.malUsername){throw 'Error: You have a My Anime List account linked to your profile. Please unlink the current account to link a new one'}
+  if (user.malUsername) {
+    throw "Error: You have a My Anime List account linked to your profile. Please unlink the current account to link a new one";
+  }
 
+  const updatedInfo = await usersCollection.updateOne(
+    { emailAddress: emailAddress },
+    { $set: { malUsername: malUsername } },
+    { returnDocument: "after" }
+  );
+  if (updatedInfo.modifiedCount === 0) {
+    // 'DB Error: Could not link account'
+    return { emailAddress: emailAddress, linkedAccount: false };
+  }
 
-    const updatedInfo = await usersCollection.updateOne(
-        { emailAddress: emailAddress },
-        { $set: {malUsername: malUsername }},
-        { returnDocument: "after" },
-    );
-    if (updatedInfo.modifiedCount === 0) {
-      // 'DB Error: Could not link account'
-      return {emailAddress: emailAddress, linkedAccount: false};
-    }
+  return { emailAddress: emailAddress, linkedAccount: true };
+};
 
+export const unlinkMalAccount = async (emailAddress, malUsername) => {
+  if (!emailAddress || !malUsername) {
+    throw "You must provide both your email and malUsername";
+  }
+  emailAddress = validation.emailValidation(emailAddress);
+  if (typeof malUsername !== "string") {
+    throw "Error: malUsername must be a string input";
+  }
+  let usersCollection = undefined;
+  let user = undefined;
+  try {
+    usersCollection = await users();
+    user = await usersCollection.findOne({ emailAddress: emailAddress });
+  } catch {
+    return { emailAddress: emailAddress, unlinkedAccount: false };
+  }
+  if (user === null) {
+    throw "Error: No user with provided email found.";
+  }
 
-    return {emailAddress: emailAddress ,linkedAccount: true}
-}
+  if (!user.malUsername) {
+    throw "Error: You do not have a My Anime List account linked to your profile.";
+  }
 
-export const unlinkMalAccount = async (emailAddress, malUsername) =>{
-    if(!emailAddress || !malUsername){throw 'You must provide both your email and malUsername'}
-    emailAddress = validation.emailValidation(emailAddress);
-    if(typeof malUsername !== 'string'){
-        throw "Error: malUsername must be a string input"
-    }
-    let usersCollection = undefined;
-    let user = undefined;
-    try {
-      usersCollection = await users();
-      user = await usersCollection.findOne({ emailAddress: emailAddress });
-    } catch {
-      return {emailAddress: emailAddress, unlinkedAccount: false};
-    }
-    if (user === null) {
-        throw "Error: No user with provided email found.";
-    }
+  const updatedInfo = await usersCollection.updateOne(
+    { emailAddress: emailAddress },
+    { $unset: { malUsername: 1 } },
+    { returnDocument: "after" }
+  );
+  if (updatedInfo.modifiedCount === 0) {
+    // 'DB Error: Could not unlink account'
+    return { emailAddress: emailAddress, unlinkedAccount: false };
+  }
 
-    if(!user.malUsername){throw 'Error: You do not have a My Anime List account linked to your profile.'}
-
-
-    const updatedInfo = await usersCollection.updateOne(
-        { emailAddress: emailAddress },
-        { $unset: {malUsername: 1 }},
-        { returnDocument: "after" },
-    );
-    if (updatedInfo.modifiedCount === 0) {
-      // 'DB Error: Could not unlink account'
-      return {emailAddress: emailAddress, unlinkedAccount: false};
-    }
-
-
-    return {emailAddress: emailAddress , unlinkedAccount: true}
-}
+  return { emailAddress: emailAddress, unlinkedAccount: true };
+};
