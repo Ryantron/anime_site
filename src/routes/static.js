@@ -13,6 +13,7 @@ import {
   linkMalAccount,
   unlinkMalAccount,
 } from "../data/users.js";
+import { ObjectId } from "mongodb";
 
 router.route("/").get(async (req, res) => {
   return res.render("aboutus", {
@@ -202,15 +203,41 @@ router
     }
   });
 
-router.route("/accounts/mal/link/:malUsername").post(async (req, res) => {
-  const { emailAddress, malUsername } = req.body;
+router.route("/accounts").get(async (req, res) => {
+  const {
+    username,
+    emailAddress,
+    malUsername,
+    friendCount,
+    friendList,
+    recommendations,
+  } = req.session.user;
+  return res.render("accounts", {
+    title: "Your Account",
+    username: username,
+    emailAddress: emailAddress,
+    malUsername: malUsername ?? "N/A",
+    friendCount: friendCount,
+    friendList: friendList,
+    recommendations: recommendations,
+    hasLinked: malUsername !== undefined,
+  });
+});
+
+router.route("/accounts/mal/link").post(async (req, res) => {
+  const { malUsernameInput } = req.body;
   try {
-    const updateInfo = await linkMalAccount(emailAddress, malUsername);
+    const updateInfo = await linkMalAccount(
+      req.session.user.emailAddress,
+      malUsernameInput
+    );
     if (!updateInfo.linkedAccount) {
       return res.redirect(
-        `/errors?errorStatus=${500}&message=${"Internal server error"}`
+        `/errors?errorStatus=${500}&errorMessage=${"Internal server error"}`
       );
     }
+    // Update session: set malUsername
+    req.session.user.malUsername = malUsernameInput;
     return res.redirect("/accounts");
   } catch (err) {
     return res.redirect(
@@ -220,14 +247,15 @@ router.route("/accounts/mal/link/:malUsername").post(async (req, res) => {
 });
 
 router.route("/accounts/mal/unlink").post(async (req, res) => {
-  const { emailAddress, malUsername } = req.body;
   try {
-    const updateInfo = await unlinkMalAccount(emailAddress, malUsername);
+    const updateInfo = await unlinkMalAccount(req.session.user.emailAddress);
     if (!updateInfo.unlinkedAccount) {
       return res.redirect(
         `/errors?errorStatus=${500}&message=${"Internal server error"}`
       );
     }
+    // Update session: clear malUsername
+    req.session.user.malUsername = undefined;
     res.redirect("/accounts");
   } catch (err) {
     return res.redirect(
@@ -254,16 +282,18 @@ router.route("/accounts/reset").patch(async (req, res) => {
       validation.integerCheck(body.pfpIdInput, { min: 1, max: 5 });
 
     const user = await changeUserInfo(
-      req.session._id,
+      new ObjectId(req.session.user._id),
       body.usernameInput,
       body.emailAddressInput,
       body.passwordInput,
       body.pfpIdInput
     );
-    req.session.user = user;
+    req.session.user.username = user.username;
+    req.session.user.emailAddress = user.emailAddress;
+    req.session.user.hashedPassword = user.hashedPassword;
+    req.session.user.pfpId = user.pfpId;
     return res.redirect("/accounts");
   } catch (err) {
-    // Client-side validation should prevent this
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
     );

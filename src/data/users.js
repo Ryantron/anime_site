@@ -47,9 +47,7 @@ export const loginUser = async (emailAddress, password) => {
   }
 
   emailAddress = emailAddress.toLowerCase();
-
   emailAddress = validation.emailValidation(emailAddress);
-  emailAddress = emailAddress.toLowerCase();
 
   password = validation.passwordValidation(password);
   const usersCollection = await users();
@@ -105,6 +103,7 @@ export const changeUserInfo = async (
     { $set: updatedProps },
     { returnDocument: "after" }
   );
+  if (!updateRes) return null;
 
   if (!updateRes.acknowledged) throw new DBError("Unable to update DB.");
 
@@ -176,14 +175,11 @@ export const linkMalAccount = async (emailAddress, malUsername) => {
   return { emailAddress: emailAddress, linkedAccount: true };
 };
 
-export const unlinkMalAccount = async (emailAddress, malUsername) => {
-  if (!emailAddress || !malUsername) {
-    throw new TypeError("You must provide both your email and malUsername");
+export const unlinkMalAccount = async (emailAddress) => {
+  if (!emailAddress) {
+    throw new TypeError("You must provide your email");
   }
   emailAddress = validation.emailValidation(emailAddress);
-  if (typeof malUsername !== "string") {
-    throw new TypeError("malUsername must be a string input");
-  }
   let usersCollection = undefined;
   let user = undefined;
   try {

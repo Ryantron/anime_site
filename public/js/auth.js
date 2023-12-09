@@ -115,10 +115,9 @@ if (form.id === "loginForm") {
     });
     const emailAddress = emailValidation(emailAddressInput.value);
     const password = passwordValidation(passwordInput.value);
-    console.log(emailAddress, password);
     const confirmPassword = confirmPasswordInput.value.trim();
     if (typeof username === "object")
-      errors.push("(Username) " + firstName.message);
+      errors.push("(Username) " + username.message);
     if (typeof emailAddress === "object")
       errors.push("(Email Address) " + emailAddress.message);
     if (typeof password === "object")

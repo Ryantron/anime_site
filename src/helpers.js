@@ -94,10 +94,10 @@ const exportedMethods = {
     emailAddress = emailAddress.trim();
     password = password.trim();
 
-    const nameRegex = /^[A-Za-z0-9]{3}$/;
+    const nameRegex = /^[A-Za-z0-9]{2}$/;
     if (nameRegex.test(username)) {
       throw new RangeError(
-        "username must be at least 3 characters long and contain no special characters"
+        "username must be at least 2 characters long and contain no special characters"
       );
     }
 
@@ -112,10 +112,10 @@ const exportedMethods = {
       throw new RangeError("username cannot contain empty spaces");
     }
     username = username.trim();
-    const nameRegex = /^[A-Za-z0-9]{3}$/;
+    const nameRegex = /^[A-Za-z0-9]{2}$/;
     if (nameRegex.test(username)) {
       throw new RangeError(
-        "username must be at least 3 characters long and contain no special characters"
+        "username must be at least 2 characters long and contain no special characters"
       );
     }
     return username;
