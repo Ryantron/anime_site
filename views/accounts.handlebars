@@ -3,15 +3,17 @@
 </header>
 
 <main class="mx-5">
-  <ul class="list-group">
+  <img src="{{image}}" alt="Profile Picture" width="128" height="128" />
+  <ul class="list-group my-3">
     {{! Plaintext password not available }}
-    <img src="{{image}}" alt="Profile Picture" width="250" height="250" />
     <li class="list-group-item">Username: {{username}}</li>
     <li class="list-group-item">Email Address: {{email}}</li>
-    <li class="list-group-item">MyAnimeList Username: {{malUsername}}</li>
+    {{! MAL display as linked with username or unlinked }}
+    <li class="list-group-item">MyAnimeList: {{malUsername}}</li>
     <li class="list-group-item">Friend count: {{friendCount}}</li>
   </ul>
-  <h3 tabindex="0">Friend List:</h3>
+  {{! TODO: button to hide? }}
+  <h3 class="my-2" tabindex="0">Friend List:</h3>
   <ul class="list-group">
     {{#each friendList}}
       <li class="list-group-item">{{this}}</li>
@@ -19,19 +21,17 @@
   </ul>
 
   {{! Reset Account }}
-  <button
-    name="toggleReset"
-    id="toggleReset"
-    class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
-  >
-    Edit Account Info
-  </button>
+  <h3 class="my-2" tabindex="0">Edit Account Info:</h3>
+  {{! Middleware changes this form to PUT }}
   <form
     action="/accounts/reset"
     method="post"
     id="resetForm"
     class="flex-center flex-column"
   >
+    {{! Trigger rewriteUnsupportedBrowserMethods middleware }}
+    <input type="hidden" name="_method" value="PUT" />
+
     <div class="flex-center flex-column py-2">
       <label for="usernameInput">Username</label>
       <input
@@ -64,72 +64,77 @@
     </div>
 
     <div class="flex-center flex-column py-2">
+      <label for="submitResetInput" hidden>Update Account</label>
       <button
         name="submitResetInput"
         id="submitResetInput"
         class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
+        type="submit"
       >
         Update Account
       </button>
     </div>
   </form>
 
-  {{#if wasErrored}}
-    <div class="serverErrorContainer flex-center flex-column">
-      <h2>{{errorStatus}}</h2>
-      <p>{{errorMessage}}</p>
-    </div>
-  {{/if}}
+  {{! Error div }}
+  <div id="errorList" class="py-3">
+  </div>
 
   {{! Link MAL if not linked }}
   {{#unless hasLinked}}
-  <button
-    name="toggleMalLink"
-    id="toggleMalLink"
-    class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
-  >
-    Link Your MyAnimeList Account
-  </button>
-  <form
-    action="/accounts/mal/link"
-    method="post"
-    id="malForm"
-    class="flex-center flex-column"
-  >
-    {{! Session provides the email }}
-    <div class="flex-center flex-column py-2">
-      <label for="malUsernameInput">MyAnimeList Username</label>
-      <input name="malUsernameInput" id="malUsernameInput" type="text" />
-    </div>
+    <h3 tabindex="0">Link Your MyAnimeList Account:</h3>
+    <form
+      action="/accounts/mal/link"
+      method="post"
+      id="malForm"
+      class="flex-center flex-column"
+    >
+      {{! Session provides the email }}
+      <div class="flex-center flex-column py-2">
+        <label for="malUsernameInput">MyAnimeList Username</label>
+        <input name="malUsernameInput" id="malUsernameInput" type="text" />
+      </div>
 
-    <div class="flex-center flex-column py-2">
-      <button
-        name="submitMalInput"
-        id="submitMalInput"
-        class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
-      >
-        Link MyAnimeList
-      </button>
-    </div>
-  </form>
+      <div class="flex-center flex-column py-2">
+        <label for="submitMalInput">Link MyAnimeList</label>
+        <button
+          name="submitMalInput"
+          id="submitMalInput"
+          class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
+          type="submit"
+        >
+          Link MyAnimeList
+        </button>
+      </div>
+    </form>
   {{/unless}}
 
   {{! Unlink MAL }}
   {{#if hasLinked}}
-  <button
-    name="unlinkMalButton"
-    id="unlinkMalButton"
-    class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
-  >
-    Unlink Your MyAnimeList Account
-  </button>
+    <h3 tabindex="0">Unlink Your MyAnimeList Account:</h3>
+    <form
+      action="/accounts/mal/unlink"
+      method="post"
+      id="unlinkMal"
+      class="flex-center flex-column"
+    >
+      <label for="unlinkMalButton" hidden>Unlink Your MyAnimeList Account</label>
+      <button
+        name="unlinkMalButton"
+        id="unlinkMalButton"
+        class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
+        type="submit"
+      >
+        Unlink Your MyAnimeList Account
+      </button>
+    </form>
   {{/if}}
 
   {{! History of recommendation lists sorted by generated date (reverse inserted order) }}
   <button
     name="toggleRecHistory"
     id="toggleRecHistory"
-    class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
+    class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2 mx-2"
   >
     Toggle Recommendation History
   </button>

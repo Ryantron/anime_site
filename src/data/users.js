@@ -63,7 +63,8 @@ export const loginUser = async (emailAddress, password) => {
   };
 };
 
-export const changeUserInfo = async (username, emailAddress, password) => {
+// TODO: pfp implementation
+export const changeUserInfo = async (username, emailAddress, password, pfp) => {
   if (
     typeof username !== "string" ||
     typeof emailAddress !== "string" ||
@@ -90,6 +91,7 @@ export const changeUserInfo = async (username, emailAddress, password) => {
     username: username,
     emailAddress: emailAddress,
     hashedPassword: hashedPassword,
+    pfp: pfp
   };
 
   const updatedInfo = await usersCollection.updateOne(
@@ -97,8 +99,9 @@ export const changeUserInfo = async (username, emailAddress, password) => {
     { $set: updatedUser },
     { returnDocument: "after" }
   );
+  if (!updatedInfo) return null;
 
-  return { emailAddress: emailAddress, username: username };
+  return { emailAddress: emailAddress, username: username, pfp: pfp, malUsername: null };
 };
 
 export const linkMalAccount = async (emailAddress, malUsername) => {

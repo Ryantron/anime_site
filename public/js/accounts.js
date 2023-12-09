@@ -77,20 +77,19 @@ const createErrorList = (errors) => {
 
 const deleteError = () => {
   const errorLi = document.querySelector(".clienterror");
+  const errorHeader = document.querySelector(".errorHeader");
   if (errorLi) errorLi.remove();
+  if (errorHeader) errorHeader.remove();
   // Also check for server generated errors
   const serverErrorEl = document.querySelector(".serverErrorContainer");
   if (serverErrorEl) serverErrorEl.remove();
 };
 
-const main = document.querySelector("main");
+const errorList = document.querySelector("#errorList");
 const resetForm = document.querySelector("#resetForm");
 const malForm = document.querySelector("#malForm");
-const toggleReset = document.querySelector("#toggleReset");
 const submitResetInput = document.querySelector("#submitResetInput");
-const toggleMalLink = document.querySelector("#toggleMalLink");
 const submitMalInput = document.querySelector("#submitMalInput");
-const unlinkMalButton = document.querySelector("#unlinkMalButton");
 const toggleRecHistory = document.querySelector("#toggleRecHistory");
 const usernameInput = document.querySelector("#usernameInput");
 const emailAddressInput = document.querySelector("#emailAddressInput");
@@ -99,73 +98,79 @@ const pfpInput = document.querySelector("#pfpInput");
 const malUsernameInput = document.querySelector("#malUsernameInput");
 
 // Toggle button event listeners
-if (!toggleReset) {
-  toggleReset.addEventListener("click", (e) => {
-    if (resetForm.style.display === "none") {
-      resetForm.style.display = "block";
-    } else {
-      resetForm.style.display = "none";
-    }
-  });
-}
-if (!toggleMalLink) {
-  toggleMalLink.addEventListener("click", (e) => {
-    if (malForm.style.display === "none") {
-      malForm.style.display = "block";
-    } else {
-      malForm.style.display = "none";
-    }
-  });
-}
+// TODO: this, and remove toggleRecHistory?
 
-// Forms
-if (!resetForm) {
-  resetForm.addEventListener("submit", (e) => {
-    deleteError();
-    const errors = [];
-    const username = stringValidation(usernameInput.value, {
+// Form event listeners
+resetForm.addEventListener("submit", (e) => {
+  deleteError();
+  const errors = [];
+  // Not all input required: validate non-empty strings after trim
+  let username = undefined;
+  let emailAddress = undefined;
+  let password = undefined;
+  let pfp = undefined;
+  if (
+    typeof usernameInput.value === "string" &&
+    usernameInput.value.trim() !== ""
+  ) {
+    username = stringValidation(usernameInput.value, {
       minLen: 2,
       maxLen: 25,
     });
-    const emailAddress = emailValidation(emailAddressInput.value);
-    const password = passwordValidation(passwordInput.value);
-    const pfp = pfpValidaton(pfpInput.value);
-    if (typeof username === "object")
-      errors.push("(Username) " + firstName.message);
-    if (typeof emailAddress === "object")
-      errors.push("(Email Address) " + emailAddress.message);
-    if (typeof password === "object")
-      errors.push("(Password) " + password.message);
-    if (typeof pfp === "object")
-      errors.push("(Profile Picture:) " + pfp.message);
-
-    if (errors.length > 0) {
-      e.preventDefault();
-      const errLi = createErrorList(errors);
-      main.appendChild(errLi);
-    }
-  });
-} else if (form.id === "signupForm") {
-  form.addEventListener("submit", (e) => {
-    deleteError();
-    const errors = [];
-    const username = stringValidation(usernameInput.value, {
+  }
+  if (
+    typeof emailAddressInput.value === "string" &&
+    emailAddressInput.value.trim() !== ""
+  ) {
+    emailAddress = emailValidation(emailAddressInput.value);
+  }
+  if (
+    typeof passwordInput.value === "string" &&
+    passwordInput.value.trim() !== ""
+  ) {
+    password = passwordValidation(passwordInput.value);
+  }
+  if (typeof pfpInput.value === "string" && pfpInput.value.trim() !== "") {
+    pfp = stringValidation(pfpInput.value, {
       minLen: 2,
       maxLen: 25,
     });
-    const emailAddress = emailValidation(emailAddressInput.value);
-    const password = passwordValidation(passwordInput.value);
-    if (typeof username === "object")
-      errors.push("(Username) " + firstName.message);
-    if (typeof emailAddress === "object")
-      errors.push("(Email Address) " + emailAddress.message);
-    if (typeof password === "object")
-      errors.push("(Password) " + password.message);
+  }
 
-    if (errors.length > 0) {
-      e.preventDefault();
-      const errLi = createErrorList(errors);
-      main.appendChild(errLi);
-    }
-  });
-}
+  if (typeof username === "object")
+    errors.push("(Username) " + username.message);
+  if (typeof emailAddress === "object")
+    errors.push("(Email Address) " + emailAddress.message);
+  if (typeof password === "object")
+    errors.push("(Password) " + password.message);
+  if (typeof pfp === "object") errors.push("(Profile Picture) " + pfp.message);
+
+  if (errors.length > 0) {
+    e.preventDefault();
+    const errorHeader = document.createElement("h3");
+    errorHeader.classList.add("errorHeader");
+    errorHeader.classList.add("px-4");
+    errorHeader.textContent = "Error:";
+    errorList.appendChild(errorHeader);
+    const errLi = createErrorList(errors);
+    errorList.appendChild(errLi);
+  }
+});
+
+malForm.addEventListener("submit", (e) => {
+  deleteError();
+  const errors = [];
+  const malUsername = stringValidation(malUsernameInput.value);
+  if (typeof malUsername === "object")
+    errors.push("(MyAnimeList Username) " + malUsername.message);
+  if (errors.length > 0) {
+    e.preventDefault();
+    const errorHeader = document.createElement("h3");
+    errorHeader.classList.add("errorHeader");
+    errorHeader.classList.add("px-4");
+    errorHeader.textContent = "Error:";
+    errorList.appendChild(errorHeader);
+    const errLi = createErrorList(errors);
+    errorList.appendChild(errLi);
+  }
+});

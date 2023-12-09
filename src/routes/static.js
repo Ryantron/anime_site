@@ -205,90 +205,79 @@ router
     }
   });
 
+router.route("/accounts").get(async (req, res) => {
+  return res.render("accounts", {
+    title: "Your Account",
+  });
+});
+
 router.route("/accounts/mal/link").post(async (req, res) => {
-  const { emailAddress, malUsername } = req.body;
+  const { malUsernameInput } = req.body;
   try {
-    const updateInfo = await linkMalAccount(emailAddress, malUsername);
+    const updateInfo = await linkMalAccount(req.session.user.emailAddress, malUsernameInput);
     if (!updateInfo.linkedAccount) {
       return res.redirect(
-        `/errors?errorStatus=${500}&message=${"Internal server error"}`
+        `/errors?errorStatus=${500}&errorMessage=${"Internal server error"}`
       );
     }
-    return res.redirect("/accounts");
+    // Update session: set malUsername
+    req.session.user.malUsername = malUsernameInput;
+    return res.render("accounts");
   } catch (e) {
-    return res.redirect(`/errors?errorStatus=${400}&message=${e}`);
+    return res.redirect(`/errors?errorStatus=${400}&errorMessage=${e}`);
   }
 });
 
 router.route("/accounts/mal/unlink").post(async (req, res) => {
-  const { emailAddress, malUsername } = req.body;
   try {
-    const updateInfo = await unlinkMalAccount(emailAddress, malUsername);
+    const updateInfo = await unlinkMalAccount(req.session.user.emailAddress);
     if (!updateInfo.unlinkedAccount) {
-      return res.render(
-        `/errors?errorStatus=${500}&message=${"Internal server error"}`
+      return res.redirect(
+        `/errors?errorStatus=${500}&errorMessage=${"Internal server error"}`
       );
     }
-    res.redirect("/accounts");
+    // Update session: clear malUsername
+    req.session.user.malUsername = null;
+    return res.render("accounts");
   } catch (e) {
-    return res.render(`/errors?errorStatus=${400}&message=${e}`);
+    return res.redirect(`/errors?errorStatus=${400}&errorMessage=${e}`);
   }
 });
 
-router.route("/accounts/reset").patch(async (req, res) => {
+router.route("/accounts/reset").put(async (req, res) => {
   // TODO: pfp change implementation
   // Update exactly 1 field (username, email, password, or pfp)
   let userInfo = req.body;
-  let fieldCode = undefined;
-  let newField = undefined;
+  // Substitute blank form fields with session credentials
+  if (!userInfo.username) userInfo.username = req.session.user.username;
+  if (!userInfo.emailAddress) userInfo.emailAddress = req.session.user.emailAddress;
+  if (!userInfo.password) userInfo.password = req.session.user.password;
+  if (!userInfo.pfp) userInfo.pfp = req.session.user.pfp;
   try {
-    if (userInfo.username) {
-      validation.usernameValidation(userInfo.username);
-      newField = userInfo.username;
-      fieldCode = 0;
-    } else if (userInfo.emailAddress) {
-      validation.emailValidation(userInfo.emailAddress);
-      newField = userInfo.emailAddress;
-      fieldCode = 1;
-    } else if (userInfo.password) {
-      validation.passwordValidation(userInfo.password);
-      newField = userInfo.password;
-      fieldCode = 2;
-    } else {
-      validation.pfpValidation(userInfo.pfp);
-      newField = userInfo.pfp;
-      fieldCode = 3;
-    }
+    validation.usernameValidation(userInfo.username);
+    validation.emailValidation(userInfo.emailAddress);
+    validation.passwordValidation(userInfo.password);
+    validation.pfpValidation(userInfo.pfp);
   } catch (e) {
-    // Client-side validation should prevent this
-    return res.status(400).render("errors", {
-      errorStatus: 400,
-      title: "Error",
-      errorMessage: "Invalid user info",
-    });
+    return res.redirect(`/errors?errorStatus=${400}&errorMessage=${e}`);
   }
 
   try {
     const update = await changeUserInfo(
-      req.session.user.emailAddress,
-      newField,
-      fieldCode
+      userInfo.username,
+      userInfo.emailAddress,
+      userInfo.password,
+      userInfo.pfp
     );
     if (!update) {
-      res.status(500).render("errors", {
-        errorStatus: 500,
-        title: "Error",
-        errorMessage: "Internal server error",
-      });
+      return res.redirect(
+        `/errors?errorStatus=${500}&errorMessage=${"Internal server error"}`
+      );
     } else {
-      res.redirect("accounts");
+      return res.render("accounts");
     }
   } catch (e) {
-    res.status(400).render("errors", {
-      errorStatus: 400,
-      title: "Error",
-      errorMessage: e,
-    });
+    return res.redirect(`/errors?errorStatus=${400}&errorMessage=${e}`);
   }
 });
 
