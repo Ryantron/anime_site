@@ -1,5 +1,5 @@
 import { users } from "../config/mongoCollections.js";
-import validation from "../helpers.js";
+import validation, { DBError, ResourcesError } from "../helpers.js";
 
 export const getHistory = async (emailAddress) => {
   emailAddress = validation.emailValidation(emailAddress);
@@ -10,10 +10,10 @@ export const getHistory = async (emailAddress) => {
     usersCollection = await users();
     user = await usersCollection.findOne({ emailAddress: emailAddress });
   } catch {
-    throw "UnexpectedError: Failed to connect to DB";
+    throw new DBError("UnexpectedError: Failed to connect to DB");
   }
   if (user === null) {
-    throw "Error: No user with provided email found.";
+    throw new ResourcesError("Error: No user with provided email found.");
   }
 
   return user.recommendations;
