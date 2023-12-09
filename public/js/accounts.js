@@ -115,9 +115,16 @@ const emailAddressInput = document.querySelector("#emailAddressInput");
 const passwordInput = document.querySelector("#passwordInput");
 const pfpInput = document.querySelector("#pfpInput");
 const malUsernameInput = document.querySelector("#malUsernameInput");
+const recList = document.querySelector("#rec-list");
 
 // Toggle button event listeners
-// TODO: this, and remove toggleRecHistory?
+toggleRecHistory.addEventListener("click", (e) => {
+  if (recList.style.display === "none") {
+    recList.style.display = "block";
+  } else {
+    recList.style.display = "none";
+  }
+});
 
 // Form event listeners
 resetForm.addEventListener("submit", (e) => {
