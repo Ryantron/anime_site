@@ -39,7 +39,24 @@ export function errorToStatus(error) {
   }
 }
 
+export function createOptionalObject(name, value) {
+  return value ? { [name]: value } : {};
+}
+
 const exportedMethods = {
+  integerCheck(arg, { min = -Infinity, max = Infinity } = {}) {
+    if (arg == undefined)
+      throw new TypeError(`No value passed to integerCheck: ${arg}`);
+    if (typeof arg !== "number") throw new TypeError(`${arg} must be a number`);
+    if (!Number.isInteger(arg))
+      throw new RangeError(`${arg} is not an integer`);
+    if (arg < min)
+      throw new RangeError(`${arg} is below min allowed value (${min})`);
+    if (arg > max)
+      throw new RangeError(`${arg} is above max allowed value (${max})`);
+
+    return arg;
+  },
   stringCheck(arg) {
     if (arg == undefined) {
       throw new TypeError(
@@ -127,11 +144,6 @@ const exportedMethods = {
       );
     }
     return password;
-  },
-
-  //TODO: pfp validation
-  pfpValidation(pfp) {
-    return pfp;
   },
 };
 

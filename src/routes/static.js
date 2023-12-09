@@ -241,50 +241,33 @@ router.route("/accounts/mal/unlink").post(async (req, res) => {
 });
 
 router.route("/accounts/reset").patch(async (req, res) => {
-  // TODO: pfp change implementation
-  // Update exactly 1 field (username, email, password, or pfp)
-  let userInfo = req.body;
-  let fieldCode = undefined;
-  let newField = undefined;
   try {
-    if (userInfo.username) {
-      validation.usernameValidation(userInfo.username);
-      newField = userInfo.username;
-      fieldCode = 0;
-    } else if (userInfo.emailAddress) {
-      validation.emailValidation(userInfo.emailAddress);
-      newField = userInfo.emailAddress;
-      fieldCode = 1;
-    } else if (userInfo.password) {
-      validation.passwordValidation(userInfo.password);
-      newField = userInfo.password;
-      fieldCode = 2;
-    } else {
-      validation.pfpValidation(userInfo.pfp);
-      newField = userInfo.pfp;
-      fieldCode = 3;
-    }
+    const body = req.body;
+    if (
+      !body.usernameInput &&
+      !body.emailAddressInput &&
+      !body.passwordInput &&
+      !body.pfpIdInput
+    )
+      throw new RangeError("Must provide at least one input");
+    if (body.usernameInput) validation.usernameValidation(body.usernameInput);
+    if (body.emailAddressInput)
+      validation.emailValidation(body.emailAddressInput);
+    if (body.passwordInput) validation.passwordValidation(body.passwordInput);
+    if (body.pfpIdInput)
+      validation.integerCheck(body.pfpIdInput, { min: 1, max: 5 });
+
+    const user = await changeUserInfo(
+      req.session._id,
+      body.usernameInput,
+      body.emailAddressInput,
+      body.passwordInput,
+      body.pfpIdInput
+    );
+    req.session.user = user;
+    return res.redirect("/accounts");
   } catch (err) {
     // Client-side validation should prevent this
-    return res.redirect(
-      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
-    );
-  }
-
-  try {
-    const update = await changeUserInfo(
-      req.session.user.emailAddress,
-      newField,
-      fieldCode
-    );
-    if (!update) {
-      return res.redirect(
-        `/errors?errorStatus=${500}&message=${"Internal server error"}`
-      );
-    } else {
-      res.redirect("accounts");
-    }
-  } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
     );
