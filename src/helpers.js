@@ -138,11 +138,6 @@ const exportedMethods = {
     }
     return password;
   },
-
-  //TODO: pfp validation
-  pfpValidation(pfp) {
-    return pfp;
-  },
 };
 
 export default exportedMethods;
