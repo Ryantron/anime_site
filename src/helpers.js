@@ -20,15 +20,14 @@ export class ResourcesError extends Error {
 }
 
 export function errorToStatus(error) {
-  switch (error.name) {
-    case "TypeError":
-    case "RangeError":
-      return 400;
-    case "ResourcesError":
-      return 404;
-    case "DBError":
-    default:
-      return 500;
+  if (error instanceof TypeError || error instanceof RangeError) {
+    return 400;
+  } else if (error instanceof ResourcesError) {
+    return 404;
+  } else if (error instanceof DBError) {
+    return 500;
+  } else {
+    return 500;
   }
 }
 

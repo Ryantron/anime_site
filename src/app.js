@@ -64,12 +64,6 @@ app.use("/accounts", (req, res, next) => {
   res.redirect("/login");
 });
 
-app.use("/accounts/reset", (req, res, next) => {
-  if (req.session.user) return next();
-  req.method = "PUT";
-  return next();
-});
-
 app.use("/login", (req, res, next) => {
   if (!req.session.user) return next();
   res.redirect("/main");
