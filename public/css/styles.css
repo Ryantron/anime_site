@@ -103,6 +103,10 @@
   width: 100%;
 }
 
+.hiddenLabel {
+  display: none;
+}
+
 /*Imitate Google Chrome focus*/
 #navbar__menu-button:focus {
   outline: 1px dotted #212121;
