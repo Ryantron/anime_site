@@ -1,6 +1,10 @@
 import express from "express";
 const router = express.Router();
-import validation from "../helpers.js";
+import validation, {
+  DBError,
+  ResourcesError,
+  errorToStatus,
+} from "../helpers.js";
 import {
   changeUserInfo,
   registerUser,
@@ -21,18 +25,20 @@ router.route("/aboutus").get(async (req, res) => {
   });
 });
 //Everything commented out with / * * / on the left side always
-router.route("/main").get(async (req, res) =>{
-/*  if (req.session.user)
+router
+  .route("/main")
+  .get(async (req, res) => {
+    /*  if (req.session.user)
   {
     if (req.session.user["MALUsername"])
     {
       //Route ran if logged in + linked MAL Username
-*/      return res.render("main", {
-        title: "Main",
-        linkedRoute: "/main/recommendations",
-        linkMessage: "Search using your MyAnimeList recommendations",
-      });
-/*    }
+*/ return res.render("main", {
+      title: "Main",
+      linkedRoute: "/main/recommendations",
+      linkMessage: "Search using your MyAnimeList recommendations",
+    });
+    /*    }
     else
     {
       //Route ran if logged in and not linked
@@ -52,23 +58,23 @@ router.route("/main").get(async (req, res) =>{
       linkMessage: "Login to use MyAnimeList Functionality!",
     });
   }
-*/})
-.post(async (req, res) =>{
-  try
-  {
-    let animeInput = req.body['animeInput'].trim(); //trimming the initial input
-    if (animeInput === '') throw "Invalid input"; //Invalid input for empty strings/only spaces
-    let animeArr = animeInput.split(','); //splitting into an array
-    let finalAnimeArr = []; //the array that'll be used for comparing
-    for (let x of animeArr) //this entire for statement prunes the blank/space only inputs of the manual input
-    {
-      if (x.trim() != '')
-      { 
-        finalAnimeArr.push(x.trim());
+*/
+  })
+  .post(async (req, res) => {
+    try {
+      // TODO: Check if req.body["animeInput"] is a string before trimming
+      let animeInput = req.body["animeInput"].trim(); //trimming the initial input
+      if (animeInput === "") throw new RangeError("Invalid input"); //Invalid input for empty strings/only spaces
+      let animeArr = animeInput.split(","); //splitting into an array
+      let finalAnimeArr = []; //the array that'll be used for comparing
+      for (let x of animeArr) {
+        //this entire for statement prunes the blank/space only inputs of the manual input
+        if (x.trim() != "") {
+          finalAnimeArr.push(x.trim());
+        }
       }
-    }
-    if (finalAnimeArr.length === 0) throw "Invalid Input"; //If every single one was invalid, then errors, else goes with all other valid inputs
-/*  let newManList = placeholderManRecc(finalAnimeArr);  //Placeholder function that obtains the object list of recommendations
+      if (finalAnimeArr.length === 0) throw new RangeError("Invalid Input"); //If every single one was invalid, then errors, else goes with all other valid inputs
+      /*  let newManList = placeholderManRecc(finalAnimeArr);  //Placeholder function that obtains the object list of recommendations
     if (req.session.user)    //If section to add the manual list to the database is the user is logged in
     {
       let manObjectId = placeholderManAddDb(newManList);   //Placeholder function to add a manual list to the database, might need another parameter such as req.session.user[emailAddress] to work 
@@ -76,31 +82,27 @@ router.route("/main").get(async (req, res) =>{
     }
     else
     {
-*/      return res.render("manualList", {  //Renders the manual list in its own screen, I realized that I don't actually need to use /entries and can just render it here in /main
-        NoResult: false,       //This variable will be used in a later potential check for if the function errors out if there's no results, below I'll catch that specific error and set this to true.
+*/ return res.render("manualList", {
+        //Renders the manual list in its own screen, I realized that I don't actually need to use /entries and can just render it here in /main
+        NoResult: false, //This variable will be used in a later potential check for if the function errors out if there's no results, below I'll catch that specific error and set this to true.
         Result: finalAnimeArr, //This will be some form of the returned list/Object list instead in the final
       });
-/*    }
-*/  }
-  //If the function errors out if no recommendations are found, I'll implement a case for that then.
-  catch (e)
-  {
-    res.render("errors", {
-      errorStatus: 400,
-      title: "Error",
-      errorMessage: "Bad request",
-    });
-  }
-});
+      /*    }
+       */
+    } catch (err) {
+      //If the function errors out if no recommendations are found, I'll implement a case for that then.
+      res.redirect(`/errors?errorStatus=${errorToStatus(err)}&message=${err}`);
+    }
+  });
 
-router.route("/main/recommendations").get(async (req,res) => {
-/*  if (req.session.user["MALUsername"])    //This should already be checked once you get here, but one more check doesn't hurt
+router.route("/main/recommendations").get(async (req, res) => {
+  /*  if (req.session.user["MALUsername"])    //This should already be checked once you get here, but one more check doesn't hurt
   {
     try
     {
       let newReccs = malReccFunction(req.session.user["emailAddress"]);      //Placeholder function that returns the object id of a myanimelist recc list that is inserted into the db
-*/      res.redirect("/recommendations/".concat(newReccs));
-/*    }
+*/ res.redirect("/recommendations/".concat(newReccs));
+  /*    }
     //If the function errors out if no results are found, I'll implement a case for that then, probably a good idea to have.
     catch (e)
     {
@@ -112,14 +114,16 @@ router.route("/main/recommendations").get(async (req,res) => {
     }
   }
   else    //Above case for function failure, below case for if somehow myanimelist is not linked.
-  {
+  { // TODO: Use res.redirect(`/errors?errorStatus=${400}&message=${"Bad request"}`) instead
     res.render("errors", {
       errorStatus: 400,
       title: "Error",
       errorMessage: "Bad request",
     });
   }
-*/});
+*/
+  // TODO: Identify different errors with errorToStatus helper function
+});
 
 router.route("/errors").get(async (req, res) => {
   const errorStatus = Number.parseInt(req.query.errorStatus);
@@ -151,7 +155,9 @@ router
       validation.emailValidation(body.emailAddressInput);
       validation.passwordValidation(body.passwordInput);
     } catch (err) {
-      return res.redirect(`/errors?errorStatus=${400}&message=${err}`);
+      return res.redirect(
+        `/errors?errorStatus=${errorToStatus(err)}&message=${err.message}`
+      );
     }
 
     try {
@@ -160,7 +166,9 @@ router
       return res.redirect("/accounts");
     } catch (err) {
       return res.redirect(
-        `/login?wasErrored=${true}&errorStatus=${500}&errorMessage=${"Internal Server Error"}`
+        `/login?wasErrored=${true}&errorStatus=${errorToStatus(
+          err
+        )}&errorMessage=${err}`
       );
     }
   });
@@ -188,7 +196,9 @@ router
         body.passwordInput
       );
     } catch (err) {
-      return res.redirect(`/errors?errorStatus=${400}&message=${err}`);
+      return res.redirect(
+        `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+      );
     }
 
     try {
@@ -200,7 +210,9 @@ router
       return res.redirect("/login");
     } catch (err) {
       return res.redirect(
-        `/signup?wasErrored=${true}&errorStatus=${500}&errorMessage=${"Internal Server Error"}`
+        `/signup?wasErrored=${true}&errorStatus=${errorToStatus(
+          err
+        )}&errorMessage=${err}`
       );
     }
   });
@@ -215,8 +227,10 @@ router.route("/accounts/mal/link/:malUsername").post(async (req, res) => {
       );
     }
     return res.redirect("/accounts");
-  } catch (e) {
-    return res.redirect(`/errors?errorStatus=${400}&message=${e}`);
+  } catch (err) {
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
   }
 });
 
@@ -225,13 +239,15 @@ router.route("/accounts/mal/unlink").post(async (req, res) => {
   try {
     const updateInfo = await unlinkMalAccount(emailAddress, malUsername);
     if (!updateInfo.unlinkedAccount) {
-      return res.render(
+      return res.redirect(
         `/errors?errorStatus=${500}&message=${"Internal server error"}`
       );
     }
     res.redirect("/accounts");
-  } catch (e) {
-    return res.render(`/errors?errorStatus=${400}&message=${e}`);
+  } catch (err) {
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
   }
 });
 
@@ -259,13 +275,11 @@ router.route("/accounts/reset").patch(async (req, res) => {
       newField = userInfo.pfp;
       fieldCode = 3;
     }
-  } catch (e) {
+  } catch (err) {
     // Client-side validation should prevent this
-    return res.status(400).render("errors", {
-      errorStatus: 400,
-      title: "Error",
-      errorMessage: "Invalid user info",
-    });
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
   }
 
   try {
@@ -275,20 +289,16 @@ router.route("/accounts/reset").patch(async (req, res) => {
       fieldCode
     );
     if (!update) {
-      res.status(500).render("errors", {
-        errorStatus: 500,
-        title: "Error",
-        errorMessage: "Internal server error",
-      });
+      return res.redirect(
+        `/errors?errorStatus=${500}&message=${"Internal server error"}`
+      );
     } else {
       res.redirect("accounts");
     }
-  } catch (e) {
-    res.status(400).render("errors", {
-      errorStatus: 400,
-      title: "Error",
-      errorMessage: e,
-    });
+  } catch (err) {
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
   }
 });
 
