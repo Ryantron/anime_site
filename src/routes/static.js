@@ -1,6 +1,7 @@
 import express from "express";
 const router = express.Router();
 import validation, {
+  AuthError,
   DBError,
   ResourcesError,
   errorToStatus,
