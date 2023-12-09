@@ -18,12 +18,19 @@ export class ResourcesError extends Error {
     super(msg);
   }
 }
+export class AuthError extends Error {
+  constructor(msg) {
+    super(msg);
+  }
+}
 
 export function errorToStatus(error) {
   switch (error.name) {
     case "TypeError":
     case "RangeError":
       return 400;
+    case "AuthError":
+      return 401;
     case "ResourcesError":
       return 404;
     case "DBError":
