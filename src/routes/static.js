@@ -98,7 +98,7 @@ router
 
 router.route("/main/recommendations").get(async (req, res) => {
   try{ 
-    if (req.session.user)                     //Checks for 
+    if (req.session.user)                     //Checks for if the user is logged in, if they somehow get here without being so.
     {
       if (req.session.user["MALUsername"])    //This should already be checked once you get here, but one more check doesn't hurt
       {

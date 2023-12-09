@@ -25,7 +25,7 @@ export class ResourcesError extends Error {
 }
 
 export function errorToStatus(error) {
-  switch (error.name) {
+  switch (error.constructor.name) {
     case "TypeError":
     case "RangeError":
       return 400;
