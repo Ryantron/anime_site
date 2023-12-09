@@ -1,0 +1,30 @@
+<header>
+  <h1 tabindex="0">Main</h1>
+</header>
+
+<main>
+  <h2 class="text-center" tabindex="0">How To Use</h2>
+  <p class="max-width-700 pb-5" tabindex="0">
+    To use the recommendation feature, type in a list of your watched anime,
+    separated by commas! Alternatively, if you're logged in, you can link your
+    MyAnimeList profile to get recommendations based on your MAL anime list!
+  </p>
+  <div class="flex-center pb-5">
+    <form method="POST" id="manual-form">
+      <label for="animeInput">Enter Anime:</label>
+      <input type="text" name="animeInput" id="animeInput" />
+      <label class="hiddenLabel" for="manualSubmit">Submit</label>
+      <button
+        type="submit"
+        id="manualSubmit"
+        class="primary-bg-color primary-text-color rounded-pill no-underline px-5 py-2"
+      >Submit</button>
+    </form>
+  </div>
+  <div class="flex-center pb-5">
+    <a
+      href={{linkedRoute}}
+      class="primary-bg-color primary-text-color rounded-pill no-underline px-5 py-2"
+    >{{linkMessage}}</a>
+  </div>
+</main>

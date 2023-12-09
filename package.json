@@ -4,7 +4,11 @@
   "description": "",
   "main": "./src/app.js",
   "scripts": {
-    "start": "node ./src/app.js"
+    "start": "node ./src/app.js",
+    "seed": "node ./tasks/seed.js",
+    "test": "node ./test/index.js",
+    "format:check": "npx prettier --check .",
+    "format:write": "npx prettier --write ."
   },
   "keywords": [],
   "contributors": [
@@ -22,11 +26,14 @@
     "crypto": "^1.0.1",
     "express": "^4.18.2",
     "express-handlebars": "^7.1.2",
+    "express-session": "^1.17.3",
     "mongodb": "^6.2.0",
     "ramda": "^0.29.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "prettier": "3.1.0"
+    "prettier": "3.1.0",
+    "supertest": "^6.3.3",
+    "supertest-session": "^5.0.1"
   }
 }

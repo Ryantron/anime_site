@@ -1,0 +1,55 @@
+<header>
+  <h1 tabindex="0" class="text-center">Signup</h1>
+  <a tabindex="0" href="/login">Already have an account? Click here to log in</a>
+</header>
+<main class="mx-5">
+  <form
+    action="/signup"
+    method="post"
+    class="flex-center flex-column"
+    id="signupForm"
+  >
+    <div class="flex-center flex-column py-2">
+      <label for="usernameInput">Username</label>
+      <input name="usernameInput" id="usernameInput" type="text" />
+    </div>
+
+    <div class="flex-center flex-column py-2">
+      <label for="emailAddressInput">Email</label>
+      <input name="emailAddressInput" id="emailAddressInput" type="email" />
+    </div>
+
+    <div class="flex-center flex-column py-2">
+      <label for="passwordInput">Password</label>
+      <input name="passwordInput" id="passwordInput" type="password" />
+    </div>
+
+    <div class="flex-center flex-column py-2">
+      <label for="confirmPasswordInput">Confirm Password</label>
+      <input
+        name="confirmPasswordInput"
+        id="confirmPasswordInput"
+        type="password"
+      />
+    </div>
+
+    <div class="flex-center flex-column py-2">
+      <label for="submitInput">Submit</label>
+      <input
+        name="submitInput"
+        id="submitInput"
+        type="submit"
+        value="Sign Up"
+        class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
+      />
+    </div>
+  </form>
+  {{#if wasErrored}}
+    <div class="serverErrorContainer flex-center flex-column">
+      <h2>{{errorStatus}}</h2>
+      <p>{{errorMessage}}</p>
+    </div>
+  {{/if}}
+</main>
+
+<script defer src="/public/js/auth.js"></script>
