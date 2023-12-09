@@ -1,6 +1,7 @@
 import express from "express";
 const router = express.Router();
 import validation, {
+  AuthError,
   DBError,
   ResourcesError,
   errorToStatus,
@@ -29,41 +30,36 @@ router.route("/aboutus").get(async (req, res) => {
 router
   .route("/main")
   .get(async (req, res) => {
-    /*  if (req.session.user)
-  {
-    if (req.session.user["MALUsername"])
-    {
-      //Route ran if logged in + linked MAL Username
-*/ return res.render("main", {
-      title: "Main",
-      linkedRoute: "/main/recommendations",
-      linkMessage: "Search using your MyAnimeList recommendations",
-    });
-    /*    }
-    else
-    {
-      //Route ran if logged in and not linked
+    if (req.session.user) {
+      if (req.session.user["MALUsername"]) {
+        //Route ran if logged in + linked MAL Username
+        return res.render("main", {
+          title: "Main",
+          linkedRoute: "/main/recommendations",
+          linkMessage: "Search using your MyAnimeList recommendations",
+        });
+      } else {
+        //Route ran if logged in and not linked
+        return res.render("main", {
+          title: "Main",
+          linkedRoute: "/accounts",
+          linkMessage:
+            "Link your MyAnimeList account to use MAL Functionality!",
+        });
+      }
+    } else {
+      //Route ran if not logged in
       return res.render("main", {
         title: "Main",
-        linkedRoute: "/accounts",
-        linkMessage: "Link your MyAnimeList account to use MAL Functionality!",
+        linkedRoute: "/login",
+        linkMessage: "Login to use MyAnimeList Functionality!",
       });
     }
-  }
-  else
-  {
-    //Route ran if not logged in
-    return res.render("main", {
-      title: "Main",
-      linkedRoute: "/login",
-      linkMessage: "Login to use MyAnimeList Functionality!",
-    });
-  }
-*/
   })
   .post(async (req, res) => {
     try {
-      // TODO: Check if req.body["animeInput"] is a string before trimming
+      if (typeof req.body["animeInput"] != "string")
+        throw new RangeError("Invalid input");
       let animeInput = req.body["animeInput"].trim(); //trimming the initial input
       if (animeInput === "") throw new RangeError("Invalid input"); //Invalid input for empty strings/only spaces
       let animeArr = animeInput.split(","); //splitting into an array
@@ -75,55 +71,44 @@ router
         }
       }
       if (finalAnimeArr.length === 0) throw new RangeError("Invalid Input"); //If every single one was invalid, then errors, else goes with all other valid inputs
-      /*  let newManList = placeholderManRecc(finalAnimeArr);  //Placeholder function that obtains the object list of recommendations
-    if (req.session.user)    //If section to add the manual list to the database is the user is logged in
-    {
-      let manObjectId = placeholderManAddDb(newManList);   //Placeholder function to add a manual list to the database, might need another parameter such as req.session.user[emailAddress] to work 
-      res.redirect("/recommendations/".concat(manObjectId));   //Redirects to that stored version of the manual list within the users' saved lists
-    }
-    else
-    {
-*/ return res.render("manualList", {
-        //Renders the manual list in its own screen, I realized that I don't actually need to use /entries and can just render it here in /main
-        NoResult: false, //This variable will be used in a later potential check for if the function errors out if there's no results, below I'll catch that specific error and set this to true.
-        Result: finalAnimeArr, //This will be some form of the returned list/Object list instead in the final
-      });
-      /*    }
-       */
+      //let newManList = placeholderManRecc(finalAnimeArr);  //Placeholder function that obtains the object list of recommendations, commented out until implemented
+      if (req.session.user) {
+        //If section to add the manual list to the database is the user is logged in
+        //let manObjectId = placeholderManAddDb(newManList);   //Placeholder function to add a manual list to the database, might need another parameter such as req.session.user[emailAddress] to work, commented out until implemented
+        let manObjectId = "success"; //Testing purposes, delete when above line implemented
+        return res.redirect("/recommendations/".concat(manObjectId)); //Redirects to recommendations page (will work when both recommendations and function are implemented)
+      } else {
+        return res.redirect("/entries", {
+          // Please redirect instead of render on routes that uses another html
+          NoResult: false, //This variable will be used in a later potential check for if the function errors out if there's no results, below I'll catch that specific error and set this to true.
+          Result: finalAnimeArr, //This will be some form of the returned list/Object list instead in the final, for now it just returns the list the user put it (with valid values)
+        });
+      }
     } catch (err) {
       //If the function errors out if no recommendations are found, I'll implement a case for that then.
-      res.redirect(`/errors?errorStatus=${errorToStatus(err)}&message=${err}`);
+      return res.redirect(
+        `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+      );
     }
   });
 
 router.route("/main/recommendations").get(async (req, res) => {
-  /*  if (req.session.user["MALUsername"])    //This should already be checked once you get here, but one more check doesn't hurt
-  {
-    try
-    {
-      let newReccs = malReccFunction(req.session.user["emailAddress"]);      //Placeholder function that returns the object id of a myanimelist recc list that is inserted into the db
-*/ res.redirect("/recommendations/".concat(newReccs));
-  /*    }
-    //If the function errors out if no results are found, I'll implement a case for that then, probably a good idea to have.
-    catch (e)
-    {
-      res.render("errors", {
-        errorStatus: 400,
-        title: "Error",
-        errorMessage: "Bad request",
-      });
+  try {
+    if (req.session.user) {
+      //Checks for if the user is logged in, if they somehow get here without being so.
+      if (req.session.user["MALUsername"]) {
+        //This should already be checked once you get here, but one more check doesn't hurt
+        //let newReccs = malReccFunction(req.session.user["emailAddress"]);      //Placeholder function that returns the object id of a myanimelist recc list that is inserted into the db
+        let newReccs = "success"; //Testing purposes, delete when above line implemented
+        return res.redirect("/recommendations/".concat(newReccs)); //Redirects to the recommendation page. (Will be functional when function and recommendations page is done)
+      }
     }
+    throw new AuthError("Not Authorized");
+  } catch (err) {
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
   }
-  else    //Above case for function failure, below case for if somehow myanimelist is not linked.
-  { // TODO: Use res.redirect(`/errors?errorStatus=${400}&message=${"Bad request"}`) instead
-    res.render("errors", {
-      errorStatus: 400,
-      title: "Error",
-      errorMessage: "Bad request",
-    });
-  }
-*/
-  // TODO: Identify different errors with errorToStatus helper function
 });
 
 router.route("/errors").get(async (req, res) => {

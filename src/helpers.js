@@ -8,6 +8,11 @@ import { ObjectId } from "mongodb";
  * ResourcesError (resources not found) -> 404
  */
 
+export class AuthError extends Error {
+  constructor(msg) {
+    super(msg);
+  }
+}
 export class DBError extends Error {
   constructor(msg) {
     super(msg);
@@ -20,14 +25,17 @@ export class ResourcesError extends Error {
 }
 
 export function errorToStatus(error) {
-  if (error instanceof TypeError || error instanceof RangeError) {
-    return 400;
-  } else if (error instanceof ResourcesError) {
-    return 404;
-  } else if (error instanceof DBError) {
-    return 500;
-  } else {
-    return 500;
+  switch (error.constructor.name) {
+    case "TypeError":
+    case "RangeError":
+      return 400;
+    case "AuthError":
+      return 401;
+    case "ResourcesError":
+      return 404;
+    case "DBError":
+    default:
+      return 500;
   }
 }
 
