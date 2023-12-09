@@ -43,6 +43,15 @@ export function createOptionalObject(name, value) {
   return value ? { [name]: value } : {};
 }
 
+export function removeObjectIdFromUser(user) {
+  user._id = user._id.toString();
+  user.recommendations = user.recommendations.map((rec) => {
+    rec._id = rec._id.toString();
+    rec.usersLiked = rec.usersLiked.map((objId) => objId.toString());
+    return rec;
+  });
+}
+
 const exportedMethods = {
   integerCheck(arg, { min = -Infinity, max = Infinity } = {}) {
     if (arg == undefined)

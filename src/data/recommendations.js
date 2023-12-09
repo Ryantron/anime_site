@@ -1,5 +1,9 @@
 import { users } from "../config/mongoCollections.js";
-import validation, { DBError, ResourcesError } from "../helpers.js";
+import validation, {
+  DBError,
+  ResourcesError,
+  removeObjectIdFromUser,
+} from "../helpers.js";
 import { MAL_HANDLER } from "./mal-handler.js";
 import { ObjectId } from "mongodb";
 
@@ -7,6 +11,7 @@ const MAL_API_URL = "https://api.myanimelist.net/v2/users/";
 const MAL_CLIENT_ID = "1998d4dbe36d8e9b017e280329d92592";
 const MAL_CLIENT_HEADERS = { "X-MAL-CLIENT-ID": MAL_CLIENT_ID };
 
+// Helper function for getUserRecs
 const getUserAnimeList = async (emailAddress) => {
   if (!emailAddress) {
     throw "You must supply your accounts email address";
@@ -30,6 +35,7 @@ const getUserAnimeList = async (emailAddress) => {
   return userList.data;
 };
 
+// Helper function for getUserRecs
 const getAnimeRecs = async (animeId) => {
   const URL =
     "https://api.myanimelist.net/v2/anime/" +
@@ -85,6 +91,7 @@ export const getUserRecs = async (emailAddress) => {
   };
 };
 
+// Helper function for getUserRecs
 const getTopFiveRecs = async (recs, showsSeen) => {
   const filterRecs = recs.filter((num) => !showsSeen.includes(num));
   const counts = {};
@@ -108,6 +115,7 @@ const getTopFiveRecs = async (recs, showsSeen) => {
 };
 
 // Exporting this to test it as a unit
+// Helper function for getUserRecs
 export const getAnimeInfo = async (animeId) => {
   const URL =
     "https://api.myanimelist.net/v2/anime/" + animeId + "?fields=title,";
@@ -115,6 +123,44 @@ export const getAnimeInfo = async (animeId) => {
   let animeInfo = await response.json();
   // TODO: Test this
   return animeInfo;
+};
+
+// const getUser = async (queryCallback) => {
+//   id = validation.stringCheck(id);
+//   if (!ObjectId.isValid(id)) throw new TypeError("Not a valid object id");
+//   const usersCollection = await users();
+//   const user = await usersCollection.findOne(queryCallback());
+
+//   if (user === null) throw new ResourcesError(`No user with id ${id} exist`);
+
+//   return user;
+// };
+
+export const hasCurrentUserLikedAlready = async (currentUserId, recListId) => {
+  // Validate emailAddress and recListId
+
+  const usersCollection = await users();
+  const user = await usersCollection.findOne({
+    "recommendations._id": new ObjectId(recListId),
+  });
+
+  if (user === null)
+    throw new ResourcesError(
+      `No user with recommendation id ${recListId} found.`
+    );
+
+  const recList = user.recommendations.find(
+    (rec) => rec._id.toString() === recListId
+  );
+  if (!recList) throw Error("Interal Error, recList is null");
+
+  if (
+    recList.usersLiked.find(
+      (userObjId) => userObjId.toString() === currentUserId
+    )
+  )
+    return true;
+  else return false;
 };
 
 export const getHistory = async (emailAddress) => {
@@ -132,5 +178,6 @@ export const getHistory = async (emailAddress) => {
     throw new ResourcesError("Error: No user with provided email found.");
   }
 
+  removeObjectIdFromUser(user);
   return user.recommendations;
 };

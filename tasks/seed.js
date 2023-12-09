@@ -29,7 +29,6 @@ async function insertUser({
   };
   const usersCollection = await users();
   const user = await usersCollection.insertOne(res);
-  console.log(user);
   if (!user) throw "Unable to add user to collection";
   return user;
 }
