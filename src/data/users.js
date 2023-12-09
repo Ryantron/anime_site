@@ -47,9 +47,7 @@ export const loginUser = async (emailAddress, password) => {
   }
 
   emailAddress = emailAddress.toLowerCase();
-
   emailAddress = validation.emailValidation(emailAddress);
-  emailAddress = emailAddress.toLowerCase();
 
   password = validation.passwordValidation(password);
   const usersCollection = await users();
@@ -105,7 +103,7 @@ export const changeUserInfo = async (
     { $set: updatedProps },
     { returnDocument: "after" }
   );
-  if (!updatedInfo) return null;
+  if (!updateRes) return null;
 
   if (!updateRes.acknowledged) throw new DBError("Unable to update DB.");
 

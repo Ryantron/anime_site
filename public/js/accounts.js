@@ -9,7 +9,7 @@ const errorConstructor = (message) => {
  * @param {object} [param0]
  * @param {number} [param0.minLen]
  * @param {number} [param0.maxLen]
- *
+ * @returns {string}
  */
 const stringValidation = (str, { minLen = 1, maxLen = Infinity } = {}) => {
   if (typeof str !== "string")
@@ -28,7 +28,6 @@ const stringValidation = (str, { minLen = 1, maxLen = Infinity } = {}) => {
 
 /**
  * @param {any} email
- * @param {object} [obj]
  * @returns {string}
  */
 const emailValidation = (email) => {
@@ -40,6 +39,10 @@ const emailValidation = (email) => {
   else return errorConstructor(`Invalid email ${res}`);
 };
 
+/**
+ * @param {any} password
+ * @returns {string}
+ */
 const passwordValidation = (password) => {
   if (/\s/.test(password)) {
     return errorConstructor("Password cannot contain empty spaces");
@@ -56,9 +59,25 @@ const passwordValidation = (password) => {
   return password;
 };
 
+const integerCheck = (arg, { min = -Infinity, max = Infinity } = {}) => {
+  if (arg === undefined)
+    return errorConstructor(`No value passed to integerCheck: ${arg}`);
+  if (typeof arg !== "number")
+    return errorConstructor(`${arg} must be a number`);
+  if (!Number.isInteger(arg))
+    return errorConstructor(`${arg} is not an integer`);
+  if (arg < min)
+    return errorConstructor(`${arg} is below min allowed value (${min})`);
+  if (arg > max)
+    return errorConstructor(`${arg} is above max allowed value (${max})`);
+
+  return arg;
+};
+
 // TODO: validation?
-const pfpValidation = (pfp) => {
-  return pfp;
+const pfpValidation = (pfpId) => {
+  pfpId = integerCheck(pfpId, { min: 1, max: 5 });
+  return pfpId;
 };
 
 const createErrorList = (errors) => {
@@ -131,10 +150,7 @@ resetForm.addEventListener("submit", (e) => {
     password = passwordValidation(passwordInput.value);
   }
   if (typeof pfpInput.value === "string" && pfpInput.value.trim() !== "") {
-    pfp = stringValidation(pfpInput.value, {
-      minLen: 2,
-      maxLen: 25,
-    });
+    pfp = pfpValidation(parseInt(pfpInput.value, 10));
   }
 
   if (typeof username === "object")
@@ -157,20 +173,22 @@ resetForm.addEventListener("submit", (e) => {
   }
 });
 
-malForm.addEventListener("submit", (e) => {
-  deleteError();
-  const errors = [];
-  const malUsername = stringValidation(malUsernameInput.value);
-  if (typeof malUsername === "object")
-    errors.push("(MyAnimeList Username) " + malUsername.message);
-  if (errors.length > 0) {
-    e.preventDefault();
-    const errorHeader = document.createElement("h3");
-    errorHeader.classList.add("errorHeader");
-    errorHeader.classList.add("px-4");
-    errorHeader.textContent = "Error:";
-    errorList.appendChild(errorHeader);
-    const errLi = createErrorList(errors);
-    errorList.appendChild(errLi);
-  }
-});
+if (malForm) {
+  malForm.addEventListener("submit", (e) => {
+    deleteError();
+    const errors = [];
+    const malUsername = stringValidation(malUsernameInput.value);
+    if (typeof malUsername === "object")
+      errors.push("(MyAnimeList Username) " + malUsername.message);
+    if (errors.length > 0) {
+      e.preventDefault();
+      const errorHeader = document.createElement("h3");
+      errorHeader.classList.add("errorHeader");
+      errorHeader.classList.add("px-4");
+      errorHeader.textContent = "Error:";
+      errorList.appendChild(errorHeader);
+      const errLi = createErrorList(errors);
+      errorList.appendChild(errLi);
+    }
+  });
+}
