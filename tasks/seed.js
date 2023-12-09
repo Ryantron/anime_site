@@ -31,6 +31,7 @@ async function insertUser({
   const user = await usersCollection.insertOne(res);
   console.log(user);
   if (!user) throw "Unable to add user to collection";
+  return user;
 }
 
 // Delete collection
@@ -40,13 +41,15 @@ await usersCollection.drop();
 
 // Add document to collection
 
-await insertUser({
+const testuser = await insertUser({
   username: "testuser",
   emailAddress: "test@test.com",
   password: "Test1234@",
   pfpId: 1,
+
   recommendations: [
     {
+      usersLiked: [],
       recommendationList: [
         {
           animeId: "25798",
@@ -67,7 +70,7 @@ await insertUser({
   malUsername: "Jimmy2006",
 });
 
-await insertUser({
+const testuser2 = await insertUser({
   username: "testuser2",
   emailAddress: "test2@test.com",
   password: "Test1234@@",
@@ -75,12 +78,31 @@ await insertUser({
   recommendations: [],
 });
 
-await insertUser({
+const testuser3 = await insertUser({
   username: "testuser3",
   emailAddress: "test3@test.com",
   password: "Test123@@",
   pfpId: 3,
-  recommendations: [],
+  recommendations: [
+    {
+      usersLiked: [testuser.insertedId],
+      recommendationList: [
+        {
+          animeId: "25798",
+          title:
+            "That time I got reincarnated as a coach and had to go around the world to save fishes because they needed help from the humans who are incompetent",
+          frequency: 3,
+          review: 5,
+        },
+        {
+          animeId: "13452",
+          title: "Paul V",
+          frequency: 2,
+          review: 4,
+        },
+      ],
+    },
+  ],
 });
 
 await closeConnection();

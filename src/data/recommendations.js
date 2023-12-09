@@ -107,11 +107,13 @@ const getTopFiveRecs = async (recs, showsSeen) => {
   return finalRecs;
 };
 
-const getAnimeInfo = async (animeId) => {
+// Exporting this to test it as a unit
+export const getAnimeInfo = async (animeId) => {
   const URL =
     "https://api.myanimelist.net/v2/anime/" + animeId + "?fields=title,";
   const response = await MAL_HANDLER.request(URL, MAL_CLIENT_HEADERS, "GET");
   let animeInfo = await response.json();
+  // TODO: Test this
   return animeInfo;
 };
 
