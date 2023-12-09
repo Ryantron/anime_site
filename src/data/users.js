@@ -115,8 +115,6 @@ export const changeUserInfo = async (
     throw new DBError(
       "DB was not updated even though update was acknowledged."
     );
-  if (updatedInfo.modifiedCount === 0)
-    throw "Could not update user successfully";
 
   return updatedUser;
 };
