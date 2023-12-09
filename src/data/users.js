@@ -1,6 +1,10 @@
 import { response } from "express";
 import { users } from "../config/mongoCollections.js";
-import validation, { DBError, ResourcesError } from "../helpers.js";
+import validation, {
+  DBError,
+  ResourcesError,
+  createOptionalObject,
+} from "../helpers.js";
 import bcrypt from "bcrypt";
 const saltRounds = 16;
 
@@ -21,6 +25,7 @@ export const registerUser = async (username, emailAddress, password) => {
     username: username,
     emailAddress: emailAddress,
     hashedPassword: hashedPassword,
+    pfpId: 1,
     recommendations: [],
   };
 
@@ -58,54 +63,61 @@ export const loginUser = async (emailAddress, password) => {
     throw new RangeError("Either the username or password is invalid");
   }
 
-  return {
-    username: user.username,
-    emailAddress: user.emailAddress,
-  };
+  return user;
 };
 
-export const changeUserInfo = async (username, emailAddress, password) => {
-  if (
-    typeof username !== "string" ||
-    typeof emailAddress !== "string" ||
-    typeof password !== "string"
-  ) {
-    throw new TypeError("All inputs must be a string");
-  }
-  if (!emailAddress) {
-    throw new TypeError(
-      "You must provide your account's email address to modify username/password"
-    );
-  }
-  if (!username || !password) {
-    throw new TypeError("You must provide a username and password to modify.");
-  }
+export const changeUserInfo = async (
+  id,
+  username,
+  emailAddress,
+  password,
+  pfpId
+) => {
+  if (!username && !emailAddress && !password && !pfpId)
+    throw new RangeError("Must provide at least one input");
 
-  username = username.toLowerCase();
-  password = validation.passwordValidation(password);
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
+  let hashedPassword;
+  if (username) username = validation.stringCheck(username).toLowerCase();
+  if (emailAddress) {
+    emailAddress = validation.emailValidation(emailAddress).toLowerCase();
+  }
+  if (password) {
+    password = validation.passwordValidation(password);
+    hashedPassword = await bcrypt.hash(password, saltRounds);
+  }
+  if (pfpId) validation.integerCheck(pfpId, { min: 1, max: 5 });
+
+  const updatedProps = {
+    ...createOptionalObject("username", username),
+    ...createOptionalObject("emailAddress", emailAddress),
+    ...createOptionalObject("hashedPassword", hashedPassword),
+    ...createOptionalObject("pfpId", pfpId),
+  };
+
   const usersCollection = await users();
-  const user = await usersCollection.findOne({ emailAddress: emailAddress });
+  const user = await usersCollection.findOne({ _id: id });
   if (user === null) {
     throw new ResourcesError("No user with provided email found.");
   }
-  const updatedUser = {
-    username: username,
-    emailAddress: emailAddress,
-    hashedPassword: hashedPassword,
-  };
 
-  const updatedInfo = await usersCollection.updateOne(
-    { emailAddress: emailAddress },
-    { $set: updatedUser },
+  const updateRes = await usersCollection.updateOne(
+    { _id: id },
+    { $set: updatedProps },
     { returnDocument: "after" }
   );
 
-  if (!updatedInfo.acknowledged) throw new DBError("Unable to update DB.");
+  if (!updateRes.acknowledged) throw new DBError("Unable to update DB.");
 
-  // TODO: Error testing for
+  const updatedUser = await usersCollection.findOne({
+    _id: id,
+  });
 
-  return { emailAddress: emailAddress, username: username };
+  if (updatedUser === null)
+    throw new DBError(
+      "DB was not updated even though update was acknowledged."
+    );
+
+  return updatedUser;
 };
 
 export const linkMalAccount = async (emailAddress, malUsername) => {

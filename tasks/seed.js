@@ -8,6 +8,7 @@ async function insertUser({
   username,
   emailAddress,
   password,
+  pfpId,
   recommendations,
   malUsername,
 }) {
@@ -21,9 +22,10 @@ async function insertUser({
       username,
       emailAddress,
       hashedPassword: await bcrypt.hash(password, saltRounds),
+      pfpId,
       recommendations,
     },
-    ...(malUsername ? {} : { malUsername }),
+    ...(malUsername ? { malUsername } : {}),
   };
   const usersCollection = await users();
   const user = await usersCollection.insertOne(res);
@@ -31,10 +33,18 @@ async function insertUser({
   if (!user) throw "Unable to add user to collection";
 }
 
+// Delete collection
+
+const usersCollection = await users();
+await usersCollection.drop();
+
+// Add document to collection
+
 await insertUser({
   username: "testuser",
   emailAddress: "test@test.com",
   password: "Test1234@",
+  pfpId: 1,
   recommendations: [
     {
       recommendationList: [
@@ -54,6 +64,23 @@ await insertUser({
       ],
     },
   ],
+  malUsername: "Jimmy2006",
+});
+
+await insertUser({
+  username: "testuser2",
+  emailAddress: "test2@test.com",
+  password: "Test1234@@",
+  pfpId: 1,
+  recommendations: [],
+});
+
+await insertUser({
+  username: "testuser3",
+  emailAddress: "test3@test.com",
+  password: "Test123@@",
+  pfpId: 3,
+  recommendations: [],
 });
 
 await closeConnection();
