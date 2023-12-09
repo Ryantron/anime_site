@@ -8,17 +8,17 @@ import { ObjectId } from "mongodb";
  * ResourcesError (resources not found) -> 404
  */
 
+export class AuthError extends Error {
+  constructor(msg) {
+    super(msg);
+  }
+}
 export class DBError extends Error {
   constructor(msg) {
     super(msg);
   }
 }
 export class ResourcesError extends Error {
-  constructor(msg) {
-    super(msg);
-  }
-}
-export class AuthError extends Error {
   constructor(msg) {
     super(msg);
   }
