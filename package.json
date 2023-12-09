@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "prettier": "3.1.0",
-    "supertest": "^6.3.3"
+    "supertest": "^6.3.3",
+    "supertest-session": "^5.0.1"
   }
 }
