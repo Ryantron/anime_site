@@ -1,6 +1,10 @@
 import { response } from "express";
 import { users } from "../config/mongoCollections.js";
-import validation from "../helpers.js";
+import validation, {
+  DBError,
+  ResourcesError,
+  createOptionalObject,
+} from "../helpers.js";
 import bcrypt from "bcrypt";
 const saltRounds = 16;
 
@@ -15,18 +19,19 @@ export const registerUser = async (username, emailAddress, password) => {
     emailAddress: emailAddress,
   });
   if (existingUser !== null) {
-    throw "User with provided email already exists";
+    throw new RangeError("User with provided email already exists");
   }
   let newUser = {
     username: username,
     emailAddress: emailAddress,
     hashedPassword: hashedPassword,
+    pfpId: 1,
     recommendations: [],
   };
 
   const insertedInfo = await usersCollection.insertOne(newUser);
   if (!insertedInfo.acknowledged || !insertedInfo.insertedId) {
-    throw "User could not be added";
+    throw new DBError("User could not be added");
   }
 
   return { insertedUser: true };
@@ -34,11 +39,11 @@ export const registerUser = async (username, emailAddress, password) => {
 
 export const loginUser = async (emailAddress, password) => {
   if (!emailAddress || !password) {
-    throw "You must provide both an email and a password";
+    throw new TypeError("You must provide both an email and a password");
   }
 
   if (typeof emailAddress !== "string" || typeof password !== "string") {
-    throw "Both username and password must be string inputs";
+    throw new TypeError("Both username and password must be string inputs");
   }
 
   emailAddress = emailAddress.toLowerCase();
@@ -49,90 +54,98 @@ export const loginUser = async (emailAddress, password) => {
   password = validation.passwordValidation(password);
   const usersCollection = await users();
   const user = await usersCollection.findOne({ emailAddress: emailAddress });
+  // For login data functions, not finding user should return RangeError
   if (user === null) {
-    throw "Either the username or password is invalid";
+    throw new RangeError("Either the username or password is invalid");
   }
   const passwordCheck = await bcrypt.compare(password, user.hashedPassword);
   if (!passwordCheck) {
-    throw "Either the username or password is invalid";
+    throw new RangeError("Either the username or password is invalid");
   }
 
-  return {
-    username: user.username,
-    emailAddress: user.emailAddress,
-  };
+  return user;
 };
 
-// TODO: pfp implementation
-export const changeUserInfo = async (username, emailAddress, password, pfp) => {
-  if (
-    typeof username !== "string" ||
-    typeof emailAddress !== "string" ||
-    typeof password !== "string"
-  ) {
-    throw "All inputs must be a string";
-  }
-  if (!emailAddress) {
-    throw "You must provide your account's email address to modify username/password";
-  }
-  if (!username || !password) {
-    throw "You must provide a username and password to modify.";
-  }
+export const changeUserInfo = async (
+  id,
+  username,
+  emailAddress,
+  password,
+  pfpId
+) => {
+  if (!username && !emailAddress && !password && !pfpId)
+    throw new RangeError("Must provide at least one input");
 
-  username = username.toLowerCase();
-  password = validation.passwordValidation(password);
-  const hashedPassword = await bcrypt.hash(password, saltRounds);
-  const usersCollection = await users();
-  const user = await usersCollection.findOne({ emailAddress: emailAddress });
-  if (user === null) {
-    throw "No user with provided email found.";
+  let hashedPassword;
+  if (username) username = validation.stringCheck(username).toLowerCase();
+  if (emailAddress) {
+    emailAddress = validation.emailValidation(emailAddress).toLowerCase();
   }
-  const updatedUser = {
-    username: username,
-    emailAddress: emailAddress,
-    hashedPassword: hashedPassword,
-    pfp: pfp
+  if (password) {
+    password = validation.passwordValidation(password);
+    hashedPassword = await bcrypt.hash(password, saltRounds);
+  }
+  if (pfpId) validation.integerCheck(pfpId, { min: 1, max: 5 });
+
+  const updatedProps = {
+    ...createOptionalObject("username", username),
+    ...createOptionalObject("emailAddress", emailAddress),
+    ...createOptionalObject("hashedPassword", hashedPassword),
+    ...createOptionalObject("pfpId", pfpId),
   };
 
-  const updatedInfo = await usersCollection.updateOne(
-    { emailAddress: emailAddress },
-    { $set: updatedUser },
+  const usersCollection = await users();
+  const user = await usersCollection.findOne({ _id: id });
+  if (user === null) {
+    throw new ResourcesError("No user with provided email found.");
+  }
+
+  const updateRes = await usersCollection.updateOne(
+    { _id: id },
+    { $set: updatedProps },
     { returnDocument: "after" }
   );
   if (!updatedInfo) return null;
 
-  return { emailAddress: emailAddress, username: username, pfp: pfp, malUsername: null };
+  if (!updateRes.acknowledged) throw new DBError("Unable to update DB.");
+
+  const updatedUser = await usersCollection.findOne({
+    _id: id,
+  });
+
+  if (updatedUser === null)
+    throw new DBError(
+      "DB was not updated even though update was acknowledged."
+    );
+
+  return updatedUser;
 };
 
 export const linkMalAccount = async (emailAddress, malUsername) => {
   if (!emailAddress || !malUsername) {
-    throw "You must provide both your email and malUsername";
+    throw new TypeError("You must provide both your email and malUsername");
   }
   emailAddress = validation.emailValidation(emailAddress);
   if (typeof malUsername !== "string") {
-    throw "Error: malUsername must be a string input";
+    throw new TypeError("malUsername must be a string input");
   }
 
   const MAL_API_URL =
     "https://api.myanimelist.net/v2/users/" + malUsername + "/animelist";
   const MAL_CLIENT_ID = "1998d4dbe36d8e9b017e280329d92592";
-  // FIXME: Use axios instead of fetch
-  fetch(MAL_API_URL, {
+
+  await fetch(MAL_API_URL, {
     method: "GET",
     headers: {
       "X-MAL-CLIENT-ID": MAL_CLIENT_ID,
     },
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error(
-          `No user with provided username found. Status: ${response.status}`
-        );
-      }
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
+  }).then((response) => {
+    if (!response.ok) {
+      throw new ResourcesError(
+        `No user with provided username found. Status: ${response.status}`
+      );
+    }
+  });
 
   let usersCollection = undefined;
   let user = undefined;
@@ -140,14 +153,16 @@ export const linkMalAccount = async (emailAddress, malUsername) => {
     usersCollection = await users();
     user = await usersCollection.findOne({ emailAddress: emailAddress });
   } catch {
-    return { emailAddress: emailAddress, linkedAccount: false };
+    throw new DBError("Unable to query DB.");
   }
   if (user === null) {
-    throw "Error: No user with provided email found.";
+    throw new ResourcesError("No user with provided email found.");
   }
 
   if (user.malUsername) {
-    throw "Error: You have a My Anime List account linked to your profile. Please unlink the current account to link a new one";
+    throw new RangeError(
+      "You have a My Anime List account linked to your profile. Please unlink the current account to link a new one"
+    );
   }
 
   const updatedInfo = await usersCollection.updateOne(
@@ -156,8 +171,7 @@ export const linkMalAccount = async (emailAddress, malUsername) => {
     { returnDocument: "after" }
   );
   if (updatedInfo.modifiedCount === 0) {
-    // 'DB Error: Could not link account'
-    return { emailAddress: emailAddress, linkedAccount: false };
+    throw new DBError("Could not link account");
   }
 
   return { emailAddress: emailAddress, linkedAccount: true };
@@ -165,7 +179,7 @@ export const linkMalAccount = async (emailAddress, malUsername) => {
 
 export const unlinkMalAccount = async (emailAddress) => {
   if (!emailAddress) {
-    throw "You must provide your email";
+    throw new TypeError("You must provide your email");
   }
   emailAddress = validation.emailValidation(emailAddress);
   let usersCollection = undefined;
@@ -174,14 +188,16 @@ export const unlinkMalAccount = async (emailAddress) => {
     usersCollection = await users();
     user = await usersCollection.findOne({ emailAddress: emailAddress });
   } catch {
-    return { emailAddress: emailAddress, unlinkedAccount: false };
+    throw new DBError("Unable to query DB.");
   }
   if (user === null) {
-    throw "Error: No user with provided email found.";
+    throw new ResourcesError("No user with provided email found.");
   }
 
   if (!user.malUsername) {
-    throw "Error: You do not have a My Anime List account linked to your profile.";
+    throw new RangeError(
+      "You do not have a My Anime List account linked to your profile."
+    );
   }
 
   const updatedInfo = await usersCollection.updateOne(
@@ -190,8 +206,7 @@ export const unlinkMalAccount = async (emailAddress) => {
     { returnDocument: "after" }
   );
   if (updatedInfo.modifiedCount === 0) {
-    // 'DB Error: Could not unlink account'
-    return { emailAddress: emailAddress, unlinkedAccount: false };
+    throw new DBError("Could not unlink account.");
   }
 
   return { emailAddress: emailAddress, unlinkedAccount: true };
