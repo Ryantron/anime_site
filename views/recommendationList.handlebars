@@ -6,7 +6,7 @@
 <main class="mx-5">
   <section>
     <div class="flex-center">
-      <h2 class="text-center me-2">Author</h2>
+      <h2 class="text-center me-2" tabindex="0">Author</h2>
       <form
         action="/recommendations/friends/:authorId"
         method="post"
@@ -31,7 +31,7 @@
       </form>
     </div>
     <div class="flex-center flex-column">
-      <p class="text-light-bold me-2">{{authorName}}</p>
+      <p class="text-light-bold me-2" tabindex="0">{{authorName}}</p>
       <p id="authorIdP" class="hidden">{{authorId}}</p>
       <p id="recIdP" class="hidden">{{recId}}</p>
       <img
@@ -40,12 +40,13 @@
         width="64"
         height="64"
         class="rounded-circle"
+        tabindex="0"
       />
     </div>
   </section>
   <section>
     <div class="flex-center">
-      <h2 class="text-center me-2">Recommended</h2>
+      <h2 class="text-center me-2" tabindex="0">Recommended</h2>
       <form action="/recommendations/thumbsup/" method="post" id="thumbsUpForm">
         <label for="addFriendInputs" class="hiddenLabel">Thumbs Up</label>
         {{#if alreadyLiked}}
