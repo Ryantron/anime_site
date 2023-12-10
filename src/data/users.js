@@ -4,8 +4,10 @@ import validation, {
   DBError,
   ResourcesError,
   createOptionalObject,
+  removeObjectIdFromUser,
 } from "../helpers.js";
 import bcrypt from "bcrypt";
+import { ObjectId } from "mongodb";
 const saltRounds = 16;
 
 export const registerUser = async (username, emailAddress, password) => {
@@ -61,6 +63,7 @@ export const loginUser = async (emailAddress, password) => {
     throw new RangeError("Either the username or password is invalid");
   }
 
+  removeObjectIdFromUser(user);
   return user;
 };
 
@@ -75,6 +78,13 @@ export const changeUserInfo = async (
     throw new RangeError("Must provide at least one input");
 
   let hashedPassword;
+  if (!id) throw new TypeError("Must always provide id");
+  else {
+    id = validation.stringCheck(id);
+    if (!ObjectId.isValid(id))
+      throw new TypeError("Id provided is not a valid Object Id string");
+    id = new ObjectId(id);
+  }
   if (username) username = validation.stringCheck(username).toLowerCase();
   if (emailAddress) {
     emailAddress = validation.emailValidation(emailAddress).toLowerCase();
@@ -103,7 +113,7 @@ export const changeUserInfo = async (
     { $set: updatedProps },
     { returnDocument: "after" }
   );
-  if (!updateRes) return null;
+  if (!updateRes) throw new DBError("DB Error.");
 
   if (!updateRes.acknowledged) throw new DBError("Unable to update DB.");
 
@@ -116,6 +126,7 @@ export const changeUserInfo = async (
       "DB was not updated even though update was acknowledged."
     );
 
+  removeObjectIdFromUser(updatedUser);
   return updatedUser;
 };
 
