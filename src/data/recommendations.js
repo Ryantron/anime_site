@@ -47,6 +47,70 @@ const getAnimeRecs = async (animeId) => {
   return recs.recommendations;
 };
 
+// Helper function for getUserRecs
+const getTopFiveRecs = async (recs, showsSeen, emailAddress) => {
+  const usersCollection = await users();
+  const user = await usersCollection.findOne({ emailAddress: emailAddress });
+  if (user) {
+    const userRecs = user.recommendations;
+    if (userRecs) {
+      for (const entry in userRecs) {
+        const entryData = userRecs[entry].recommendations;
+        for (const anime in entryData) {
+          showsSeen.push(entryData[anime].id);
+        }
+      }
+    }
+  }
+  const filterRecs = recs.filter((num) => !showsSeen.includes(num));
+  const counts = {};
+
+  filterRecs.forEach((element) => {
+    counts[element] = (counts[element] || 0) + 1;
+  });
+
+  const sortedRecs = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const topFive = sortedRecs.slice(0, 5);
+
+  let finalRecs = [];
+  for (const pair in topFive) {
+    const anime = await getAnimeInfo(topFive[pair][0]);
+    delete anime.main_picture;
+    anime.frequency = topFive[pair][1];
+    finalRecs.push(anime);
+  }
+  return finalRecs;
+};
+
+// Helper function for getUserRecs
+// Exported for testing purposes
+export const getAnimeInfo = async (animeId) => {
+  const URL =
+    "https://api.myanimelist.net/v2/anime/" + animeId + "?fields=title,";
+  const response = await MAL_HANDLER.request(URL, MAL_CLIENT_HEADERS, "GET");
+  let animeInfo = await response.json();
+  return animeInfo;
+};
+
+export const getHistory = async (emailAddress) => {
+  emailAddress = validation.emailValidation(emailAddress);
+
+  let usersCollection = undefined;
+  let user = undefined;
+  try {
+    usersCollection = await users();
+    user = await usersCollection.findOne({ emailAddress: emailAddress });
+  } catch {
+    throw new DBError("UnexpectedError: Failed to connect to DB");
+  }
+  if (user === null) {
+    throw new ResourcesError("Error: No user with provided email found.");
+  }
+
+  removeObjectIdFromUser(user);
+  return user.recommendations;
+};
+
 export const getUserRecs = async (emailAddress) => {
   let recs = [];
   let showsSeen = [];
@@ -59,7 +123,11 @@ export const getUserRecs = async (emailAddress) => {
     }
   }
 
-  const animeRecommendations = await getTopFiveRecs(recs, showsSeen);
+  const animeRecommendations = await getTopFiveRecs(
+    recs,
+    showsSeen,
+    emailAddress
+  );
 
   const usersCollection = await users();
   const user = await usersCollection.findOne({ emailAddress: emailAddress });
@@ -70,6 +138,7 @@ export const getUserRecs = async (emailAddress) => {
 
   const insertRec = {
     _id: new ObjectId(),
+    rating: 0,
     recommendations: animeRecommendations,
   };
   recommendationArray.push(insertRec);
@@ -92,50 +161,97 @@ export const getUserRecs = async (emailAddress) => {
   };
 };
 
-// Helper function for getUserRecs
-const getTopFiveRecs = async (recs, showsSeen) => {
-  const filterRecs = recs.filter((num) => !showsSeen.includes(num));
-  const counts = {};
-
-  filterRecs.forEach((element) => {
-    counts[element] = (counts[element] || 0) + 1;
+export const getManualListUsers = async (emailAddress, idArray) => {
+  emailAddress = validation.emailValidation(emailAddress);
+  if (!Array.isArray(idArray)) {
+    throw "You must provide an array of animeIds";
+  }
+  if (idArray.length === 0) {
+    throw "You must provide a non-empty array of integers";
+  }
+  idArray.forEach((id) => {
+    if (!Number.isInteger(id)) {
+      throw "every animeId must be an integer";
+    }
   });
 
-  const sortedRecs = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  const topFive = sortedRecs.slice(0, 5);
+  let recs = [];
+  let showsSeen = [];
 
-  let finalRecs = [];
-  for (const pair in topFive) {
-    const anime = await getAnimeInfo(topFive[pair][0]);
-    delete anime.main_picture;
-    anime.frequency = topFive[pair][1];
-    finalRecs.push(anime);
-    anime.rating = 0;
+  for (const id in idArray) {
+    showsSeen.push(idArray[id]);
+    const recdata = await getAnimeRecs(idArray[id]);
+    for (const entry of recdata) {
+      recs.push(entry.node.id);
+    }
   }
-  return finalRecs;
+
+  const animeRecommendations = await getTopFiveRecs(
+    recs,
+    showsSeen,
+    emailAddress
+  );
+
+  const usersCollection = await users();
+  const user = await usersCollection.findOne({ emailAddress: emailAddress });
+  let recommendationArray = user.recommendations;
+  if (!recommendationArray) {
+    recommendationArray = [];
+  }
+
+  const insertRec = {
+    _id: new ObjectId(),
+    rating: 0,
+    recommendations: animeRecommendations,
+  };
+  recommendationArray.push(insertRec);
+  const updatedRecommendations = {
+    recommendations: recommendationArray,
+  };
+
+  const updatedInfo = await usersCollection.updateOne(
+    { emailAddress: emailAddress },
+    { $set: updatedRecommendations },
+    { returnDocument: "after" }
+  );
+
+  if (updatedInfo.modifiedCount === 0)
+    throw "Could not update recommendation successfully";
+
+  return {
+    emailAddress: emailAddress,
+    recommendations: insertRec,
+    inserted: true,
+  };
 };
 
-// Exporting this to test it as a unit
-// Helper function for getUserRecs
-export const getAnimeInfo = async (animeId) => {
-  const URL =
-    "https://api.myanimelist.net/v2/anime/" + animeId + "?fields=title,";
-  const response = await MAL_HANDLER.request(URL, MAL_CLIENT_HEADERS, "GET");
-  let animeInfo = await response.json();
-  // TODO: Test this
-  return animeInfo;
+export const getManualListRecs = async (idArray) => {
+  if (!Array.isArray(idArray)) {
+    throw "You must provide an array of animeIds";
+  }
+  if (idArray.length === 0) {
+    throw "You must provide a non-empty array of integers";
+  }
+  idArray.forEach((id) => {
+    if (!Number.isInteger(id)) {
+      throw "every animeId must be an integer";
+    }
+  });
+
+  let recs = [];
+  let showsSeen = [];
+
+  for (const id in idArray) {
+    showsSeen.push(idArray[id]);
+    const recdata = await getAnimeRecs(idArray[id]);
+    for (const entry of recdata) {
+      recs.push(entry.node.id);
+    }
+  }
+
+  const animeRecommendations = await getTopFiveRecs(recs, showsSeen);
+  return animeRecommendations;
 };
-
-// const getUser = async (queryCallback) => {
-//   id = validation.stringCheck(id);
-//   if (!ObjectId.isValid(id)) throw new TypeError("Not a valid object id");
-//   const usersCollection = await users();
-//   const user = await usersCollection.findOne(queryCallback());
-
-//   if (user === null) throw new ResourcesError(`No user with id ${id} exist`);
-
-//   return user;
-// };
 
 export const hasCurrentUserLikedAlready = async (currentUserId, recListId) => {
   // Validate emailAddress and recListId
@@ -173,25 +289,6 @@ export const hasCurrentUserLikedAlready = async (currentUserId, recListId) => {
 
 export const isFriendAlready = async (currentUserId, authorUserId) => {
   return false;
-};
-
-export const getHistory = async (emailAddress) => {
-  emailAddress = validation.emailValidation(emailAddress);
-
-  let usersCollection = undefined;
-  let user = undefined;
-  try {
-    usersCollection = await users();
-    user = await usersCollection.findOne({ emailAddress: emailAddress });
-  } catch {
-    throw new DBError("UnexpectedError: Failed to connect to DB");
-  }
-  if (user === null) {
-    throw new ResourcesError("Error: No user with provided email found.");
-  }
-
-  removeObjectIdFromUser(user);
-  return user.recommendations;
 };
 
 export const getRecommendationListAndAuthor = async (recId) => {
