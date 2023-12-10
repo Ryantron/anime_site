@@ -5,6 +5,7 @@ import validation, {
   DBError,
   ResourcesError,
   errorToStatus,
+  IMAGE_PATHS,
 } from "../helpers.js";
 import {
   changeUserInfo,
@@ -13,7 +14,11 @@ import {
   linkMalAccount,
   unlinkMalAccount,
 } from "../data/users.js";
-import { ObjectId } from "mongodb";
+import {
+  hasCurrentUserLikedAlready,
+  isFriendAlready,
+  getRecommendationListAndAuthor,
+} from "../data/recommendations.js";
 
 router.route("/").get(async (req, res) => {
   return res.render("aboutus", {
@@ -114,19 +119,25 @@ router.route("/main/recommendations").get(async (req, res) => {
 router.route("/recommendations/:recId").get(async (req, res) => {
   try {
     const recId = req.params.recId;
+    const authorRec = await getRecommendationListAndAuthor(recId);
+    const alreadyFriended = req.session.user
+      ? await isFriendAlready(req.session.user._id, recId)
+      : true;
+    const alreadyLiked = req.session.user
+      ? await hasCurrentUserLikedAlready(req.session.user._id, recId)
+      : true;
+
+    console.log(alreadyFriended, alreadyLiked);
+
     return res.render("recommendationList", {
       title: "Recommendation List",
-      image: "/public/images/pfp/1-apple-istock.png",
-      authorName: "JohnDoe",
-      authorId: "2422faa1e",
+      image: authorRec.authorPfpPath,
+      authorName: authorRec.authorName,
+      authorId: authorRec.authorId,
       recId: recId,
-      alreadyFriended: false,
-      alreadyLiked: false,
-      recommendations: [
-        { title: "One Punch Man" },
-        { title: "Dragon Ball" },
-        { title: "Kaichou wa Maid-sama!" },
-      ],
+      alreadyFriended: alreadyFriended,
+      alreadyLiked: alreadyLiked,
+      recommendations: authorRec.recList,
     });
   } catch (err) {
     return res.redirect(
@@ -136,6 +147,7 @@ router.route("/recommendations/:recId").get(async (req, res) => {
 });
 
 router.route("/recommendations/like/:recId").post(async (req, res) => {
+  // Boilerplate
   const recId = req.params.recId;
   if (recId == req.session.user?._id)
     return res.status(400).send("You can't like your own recommendation.");
@@ -143,6 +155,7 @@ router.route("/recommendations/like/:recId").post(async (req, res) => {
 });
 
 router.route("/recommendations/friend/:authorId").post(async (req, res) => {
+  // Boilerplate
   const authorId = req.params.authorId;
   if (authorId == req.session.user?._id)
     return res.status(400).send("You can't friend yourself.");

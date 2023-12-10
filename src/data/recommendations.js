@@ -2,6 +2,7 @@ import { users } from "../config/mongoCollections.js";
 import validation, {
   DBError,
   ResourcesError,
+  IMAGE_PATHS,
   removeObjectIdFromUser,
 } from "../helpers.js";
 import { MAL_HANDLER } from "./mal-handler.js";
@@ -138,6 +139,13 @@ export const getAnimeInfo = async (animeId) => {
 
 export const hasCurrentUserLikedAlready = async (currentUserId, recListId) => {
   // Validate emailAddress and recListId
+  currentUserId = validation.stringCheck(currentUserId);
+  recListId = validation.stringCheck(recListId);
+
+  if (!ObjectId.isValid(currentUserId))
+    throw new TypeError("currentUserId is not a valid ObjectId type");
+  if (!ObjectId.isValid(recListId))
+    throw new TypeError("recListId is not a valid ObjectId type");
 
   const usersCollection = await users();
   const user = await usersCollection.findOne({
@@ -152,15 +160,19 @@ export const hasCurrentUserLikedAlready = async (currentUserId, recListId) => {
   const recList = user.recommendations.find(
     (rec) => rec._id.toString() === recListId
   );
-  if (!recList) throw Error("Interal Error, recList is null");
+  if (!recList) throw new Error("Interal Error, recList is null");
 
   if (
     recList.usersLiked.find(
       (userObjId) => userObjId.toString() === currentUserId
     )
-  )
+  ) {
     return true;
-  else return false;
+  } else return false;
+};
+
+export const isFriendAlready = async (currentUserId, authorUserId) => {
+  return false;
 };
 
 export const getHistory = async (emailAddress) => {
@@ -180,4 +192,54 @@ export const getHistory = async (emailAddress) => {
 
   removeObjectIdFromUser(user);
   return user.recommendations;
+};
+
+export const getRecommendationListAndAuthor = async (recId) => {
+  // Boilerplate
+  // Find subdocument and return the user with the recId
+  const user = {
+    _id: new ObjectId("657512059c43b4936382b72f"),
+    username: "testuser3",
+    emailAddress: "test3@test.com",
+    hashedPassword:
+      "$2b$16$jKx7GrhU4.EOKoxEZSvzG.dAKOvBUarqX0IBmCSUppTBneIl6mS.G",
+    pfpId: 3,
+    recommendations: [
+      {
+        usersLiked: [new ObjectId("657511fe9c43b4936382b72c")],
+        recommendationList: [
+          {
+            animeId: "25798",
+            title:
+              "That time I got reincarnated as a coach and had to go around the world to save fishes because they needed help from the humans who are incompetent",
+            frequency: 3,
+          },
+          {
+            animeId: "13452",
+            title: "Paul V",
+            frequency: 2,
+          },
+        ],
+        _id: new ObjectId("6575ccd927d2a9a9733cbbc2"),
+      },
+    ],
+  };
+  if (user === null)
+    throw new ResourcesError(
+      "User with recommendation list is not found in getRecommendationList"
+    );
+
+  const recListSubDoc = user.recommendations.find(
+    (rec) => rec._id.toString() === recId
+  );
+
+  if (!recListSubDoc)
+    throw new Error("Internal Error. Author found, but rec list not found.");
+
+  return {
+    authorName: user.username,
+    authorId: user._id.toString(),
+    authorPfpPath: IMAGE_PATHS[user.pfpId],
+    recList: recListSubDoc.recommendationList,
+  };
 };
