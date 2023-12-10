@@ -291,43 +291,22 @@ export const isFriendAlready = async (currentUserId, authorUserId) => {
   return false;
 };
 
-export const getRecommendationListAndAuthor = async (recId) => {
-  // Boilerplate
-  // Find subdocument and return the user with the recId
-  const user = {
-    _id: new ObjectId("657512059c43b4936382b72f"),
-    username: "testuser3",
-    emailAddress: "test3@test.com",
-    hashedPassword:
-      "$2b$16$jKx7GrhU4.EOKoxEZSvzG.dAKOvBUarqX0IBmCSUppTBneIl6mS.G",
-    pfpId: 3,
-    recommendations: [
-      {
-        usersLiked: [new ObjectId("657511fe9c43b4936382b72c")],
-        recommendationList: [
-          {
-            animeId: "25798",
-            title:
-              "That time I got reincarnated as a coach and had to go around the world to save fishes because they needed help from the humans who are incompetent",
-            frequency: 3,
-          },
-          {
-            animeId: "13452",
-            title: "Paul V",
-            frequency: 2,
-          },
-        ],
-        _id: new ObjectId("6575ccd927d2a9a9733cbbc2"),
-      },
-    ],
-  };
+export const getRecommendationListAndAuthor = async (recListId) => {
+  recListId = validation.stringCheck(recListId);
+  if (!ObjectId.isValid(recListId))
+    throw new TypeError("recListId is not a valid ObjectId type");
+
+  const usersCollection = await users();
+  const user = await usersCollection.findOne({
+    "recommendations._id": new ObjectId(recListId),
+  });
   if (user === null)
     throw new ResourcesError(
       "User with recommendation list is not found in getRecommendationList"
     );
 
   const recListSubDoc = user.recommendations.find(
-    (rec) => rec._id.toString() === recId
+    (rec) => rec._id.toString() === recListId
   );
 
   if (!recListSubDoc)

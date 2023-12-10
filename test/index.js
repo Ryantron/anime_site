@@ -9,6 +9,7 @@ import {
   getAnimeInfo,
   getUserRecs,
   hasCurrentUserLikedAlready,
+  getRecommendationListAndAuthor,
 } from "../src/data/recommendations.js";
 import { app, server } from "../src/app.js";
 import supertest from "supertest";
@@ -128,6 +129,28 @@ await createTest("hasCurrentUserLikedAlready Data Test 1", async () => {
       "Wrong value returned by hasCurrentUserLikedAlready Data Test 1"
     );
 });
+
+/**
+ * getRecommendationListAndAuthor Data Tests
+ */
+
+await createTest(
+  "getRecommendationListAndAuthor Data Test 1",
+  async () => {
+    // testuser3 rec list has testuser1 in usersLiked
+    const authorUser = await getUserByEmail("test3@test.com");
+    const recId = authorUser.recommendations[0]._id;
+    const res = await getRecommendationListAndAuthor(recId);
+
+    if (!res)
+      throw new Error(
+        "Wrong value returned by getRecommendationListAndAuthor Data Test 1"
+      );
+
+    return res;
+  },
+  true
+);
 
 /************
  * DATA ERROR TESTS

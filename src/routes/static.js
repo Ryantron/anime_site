@@ -127,8 +127,6 @@ router.route("/recommendations/:recId").get(async (req, res) => {
       ? await hasCurrentUserLikedAlready(req.session.user._id, recId)
       : true;
 
-    console.log(alreadyFriended, alreadyLiked);
-
     return res.render("recommendationList", {
       title: "Recommendation List",
       image: authorRec.authorPfpPath,
