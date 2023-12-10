@@ -222,7 +222,12 @@ export const unlinkMalAccount = async (emailAddress) => {
 };
 
 // Add user's _id to usersLiked for corresponding recListId (if not in usersLiked)
+// TODO: error checking
 export const likeRecAnimeList = async (currentUserId, recListId) => {
+  if (!ObjectId.isValid(currentUserId))
+    throw new TypeError("currentUserId is not a valid ObjectId type");
+  if (!ObjectId.isValid(recListId))
+    throw new TypeError("recListId is not a valid ObjectId type");
   const usersCollection = await users();
   const user = await usersCollection.findOne({
     _id: new ObjectId(currentUserId),
@@ -237,7 +242,7 @@ export const likeRecAnimeList = async (currentUserId, recListId) => {
     (rec) => rec._id.toString() === recListId
   );
   if (!recList) {
-    throw Error("Interal Error, recList is null");
+    throw new Error("Interal Error, recList is null");
   }
 
   // User already liked the recList: no-op
