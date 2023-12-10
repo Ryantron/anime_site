@@ -8,7 +8,7 @@
     <div class="flex-center">
       <h2 class="text-center me-2" tabindex="0">Author</h2>
       <form
-        action="/recommendations/friends/:authorId"
+        action="/recommendations/friend/:authorId"
         method="post"
         id="addFriendForm"
       >
@@ -47,8 +47,9 @@
   <section>
     <div class="flex-center">
       <h2 class="text-center me-2" tabindex="0">Recommended</h2>
-      <form action="/recommendations/thumbsup/" method="post" id="thumbsUpForm">
-        <label for="addFriendInputs" class="hiddenLabel">Thumbs Up</label>
+      <form action="/recommendations/like/:recId" method="post" id="thumbsUpForm">
+        <label for="thumbsUpIconButton" class="hiddenLabel">Thumbs Up</label>
+        {{! FIXME: label above was addFriendInputs, later implementation? }}
         {{#if alreadyLiked}}
           <button
             type="submit"

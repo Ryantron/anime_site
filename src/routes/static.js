@@ -18,7 +18,9 @@ import {
   hasCurrentUserLikedAlready,
   isFriendAlready,
   getRecommendationListAndAuthor,
+  likeRecAnimeList,
 } from "../data/recommendations.js";
+import { ObjectId } from "mongodb";
 
 router.route("/").get(async (req, res) => {
   return res.render("aboutus", {
@@ -145,19 +147,34 @@ router.route("/recommendations/:recId").get(async (req, res) => {
 });
 
 router.route("/recommendations/like/:recId").post(async (req, res) => {
-  // Boilerplate
-  const recId = req.params.recId;
-  if (recId == req.session.user?._id)
-    return res.status(400).send("You can't like your own recommendation.");
-  return res.status(200).send("Ok");
+  // If user had not liked before: add user like
+  // Else: remove user like
+  try {
+    const recId = req.params.recId;
+    if (!ObjectId.isValid(recId))
+      throw new TypeError("recId is not a valid ObjectId type");
+    await likeRecAnimeList(req.session.user?._id, recId);
+  } catch (err) {
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
+  }
 });
 
 router.route("/recommendations/friend/:authorId").post(async (req, res) => {
   // Boilerplate
-  const authorId = req.params.authorId;
-  if (authorId == req.session.user?._id)
-    return res.status(400).send("You can't friend yourself.");
-  return res.status(200).send("Ok");
+  try {
+    const authorId = req.params.authorId;
+    if (!ObjectId.isValid(authorId))
+      throw new TypeError("authorId is not a valid ObjectId type");
+    if (authorId == req.session.user?._id)
+      throw new RangeError("You can't friend yourself.");
+    //FIXME: something to finish, data function here
+  } catch (err) {
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
+  }
 });
 
 router.route("/errors").get(async (req, res) => {
@@ -253,6 +270,7 @@ router
   });
 
 router.route("/accounts").get(async (req, res) => {
+  // Middleware requires req.session.user, else redirect to /login
   const {
     username,
     emailAddress,

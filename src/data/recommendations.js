@@ -319,3 +319,56 @@ export const getRecommendationListAndAuthor = async (recListId) => {
     recList: recListSubDoc.recommendationList,
   };
 };
+
+// Add user's _id to usersLiked for corresponding recListId (if not in usersLiked)
+// REMOVES unlike if the user already liked
+export const likeRecAnimeList = async (currentUserId, recListId) => {
+  if (!ObjectId.isValid(currentUserId))
+    throw new TypeError("currentUserId is not a valid ObjectId type");
+  if (!ObjectId.isValid(recListId))
+    throw new TypeError("recListId is not a valid ObjectId type");
+  const usersCollection = await users();
+  const user = await usersCollection.findOne({
+    _id: new ObjectId(currentUserId),
+  });
+
+  if (user === null) {
+    throw new ResourcesError(`No user with user id ${currentUserId} found.`);
+  }
+
+  // recList not just the recommendationList, but its object wrapper
+  const recList = user.recommendations.find(
+    (rec) => rec._id.toString() === recListId
+  );
+  if (!recList) {
+    throw new Error("Interal Error, recList is null");
+  }
+
+  // User already liked the recList: REMOVE like
+  if (
+    recList.usersLiked.find(
+      (userObjId) => userObjId.toString() === currentUserId
+    )
+  ) {
+    const updatedInfo = await usersCollection.updateOne(
+      { "recommendations._id": new ObjectId(recListId) },
+      { $pull: { "recommendations.$.usersLiked": currentUserId } },
+      { returnDocument: "after" }
+    );
+    if (updatedInfo.modifiedCount === 0) {
+      throw new DBError("Like could not be removed");
+    }
+    return { addedLike: false };
+  } else {
+    // Add user like
+    const updatedInfo = await usersCollection.updateOne(
+      { "recommendations._id": new ObjectId(recListId) },
+      { $push: { "recommendations.$.usersLiked": currentUserId } },
+      { returnDocument: "after" }
+    );
+    if (updatedInfo.modifiedCount === 0) {
+      throw new DBError("Like could not be added");
+    }
+    return { addedLike: true };
+  }
+};
