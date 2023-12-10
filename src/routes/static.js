@@ -111,6 +111,27 @@ router.route("/main/recommendations").get(async (req, res) => {
   }
 });
 
+router.route("/recommendations/:recId").get(async (req, res) => {
+  try {
+    return res.render("recommendationList", {
+      title: "Recommendation List",
+      image: "/public/images/pfp/1-apple-istock.png",
+      authorName: "JohnDoe",
+      alreadyFriended: false,
+      alreadyLiked: false,
+      recommendations: [
+        { title: "One Punch Man" },
+        { title: "Dragon Ball" },
+        { title: "Kaichou wa Maid-sama!" },
+      ],
+    });
+  } catch (err) {
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
+  }
+});
+
 router.route("/errors").get(async (req, res) => {
   const errorStatus = Number.parseInt(req.query.errorStatus);
   const errorMessage = req.query.message ?? "Internal Server Error";

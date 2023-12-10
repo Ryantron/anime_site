@@ -1,0 +1,69 @@
+<header>
+  <h1 tabindex="0" class="text-center">Recommendation List</h1>
+  <a tabindex="0" href="/main">Go back to main page!</a>
+</header>
+
+<main class="mx-5">
+  <section>
+    <div class="flex-center">
+      <h2 class="text-center me-2">Author</h2>
+      <form action="/recommendations/friends/" method="post" id="addFriendForm">
+        <label for="addFriendIconButton" class="hiddenLabel">Add Friend</label>
+        {{#if alreadyFriended}}
+          <button
+            type="submit"
+            title="addFriendIconButton"
+            id="addFriendIconButton"
+            class="fa-solid fa-user-group disable-pointer reduce-opacity rounded-pill border-0 p-3"
+          ></button>
+        {{else}}
+          <button
+            type="submit"
+            title="addFriendIconButton"
+            id="addFriendIconButton"
+            class="fa-solid fa-user-group rounded-pill border-0 p-3"
+          ></button>
+        {{/if}}
+      </form>
+    </div>
+    <div class="flex-center flex-column">
+      <p class="text-light-bold">{{authorName}}</p>
+      <img
+        src="{{image}}"
+        alt="Profile Picture"
+        width="64"
+        height="64"
+        class="rounded-circle"
+      />
+    </div>
+  </section>
+  <section>
+    <div class="flex-center">
+      <h2 class="text-center me-2">Recommended</h2>
+      <form action="/recommendations/thumbsup/" method="post" id="thumbsUpForm">
+        <label for="addFriendInputs" class="hiddenLabel">Thumbs Up</label>
+        {{#if alreadyFriended}}
+          <button
+            type="submit"
+            title="thumbsUpIconButton"
+            id="thumbsUpIconButton"
+            class="fa-solid fa-thumbs-up disable-pointer reduce-opacity rounded-pill border-0 p-3"
+          ></button>
+        {{else}}
+          <button
+            type="submit"
+            title="thumbsUpIconButton"
+            id="thumbsUpIconButton"
+            class="fa-solid fa-thumbs-up rounded-pill border-0 p-3"
+          ></button>
+        {{/if}}
+      </form></div>
+    <ol>
+      {{#each recommendations}}
+        <li><p tabindex="0">{{this.title}}</p></li>
+      {{/each}}
+    </ol>
+  </section>
+</main>
+
+<script defer src="/public/js/recList.js"></script>

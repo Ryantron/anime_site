@@ -71,6 +71,14 @@
   font-size: 1.8rem;
 }
 
+.text-light-bold {
+  font-weight: 550;
+}
+
+.text-bold {
+  font-weight: bold;
+}
+
 .box-shadow {
   box-shadow: 10px 10px gray;
 }
@@ -105,6 +113,14 @@
 
 .hiddenLabel {
   display: none;
+}
+
+.disable-pointer {
+  pointer-events: none;
+}
+
+.reduce-opacity {
+  opacity: 0.5;
 }
 
 /*Imitate Google Chrome focus*/

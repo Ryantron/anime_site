@@ -101,14 +101,14 @@ await createTest(
  * getUserRecs Data Tests
  */
 
-// await createTest(
-//   "getUserRecs Data Test 1",
-//   async () => {
-//     await linkMalAccount("test2@test.com", "Centillionial");
-//     return await getUserRecs("test2@test.com");
-//   },
-//   true
-// );
+await createTest(
+  "getUserRecs Data Test 1",
+  async () => {
+    await linkMalAccount("test2@test.com", "Centillionial");
+    return await getUserRecs("test2@test.com");
+  },
+  true
+);
 
 /**
  * hasCurrentUserLikedAlready Data Tests
