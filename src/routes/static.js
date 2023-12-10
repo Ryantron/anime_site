@@ -113,10 +113,13 @@ router.route("/main/recommendations").get(async (req, res) => {
 
 router.route("/recommendations/:recId").get(async (req, res) => {
   try {
+    const recId = req.params.recId;
     return res.render("recommendationList", {
       title: "Recommendation List",
       image: "/public/images/pfp/1-apple-istock.png",
       authorName: "JohnDoe",
+      authorId: "2422faa1e",
+      recId: recId,
       alreadyFriended: false,
       alreadyLiked: false,
       recommendations: [
@@ -130,6 +133,20 @@ router.route("/recommendations/:recId").get(async (req, res) => {
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
     );
   }
+});
+
+router.route("/recommendations/like/:recId").post(async (req, res) => {
+  const recId = req.params.recId;
+  if (recId == req.session.user?._id)
+    return res.status(400).send("You can't like your own recommendation.");
+  return res.status(200).send("Ok");
+});
+
+router.route("/recommendations/friend/:authorId").post(async (req, res) => {
+  const authorId = req.params.authorId;
+  if (authorId == req.session.user?._id)
+    return res.status(400).send("You can't friend yourself.");
+  return res.status(200).send("Ok");
 });
 
 router.route("/errors").get(async (req, res) => {

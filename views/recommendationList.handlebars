@@ -7,7 +7,11 @@
   <section>
     <div class="flex-center">
       <h2 class="text-center me-2">Author</h2>
-      <form action="/recommendations/friends/" method="post" id="addFriendForm">
+      <form
+        action="/recommendations/friends/:authorId"
+        method="post"
+        id="addFriendForm"
+      >
         <label for="addFriendIconButton" class="hiddenLabel">Add Friend</label>
         {{#if alreadyFriended}}
           <button
@@ -27,7 +31,9 @@
       </form>
     </div>
     <div class="flex-center flex-column">
-      <p class="text-light-bold">{{authorName}}</p>
+      <p class="text-light-bold me-2">{{authorName}}</p>
+      <p id="authorIdP" class="hidden">{{authorId}}</p>
+      <p id="recIdP" class="hidden">{{recId}}</p>
       <img
         src="{{image}}"
         alt="Profile Picture"
@@ -66,4 +72,10 @@
   </section>
 </main>
 
+<script
+  defer
+  src="https://code.jquery.com/jquery-2.2.4.min.js"
+  integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+  crossorigin="anonymous"
+></script>
 <script defer src="/public/js/recList.js"></script>
