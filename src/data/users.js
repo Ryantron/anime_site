@@ -220,3 +220,43 @@ export const unlinkMalAccount = async (emailAddress) => {
 
   return { emailAddress: emailAddress, unlinkedAccount: true };
 };
+
+// Add user's _id to usersLiked for corresponding recListId (if not in usersLiked)
+export const likeRecAnimeList = async (currentUserId, recListId) => {
+  const usersCollection = await users();
+  const user = await usersCollection.findOne({
+    _id: new ObjectId(currentUserId),
+  });
+
+  if (user === null) {
+    throw new ResourcesError(`No user with user id ${currentUserId} found.`);
+  }
+
+  // recList not just the recommendationList, but its object wrapper
+  const recList = user.recommendations.find(
+    (rec) => rec._id.toString() === recListId
+  );
+  if (!recList) {
+    throw Error("Interal Error, recList is null");
+  }
+
+  // User already liked the recList: no-op
+  if (
+    recList.usersLiked.find(
+      (userObjId) => userObjId.toString() === currentUserId
+    )
+  ) {
+    return { addedLike: false };
+  } else {
+    // Add user like
+    const updatedInfo = await usersCollection.updateOne(
+      { "recommendations._id": new ObjectId(recListId) },
+      { $push: { "recommendations.$.usersLiked": currentUserId } },
+      { returnDocument: "after" }
+    );
+    if (updatedInfo.modifiedCount === 0) {
+      throw new DBError("Like could not be added");
+    }
+    return { addedLike: true };
+  }
+};
