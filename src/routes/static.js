@@ -282,7 +282,7 @@ router.route("/accounts/reset").patch(async (req, res) => {
       validation.integerCheck(body.pfpIdInput, { min: 1, max: 5 });
 
     const user = await changeUserInfo(
-      new ObjectId(req.session.user._id),
+      req.session.user._id,
       body.usernameInput,
       body.emailAddressInput,
       body.passwordInput,
