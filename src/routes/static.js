@@ -5,6 +5,7 @@ import validation, {
   DBError,
   ResourcesError,
   errorToStatus,
+  IMAGE_PATHS,
 } from "../helpers.js";
 import {
   changeUserInfo,
@@ -13,7 +14,11 @@ import {
   linkMalAccount,
   unlinkMalAccount,
 } from "../data/users.js";
-import { ObjectId } from "mongodb";
+import {
+  hasCurrentUserLikedAlready,
+  isFriendAlready,
+  getRecommendationListAndAuthor,
+} from "../data/recommendations.js";
 
 router.route("/").get(async (req, res) => {
   return res.render("aboutus", {
@@ -109,6 +114,50 @@ router.route("/main/recommendations").get(async (req, res) => {
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
     );
   }
+});
+
+router.route("/recommendations/:recId").get(async (req, res) => {
+  try {
+    const recId = req.params.recId;
+    const authorRec = await getRecommendationListAndAuthor(recId);
+    const alreadyFriended = req.session.user
+      ? await isFriendAlready(req.session.user._id, recId)
+      : true;
+    const alreadyLiked = req.session.user
+      ? await hasCurrentUserLikedAlready(req.session.user._id, recId)
+      : true;
+
+    return res.render("recommendationList", {
+      title: "Recommendation List",
+      image: authorRec.authorPfpPath,
+      authorName: authorRec.authorName,
+      authorId: authorRec.authorId,
+      recId: recId,
+      alreadyFriended: alreadyFriended,
+      alreadyLiked: alreadyLiked,
+      recommendations: authorRec.recList,
+    });
+  } catch (err) {
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
+  }
+});
+
+router.route("/recommendations/like/:recId").post(async (req, res) => {
+  // Boilerplate
+  const recId = req.params.recId;
+  if (recId == req.session.user?._id)
+    return res.status(400).send("You can't like your own recommendation.");
+  return res.status(200).send("Ok");
+});
+
+router.route("/recommendations/friend/:authorId").post(async (req, res) => {
+  // Boilerplate
+  const authorId = req.params.authorId;
+  if (authorId == req.session.user?._id)
+    return res.status(400).send("You can't friend yourself.");
+  return res.status(200).send("Ok");
 });
 
 router.route("/errors").get(async (req, res) => {

@@ -91,13 +91,11 @@ const testuser3 = await insertUser({
           title:
             "That time I got reincarnated as a coach and had to go around the world to save fishes because they needed help from the humans who are incompetent",
           frequency: 3,
-          review: 5,
         },
         {
           animeId: "13452",
           title: "Paul V",
           frequency: 2,
-          review: 4,
         },
       ],
     },
