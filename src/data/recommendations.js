@@ -2,6 +2,7 @@ import { users } from "../config/mongoCollections.js";
 import validation, {
   DBError,
   ResourcesError,
+  IMAGE_PATHS,
   removeObjectIdFromUser,
 } from "../helpers.js";
 import { MAL_HANDLER } from "./mal-handler.js";
@@ -81,7 +82,9 @@ const getTopFiveRecs = async (recs, showsSeen, emailAddress) => {
   return finalRecs;
 };
 
-const getAnimeInfo = async (animeId) => {
+// Helper function for getUserRecs
+// Exported for testing purposes
+export const getAnimeInfo = async (animeId) => {
   const URL =
     "https://api.myanimelist.net/v2/anime/" + animeId + "?fields=title,";
   const response = await MAL_HANDLER.request(URL, MAL_CLIENT_HEADERS, "GET");
@@ -252,6 +255,13 @@ export const getManualListRecs = async (idArray) => {
 
 export const hasCurrentUserLikedAlready = async (currentUserId, recListId) => {
   // Validate emailAddress and recListId
+  currentUserId = validation.stringCheck(currentUserId);
+  recListId = validation.stringCheck(recListId);
+
+  if (!ObjectId.isValid(currentUserId))
+    throw new TypeError("currentUserId is not a valid ObjectId type");
+  if (!ObjectId.isValid(recListId))
+    throw new TypeError("recListId is not a valid ObjectId type");
 
   const usersCollection = await users();
   const user = await usersCollection.findOne({
@@ -266,13 +276,46 @@ export const hasCurrentUserLikedAlready = async (currentUserId, recListId) => {
   const recList = user.recommendations.find(
     (rec) => rec._id.toString() === recListId
   );
-  if (!recList) throw Error("Interal Error, recList is null");
+  if (!recList) throw new Error("Interal Error, recList is null");
 
   if (
     recList.usersLiked.find(
       (userObjId) => userObjId.toString() === currentUserId
     )
-  )
+  ) {
     return true;
-  else return false;
+  } else return false;
+};
+
+export const isFriendAlready = async (currentUserId, authorUserId) => {
+  return false;
+};
+
+export const getRecommendationListAndAuthor = async (recListId) => {
+  recListId = validation.stringCheck(recListId);
+  if (!ObjectId.isValid(recListId))
+    throw new TypeError("recListId is not a valid ObjectId type");
+
+  const usersCollection = await users();
+  const user = await usersCollection.findOne({
+    "recommendations._id": new ObjectId(recListId),
+  });
+  if (user === null)
+    throw new ResourcesError(
+      "User with recommendation list is not found in getRecommendationList"
+    );
+
+  const recListSubDoc = user.recommendations.find(
+    (rec) => rec._id.toString() === recListId
+  );
+
+  if (!recListSubDoc)
+    throw new Error("Internal Error. Author found, but rec list not found.");
+
+  return {
+    authorName: user.username,
+    authorId: user._id.toString(),
+    authorPfpPath: IMAGE_PATHS[user.pfpId],
+    recList: recListSubDoc.recommendationList,
+  };
 };
