@@ -141,6 +141,7 @@ export const getUserRecs = async (emailAddress) => {
     rating: 0,
     recommendations: animeRecommendations,
   };
+  let recId = insertRec._id;
   recommendationArray.push(insertRec);
   const updatedRecommendations = {
     recommendations: recommendationArray,
@@ -158,6 +159,7 @@ export const getUserRecs = async (emailAddress) => {
   return {
     emailAddress: emailAddress,
     recommendations: updatedRecommendations,
+    recId: recId
   };
 };
 
