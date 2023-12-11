@@ -68,7 +68,8 @@
       </form></div>
     <ol>
       {{#each recommendations}}
-        <li><p tabindex="0">{{this.title}}</p></li>
+        <li><a tabindex="0" href="https://myanimelist.net/anime/{{this.id}}">{{this.title}}</a></li>
+        <!-- <li><p tabindex="0">{{this.title}}</p></li> -->
       {{/each}}
     </ol>
   </section>

@@ -138,10 +138,11 @@ export const getUserRecs = async (emailAddress) => {
 
   const insertRec = {
     _id: new ObjectId(),
+    usersLiked: [],
     rating: 0,
     recommendations: animeRecommendations,
   };
-  let recId = insertRec._id;
+  let recId = insertRec._id.toString();
   recommendationArray.push(insertRec);
   const updatedRecommendations = {
     recommendations: recommendationArray,
@@ -203,9 +204,11 @@ export const getManualListUsers = async (emailAddress, idArray) => {
 
   const insertRec = {
     _id: new ObjectId(),
+    usersLiked: [],
     rating: 0,
     recommendations: animeRecommendations,
   };
+  let recId = insertRec._id.toString();
   recommendationArray.push(insertRec);
   const updatedRecommendations = {
     recommendations: recommendationArray,
@@ -223,6 +226,7 @@ export const getManualListUsers = async (emailAddress, idArray) => {
   return {
     emailAddress: emailAddress,
     recommendations: insertRec,
+    recId: recId,
     inserted: true,
   };
 };
@@ -318,7 +322,7 @@ export const getRecommendationListAndAuthor = async (recListId) => {
     authorName: user.username,
     authorId: user._id.toString(),
     authorPfpPath: IMAGE_PATHS[user.pfpId],
-    recList: recListSubDoc.recommendationList,
+    recList: recListSubDoc.recommendations,
   };
 };
 

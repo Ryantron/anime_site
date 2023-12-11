@@ -20,6 +20,8 @@ import {
   getRecommendationListAndAuthor,
   likeRecAnimeList,
   getManualListUsers,
+  getUserRecs,
+  getManualListRecs,
 } from "../data/recommendations.js";
 import { ObjectId } from "mongodb";
 
@@ -88,13 +90,13 @@ router
       }
       if (req.session.user) {
         //If section to add the manual list to the database is the user is logged in
-        let result = await getManualListUsers(req.session.emailAddress, finalAnimeArr);
-        //return res.redirect("/recommendations/".concat(result.)); //Redirects to recommendations page (will work when both recommendations and function are implemented)
+        let result = await getManualListUsers(req.session.user.emailAddress, finalAnimeArr);
+        return res.redirect("/recommendations/".concat(result.recId));
       } else {
-        return res.redirect("/entries", {
-          // Please redirect instead of render on routes that uses another html
-          NoResult: false, //This variable will be used in a later potential check for if the function errors out if there's no results, below I'll catch that specific error and set this to true.
-          Result: finalAnimeArr, //This will be some form of the returned list/Object list instead in the final, for now it just returns the list the user put it (with valid values)
+        let result = await getManualListRecs(finalAnimeArr);
+        console.log(result);
+        return res.render('manualList', {
+          Result: result, //This will be some form of the returned list/Object list instead in the final, for now it just returns the list the user put it (with valid values)
         });
       }
     } catch (err) {
@@ -111,7 +113,7 @@ router.route("/main/recommendations").get(async (req, res) => {
       //Checks for if the user is logged in, if they somehow get here without being so.
       if (req.session.user["malUsername"]) {
         //This should already be checked once you get here, but one more check doesn't hurt
-        let newReccs = await getUserRecs(req.session.user["emailAddress"]);      //Placeholder function that returns the object id of a myanimelist recc list that is inserted into the db
+        let newReccs = await getUserRecs(req.session.user["emailAddress"]);
         return res.redirect("/recommendations/".concat(newReccs.recId)); //Redirects to the recommendation page. (Will be functional when function and recommendations page is done)
       }
     }
@@ -133,7 +135,6 @@ router.route("/recommendations/:recId").get(async (req, res) => {
     const alreadyLiked = req.session.user
       ? await hasCurrentUserLikedAlready(req.session.user._id, recId)
       : true;
-
     return res.render("recommendationList", {
       title: "Recommendation List",
       image: authorRec.authorPfpPath,
