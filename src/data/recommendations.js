@@ -224,3 +224,39 @@ export const getManualListRecs = async (idArray) => {
     const animeRecommendations = await getTopFiveRecs(recs, showsSeen);
     return animeRecommendations
 }
+
+export const rateRecommendations = async (emailAddress, recommendationId, rating) =>{
+  if(!emailAddress || !recommendationId || !rating){throw 'You must provide an email address, recommendationId, and a rating'}
+  emailAddress = validation.emailValidation(emailAddress)
+  if(!Number.isInteger(rating)) {throw 'Rating must be an integer between 1-5'}
+  if(!ObjectId.isValid(recommendationId)) throw 'invalid object Id'
+
+  const usersCollection = await users();
+  const user = await usersCollection.findOne({ emailAddress: emailAddress });
+  const recommendations = user.recommendations
+  let updateRecRating
+  let index
+  recommendations.forEach((recommendation) => {
+    if (recommendation._id.toString() == recommendationId){
+      index = recommendations.indexOf(recommendation)
+      updateRecRating = recommendation}
+  })
+  if(!updateRecRating){throw 'No recommendation with that id found'}
+
+  updateRecRating.rating = rating
+  recommendations[index] = updateRecRating
+  const updatedRating = {
+    recommendations
+  };
+
+  const updatedInfo = await usersCollection.updateOne(
+    { emailAddress: emailAddress},
+    { $set: updatedRating },
+    { returnDocument: "after" }
+  );
+
+  if (updatedInfo.modifiedCount === 0)
+    throw "Could not update recommendation successfully";
+
+  return {updateRecRating}
+}
