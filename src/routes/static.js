@@ -94,7 +94,6 @@ router
         return res.redirect("/recommendations/".concat(result.recId));
       } else {
         let result = await getManualListRecs(finalAnimeArr);
-        console.log(result);
         return res.render('manualList', {
           Result: result, //This will be some form of the returned list/Object list instead in the final, for now it just returns the list the user put it (with valid values)
         });
