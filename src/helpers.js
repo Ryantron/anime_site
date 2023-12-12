@@ -43,6 +43,23 @@ export function createOptionalObject(name, value) {
   return value ? { [name]: value } : {};
 }
 
+export function removeObjectIdFromUser(user) {
+  user._id = user._id.toString();
+  user.recommendations = user.recommendations.map((rec) => {
+    rec._id = rec._id.toString();
+    rec.usersLiked = rec.usersLiked.map((objId) => objId.toString());
+    return rec;
+  });
+}
+
+export const IMAGE_PATHS = {
+  1: "/public/images/pfp/1-apple-istock.png",
+  2: "/public/images/pfp/2-pen-vecteezy.png",
+  3: "/public/images/pfp/3-miku-mikuexpo2023.png",
+  4: "/public/images/pfp/4-white_hair_girl-pinterest.png",
+  5: "/public/images/pfp/5-anime_boy-wallpapers_clan.png",
+};
+
 const exportedMethods = {
   integerCheck(arg, { min = -Infinity, max = Infinity } = {}) {
     if (arg == undefined)

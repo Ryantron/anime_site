@@ -5,6 +5,7 @@ import validation, {
   DBError,
   ResourcesError,
   errorToStatus,
+  IMAGE_PATHS,
 } from "../helpers.js";
 import {
   changeUserInfo,
@@ -13,6 +14,15 @@ import {
   linkMalAccount,
   unlinkMalAccount,
 } from "../data/users.js";
+import {
+  hasCurrentUserLikedAlready,
+  isFriendAlready,
+  getRecommendationListAndAuthor,
+  likeRecAnimeList,
+  getManualListUsers,
+  getUserRecs,
+  getManualListRecs,
+} from "../data/recommendations.js";
 import { ObjectId } from "mongodb";
 
 router.route("/").get(async (req, res) => {
@@ -31,7 +41,7 @@ router
   .route("/main")
   .get(async (req, res) => {
     if (req.session.user) {
-      if (req.session.user["MALUsername"]) {
+      if (req.session.user["malUsername"]) {
         //Route ran if logged in + linked MAL Username
         return res.render("main", {
           title: "Main",
@@ -71,17 +81,21 @@ router
         }
       }
       if (finalAnimeArr.length === 0) throw new RangeError("Invalid Input"); //If every single one was invalid, then errors, else goes with all other valid inputs
-      //let newManList = placeholderManRecc(finalAnimeArr);  //Placeholder function that obtains the object list of recommendations, commented out until implemented
+      let count = 0;
+      for (let x of finalAnimeArr)
+      {
+        if (isNaN(x)) throw new RangeError("Invalid Input");
+        else finalAnimeArr[count] = parseInt(x);
+        count++;
+      }
       if (req.session.user) {
         //If section to add the manual list to the database is the user is logged in
-        //let manObjectId = placeholderManAddDb(newManList);   //Placeholder function to add a manual list to the database, might need another parameter such as req.session.user[emailAddress] to work, commented out until implemented
-        let manObjectId = "success"; //Testing purposes, delete when above line implemented
-        return res.redirect("/recommendations/".concat(manObjectId)); //Redirects to recommendations page (will work when both recommendations and function are implemented)
+        let result = await getManualListUsers(req.session.user.emailAddress, finalAnimeArr);
+        return res.redirect("/recommendations/".concat(result.recId));
       } else {
-        return res.redirect("/entries", {
-          // Please redirect instead of render on routes that uses another html
-          NoResult: false, //This variable will be used in a later potential check for if the function errors out if there's no results, below I'll catch that specific error and set this to true.
-          Result: finalAnimeArr, //This will be some form of the returned list/Object list instead in the final, for now it just returns the list the user put it (with valid values)
+        let result = await getManualListRecs(finalAnimeArr);
+        return res.render('manualList', {
+          Result: result, //This will be some form of the returned list/Object list instead in the final, for now it just returns the list the user put it (with valid values)
         });
       }
     } catch (err) {
@@ -96,14 +110,71 @@ router.route("/main/recommendations").get(async (req, res) => {
   try {
     if (req.session.user) {
       //Checks for if the user is logged in, if they somehow get here without being so.
-      if (req.session.user["MALUsername"]) {
+      if (req.session.user["malUsername"]) {
         //This should already be checked once you get here, but one more check doesn't hurt
-        //let newReccs = malReccFunction(req.session.user["emailAddress"]);      //Placeholder function that returns the object id of a myanimelist recc list that is inserted into the db
-        let newReccs = "success"; //Testing purposes, delete when above line implemented
-        return res.redirect("/recommendations/".concat(newReccs)); //Redirects to the recommendation page. (Will be functional when function and recommendations page is done)
+        let newReccs = await getUserRecs(req.session.user["emailAddress"]);
+        return res.redirect("/recommendations/".concat(newReccs.recId)); //Redirects to the recommendation page. (Will be functional when function and recommendations page is done)
       }
     }
     throw new AuthError("Not Authorized");
+  } catch (err) {
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
+  }
+});
+
+router.route("/recommendations/:recId").get(async (req, res) => {
+  try {
+    const recId = req.params.recId;
+    const authorRec = await getRecommendationListAndAuthor(recId);
+    const alreadyFriended = req.session.user
+      ? await isFriendAlready(req.session.user._id, recId)
+      : true;
+    const alreadyLiked = req.session.user
+      ? await hasCurrentUserLikedAlready(req.session.user._id, recId)
+      : true;
+    return res.render("recommendationList", {
+      title: "Recommendation List",
+      image: authorRec.authorPfpPath,
+      authorName: authorRec.authorName,
+      authorId: authorRec.authorId,
+      recId: recId,
+      alreadyFriended: alreadyFriended,
+      alreadyLiked: alreadyLiked,
+      recommendations: authorRec.recList,
+    });
+  } catch (err) {
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
+  }
+});
+
+router.route("/recommendations/like/:recId").post(async (req, res) => {
+  // If user had not liked before: add user like
+  // Else: remove user like
+  try {
+    const recId = req.params.recId;
+    if (!ObjectId.isValid(recId))
+      throw new TypeError("recId is not a valid ObjectId type");
+    await likeRecAnimeList(req.session.user?._id, recId);
+  } catch (err) {
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
+  }
+});
+
+router.route("/recommendations/friend/:authorId").post(async (req, res) => {
+  // Boilerplate
+  try {
+    const authorId = req.params.authorId;
+    if (!ObjectId.isValid(authorId))
+      throw new TypeError("authorId is not a valid ObjectId type");
+    if (authorId == req.session.user?._id)
+      throw new RangeError("You can't friend yourself.");
+    //FIXME: something to finish, data function here
   } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
@@ -204,6 +275,7 @@ router
   });
 
 router.route("/accounts").get(async (req, res) => {
+  // Middleware requires req.session.user, else redirect to /login
   const {
     username,
     emailAddress,
@@ -282,7 +354,7 @@ router.route("/accounts/reset").patch(async (req, res) => {
       validation.integerCheck(body.pfpIdInput, { min: 1, max: 5 });
 
     const user = await changeUserInfo(
-      new ObjectId(req.session.user._id),
+      req.session.user._id,
       body.usernameInput,
       body.emailAddressInput,
       body.passwordInput,

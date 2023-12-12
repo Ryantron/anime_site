@@ -71,6 +71,14 @@
   font-size: 1.8rem;
 }
 
+.text-light-bold {
+  font-weight: 550;
+}
+
+.text-bold {
+  font-weight: bold;
+}
+
 .box-shadow {
   box-shadow: 10px 10px gray;
 }
@@ -107,8 +115,20 @@
   display: none;
 }
 
+.disable-pointer {
+  pointer-events: none;
+}
+
+.reduce-opacity {
+  opacity: 0.5;
+}
+
 /*Imitate Google Chrome focus*/
 #navbar__menu-button:focus {
   outline: 1px dotted #212121;
   outline: 5px auto -webkit-focus-ring-color;
+}
+
+.hidden {
+  display: none;
 }
