@@ -128,7 +128,7 @@ export const getUserRecs = async (emailAddress) => {
     showsSeen,
     emailAddress
   );
-
+  if (animeRecommendations.length == 0) throw new DBError("All possible recommendations have been exhausted");  //NewErrorCheck: Empty rec list check for getUserRecs
   const usersCollection = await users();
   const user = await usersCollection.findOne({ emailAddress: emailAddress });
   let recommendationArray = user.recommendations;
@@ -184,6 +184,7 @@ export const getManualListUsers = async (emailAddress, idArray) => {
   for (const id in idArray) {
     showsSeen.push(idArray[id]);
     const recdata = await getAnimeRecs(idArray[id]);
+    if (!recdata) throw new RangeError("Invalid MAL anime id entered");    //NewErrorCheck: Invalid anime id error check
     for (const entry of recdata) {
       recs.push(entry.node.id);
     }
@@ -194,7 +195,7 @@ export const getManualListUsers = async (emailAddress, idArray) => {
     showsSeen,
     emailAddress
   );
-
+  if (animeRecommendations.length == 0) throw new DBError("All possible recommendations have been exhausted");  //NewErrorCheck: Empty rec list check for getManualListUsers
   const usersCollection = await users();
   const user = await usersCollection.findOne({ emailAddress: emailAddress });
   let recommendationArray = user.recommendations;
@@ -250,12 +251,16 @@ export const getManualListRecs = async (idArray) => {
   for (const id in idArray) {
     showsSeen.push(idArray[id]);
     const recdata = await getAnimeRecs(idArray[id]);
+    if (!recdata) throw new RangeError("Invalid MAL anime id entered");    //NewErrorCheck: Invalid anime id error check
     for (const entry of recdata) {
       recs.push(entry.node.id);
     }
   }
 
   const animeRecommendations = await getTopFiveRecs(recs, showsSeen);
+  //NewErrorCheck: Empty rec list check for this function. Not entirely necessary because it returns without being culled but new shows might not have recs.
+  //Note: I thought DBError was the most fitting, but technically it's not from our DB (although it is from MAL's), it's up to you whether to change or keep it.
+  if (animeRecommendations.length == 0) throw new DBError("No recommendations found");
   return animeRecommendations;
 };
 
