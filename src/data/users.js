@@ -47,10 +47,8 @@ export const loginUser = async (emailAddress, password) => {
   if (typeof emailAddress !== "string" || typeof password !== "string") {
     throw new TypeError("Both username and password must be string inputs");
   }
-
   emailAddress = emailAddress.toLowerCase();
   emailAddress = validation.emailValidation(emailAddress);
-
   password = validation.passwordValidation(password);
   const usersCollection = await users();
   const user = await usersCollection.findOne({ emailAddress: emailAddress });
