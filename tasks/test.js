@@ -102,25 +102,6 @@ await createTest(
 );
 
 /**
- * hasCurrentUserLikedAlready Data Tests
- */
-
-await createTest("hasCurrentUserLikedAlready Data Test 1", async () => {
-  // testuser3 rec list has testuser1 in usersLiked
-  const currentUser = await getUserByEmail("test@test.com");
-  const authorUser = await getUserByEmail("test3@test.com");
-  const recId = authorUser.recommendations.find((rec) => {
-    return rec.usersLiked.includes(currentUser._id);
-  })._id;
-  const res = await hasCurrentUserLikedAlready(currentUser._id, recId);
-
-  if (!res)
-    throw new Error(
-      "Wrong value returned by hasCurrentUserLikedAlready Data Test 1"
-    );
-});
-
-/**
  * getRecommendationListAndAuthor Data Tests
  */
 

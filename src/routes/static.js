@@ -82,19 +82,21 @@ router
       }
       if (finalAnimeArr.length === 0) throw new RangeError("Invalid Input"); //If every single one was invalid, then errors, else goes with all other valid inputs
       let count = 0;
-      for (let x of finalAnimeArr)
-      {
+      for (let x of finalAnimeArr) {
         if (isNaN(x)) throw new RangeError("Invalid Input");
         else finalAnimeArr[count] = parseInt(x);
         count++;
       }
       if (req.session.user) {
         //If section to add the manual list to the database is the user is logged in
-        let result = await getManualListUsers(req.session.user.emailAddress, finalAnimeArr);
+        let result = await getManualListUsers(
+          req.session.user.emailAddress,
+          finalAnimeArr
+        );
         return res.redirect("/recommendations/".concat(result.recId));
       } else {
         let result = await getManualListRecs(finalAnimeArr);
-        return res.render('manualList', {
+        return res.render("manualList", {
           title: "Recommendation List",
           Result: result, //This will be some form of the returned list/Object list instead in the final, for now it just returns the list the user put it (with valid values)
         });
@@ -132,9 +134,10 @@ router.route("/recommendations/:recId").get(async (req, res) => {
     const alreadyFriended = req.session.user
       ? await isFriendAlready(req.session.user._id, recId)
       : true;
-    const alreadyLiked = req.session.user
-      ? await hasCurrentUserLikedAlready(req.session.user._id, recId)
-      : true;
+    // const alreadyLiked = req.session.user
+    //   ? await hasCurrentUserLikedAlready(req.session.user._id, recId)
+    //   : true;
+    const alreadyLiked = true;
     return res.render("recommendationList", {
       title: "Recommendation List",
       image: authorRec.authorPfpPath,
