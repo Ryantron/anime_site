@@ -1,13 +1,15 @@
-<h1>Manual Entry Test Placeholder</h1>
-{{#if NoResult}}
-<p>We're sorry, but no recomendations were found for your query.</p>
-{{else}}
-<ol>
+<header>
+  <h1 tabindex="0" class="text-center">Recommendation List</h1>
+</header>
+<main class="mx-5">
+    <ol>
     {{#each Result}}
         {{#this}} 
             <li><a tabindex="0" href="https://myanimelist.net/anime/{{this.id}}">{{this.title}}</a></li>
         {{/this}}
     {{/each}}
-</ol>
-{{/if}}
-<a href "/main">Return to Main (Placeholder)</a>
+    </ol>
+</main>
+<footer>
+    <a tabindex="0" href="/main">Go back to main page!</a>
+</footer>

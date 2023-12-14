@@ -15,17 +15,19 @@ const MAL_CLIENT_HEADERS = { "X-MAL-CLIENT-ID": MAL_CLIENT_ID };
 // Helper function for getUserRecs
 const getUserAnimeList = async (emailAddress) => {
   if (!emailAddress) {
-    throw "You must supply your accounts email address";
+    throw new TypeError("You must supply your accounts email address");
   }
   emailAddress = validation.emailValidation(emailAddress);
   const usersCollection = await users();
   const user = await usersCollection.findOne({ emailAddress: emailAddress });
   if (user === null) {
-    throw "Error: No user with provided email found.";
+    throw new ResourcesError("Error: No user with provided email found.");
   }
 
   if (!user.malUsername) {
-    throw "Error: You dont have a linked myanimelist account, please link your account to get recommendations based on MAL profile";
+    throw new RangeError(
+      "Error: You dont have a linked myanimelist account, please link your account to get recommendations based on MAL profile"
+    );
   }
   const URL =
     MAL_API_URL + user.malUsername + "/animelist?fields=completed&limit=1000";
@@ -128,7 +130,8 @@ export const getUserRecs = async (emailAddress) => {
     showsSeen,
     emailAddress
   );
-
+  if (animeRecommendations.length == 0)
+    throw new DBError("All possible recommendations have been exhausted"); //NewErrorCheck: Empty rec list check for getUserRecs
   const usersCollection = await users();
   const user = await usersCollection.findOne({ emailAddress: emailAddress });
   let recommendationArray = user.recommendations;
@@ -155,7 +158,7 @@ export const getUserRecs = async (emailAddress) => {
   );
 
   if (updatedInfo.modifiedCount === 0)
-    throw "Could not update recommendation successfully";
+    throw new DBError("Could not update recommendation successfully");
 
   return {
     emailAddress: emailAddress,
@@ -167,14 +170,14 @@ export const getUserRecs = async (emailAddress) => {
 export const getManualListUsers = async (emailAddress, idArray) => {
   emailAddress = validation.emailValidation(emailAddress);
   if (!Array.isArray(idArray)) {
-    throw "You must provide an array of animeIds";
+    throw new TypeError("You must provide an array of animeIds");
   }
   if (idArray.length === 0) {
-    throw "You must provide a non-empty array of integers";
+    throw new RangeError("You must provide a non-empty array of integers");
   }
   idArray.forEach((id) => {
     if (!Number.isInteger(id)) {
-      throw "every animeId must be an integer";
+      throw new TypeError("every animeId must be an integer");
     }
   });
 
@@ -184,6 +187,7 @@ export const getManualListUsers = async (emailAddress, idArray) => {
   for (const id in idArray) {
     showsSeen.push(idArray[id]);
     const recdata = await getAnimeRecs(idArray[id]);
+    if (!recdata) throw new RangeError("Invalid MAL anime id entered"); //NewErrorCheck: Invalid anime id error check
     for (const entry of recdata) {
       recs.push(entry.node.id);
     }
@@ -194,7 +198,8 @@ export const getManualListUsers = async (emailAddress, idArray) => {
     showsSeen,
     emailAddress
   );
-
+  if (animeRecommendations.length == 0)
+    throw new DBError("All possible recommendations have been exhausted"); //NewErrorCheck: Empty rec list check for getManualListUsers
   const usersCollection = await users();
   const user = await usersCollection.findOne({ emailAddress: emailAddress });
   let recommendationArray = user.recommendations;
@@ -221,7 +226,7 @@ export const getManualListUsers = async (emailAddress, idArray) => {
   );
 
   if (updatedInfo.modifiedCount === 0)
-    throw "Could not update recommendation successfully";
+    throw new DBError("Could not update recommendation successfully");
 
   return {
     emailAddress: emailAddress,
@@ -233,18 +238,34 @@ export const getManualListUsers = async (emailAddress, idArray) => {
 
 export const getManualListRecs = async (idArray) => {
   if (!Array.isArray(idArray)) {
-    throw "You must provide an array of animeIds";
+    throw new TypeError("You must provide an array of animeIds");
   }
   if (idArray.length === 0) {
-    throw "You must provide a non-empty array of integers";
+    throw new RangeError("You must provide a non-empty array of integers");
   }
   idArray.forEach((id) => {
     if (!Number.isInteger(id)) {
-      throw "every animeId must be an integer";
+      throw new TypeError("every animeId must be an integer");
     }
   });
 
+  let recs = [];
+  let showsSeen = [];
+
+  for (const id in idArray) {
+    showsSeen.push(idArray[id]);
+    const recdata = await getAnimeRecs(idArray[id]);
+    if (!recdata) throw new RangeError("Invalid MAL anime id entered"); //NewErrorCheck: Invalid anime id error check
+    for (const entry of recdata) {
+      recs.push(entry.node.id);
+    }
+  }
+
   const animeRecommendations = await getTopFiveRecs(recs, showsSeen);
+  //NewErrorCheck: Empty rec list check for this function. Not entirely necessary because it returns without being culled but new shows might not have recs.
+  //Note: I thought DBError was the most fitting, but technically it's not from our DB (although it is from MAL's), it's up to you whether to change or keep it.
+  if (animeRecommendations.length == 0)
+    throw new DBError("No recommendations found");
   return animeRecommendations;
 };
 
@@ -254,13 +275,16 @@ export const rateRecommendations = async (
   rating
 ) => {
   if (!emailAddress || !recommendationId || !rating) {
-    throw "You must provide an email address, recommendationId, and a rating";
+    throw new TypeError(
+      "You must provide an email address, recommendationId, and a rating"
+    );
   }
   emailAddress = validation.emailValidation(emailAddress);
-  if (!Number.isInteger(rating)) {
-    throw "Rating must be an integer between 1-5";
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+    throw new TypeError("Rating must be an integer between 1-5");
   }
-  if (!ObjectId.isValid(recommendationId)) throw "invalid object Id";
+  if (!ObjectId.isValid(recommendationId))
+    throw new TypeError("invalid object Id");
 
   const usersCollection = await users();
   const user = await usersCollection.findOne({ emailAddress: emailAddress });
@@ -274,7 +298,7 @@ export const rateRecommendations = async (
     }
   });
   if (!updateRecRating) {
-    throw "No recommendation with that id found";
+    throw new DBError("No recommendation with that id found");
   }
 
   updateRecRating.rating = rating;
@@ -290,7 +314,7 @@ export const rateRecommendations = async (
   );
 
   if (updatedInfo.modifiedCount === 0)
-    throw "Could not update recommendation successfully";
+    throw new DBError("Could not update recommendation successfully");
 
   return { updateRecRating };
 };
