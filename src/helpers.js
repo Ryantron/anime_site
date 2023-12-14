@@ -1,5 +1,6 @@
 //You can add and export any helper functions you want here. If you aren't using any, then you can just leave this file as is.
 import { ObjectId } from "mongodb";
+
 /**
  * Errors
  * TypeError (wrong type) -> 400
@@ -7,6 +8,7 @@ import { ObjectId } from "mongodb";
  * DBError (Database errors) -> 500
  * ResourcesError (resources not found) -> 404
  */
+
 
 export class AuthError extends Error {
   constructor(msg) {
