@@ -1,3 +1,7 @@
+/**
+ * HELPERS
+ */
+
 const createErrorList = (errors) => {
   const ul = document.createElement("ul");
   ul.classList.add("clienterror");
@@ -20,11 +24,57 @@ const deleteError = () => {
   if (serverErrorEl) serverErrorEl.remove();
 };
 
-const main = document.querySelector("main");
-const addFriendForm = document.querySelector("#addFriendForm");
-const thumbsUpForm = document.querySelector("#thumbsUpForm");
+/**
+ *
+ * @param {string} idName
+ */
+const shouldFillStar = (idName) => {
+  const starId = Number.parseInt(idName[idName.length - 1]);
+  if (Number.isNaN(starId))
+    throw new Error(
+      `Unexpected Error. Wrong ID type in star-wrapper's stars: idName ${idName}, starId ${starId}`,
+      idName,
+      starId
+    );
+  return starId <= handlebars.REVIEW_RATING;
+};
+
+/**
+ * DOM ELEMENTS
+ */
+
 const authorIdP = document.querySelector("#authorIdP");
 const recIdP = document.querySelector("#recIdP");
+const main = document.querySelector("main");
+const addFriendForm = document.querySelector("#addFriendForm");
+const addReviewForm = document.querySelector("#addReviewForm");
+
+const star1 = document.querySelector("#star1");
+const star2 = document.querySelector("#star2");
+const star3 = document.querySelector("#star3");
+const star4 = document.querySelector("#star4");
+const star5 = document.querySelector("#star5");
+
+/**
+ * CONSTANTS
+ */
+
+/**
+ * RUNTIME Dynamic HTML & CSS
+ */
+
+const filledStars = [star1, star2, star3, star4, star5].filter((star) =>
+  shouldFillStar(star.id)
+);
+
+filledStars.forEach((star) => {
+  star.classList.remove("fa-regular");
+  star.classList.add("fa-solid");
+});
+
+/**
+ * EVENT LISTENERS
+ */
 
 addFriendForm.addEventListener("submit", (e) => {
   e.preventDefault();
@@ -46,22 +96,41 @@ addFriendForm.addEventListener("submit", (e) => {
     });
 });
 
-thumbsUpForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  deleteError();
-  if (recIdP.textContent === null) {
-    console.error("Recommendation ID not found... Invalid page...");
-    return (window.location.href = "/main");
-  }
-  $.ajax({
-    method: "POST",
-    url: `/recommendations/like/${recIdP.textContent}`,
-  })
-    .then(() => {
-      return (window.location.href = `/recommendations/${recIdP.textContent}`);
-    })
-    .fail((xhr, _, err) => {
-      const errEl = createErrorList([`Status ${xhr.status}: ${err}`]);
-      main.appendChild(errEl);
-    });
-});
+if (addReviewForm)
+  addReviewForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    deleteError();
+    if (recIdP.textContent === null) {
+      console.error("Recommendation ID not found... Invalid page...");
+      return (window.location.href = "/main");
+    }
+
+    const rating = e.target;
+
+    // $.ajax({
+    //   method: "POST",
+    //   url: `/recommendations/review/${recIdP.textContent}?rating=${}`
+    // }).then(())
+
+    console.log(rating);
+  });
+
+// thumbsUpForm.addEventListener("submit", (e) => {
+//   e.preventDefault();
+//   deleteError();
+//   if (recIdP.textContent === null) {
+//     console.error("Recommendation ID not found... Invalid page...");
+//     return (window.location.href = "/main");
+//   }
+//   $.ajax({
+//     method: "POST",
+//     url: `/recommendations/like/${recIdP.textContent}`,
+//   })
+//     .then(() => {
+//       return (window.location.href = `/recommendations/${recIdP.textContent}`);
+//     })
+//     .fail((xhr, _, err) => {
+//       const errEl = createErrorList([`Status ${xhr.status}: ${err}`]);
+//       main.appendChild(errEl);
+//     });
+// });

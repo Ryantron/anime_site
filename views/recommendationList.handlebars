@@ -44,31 +44,96 @@
       />
     </div>
   </section>
-  <section>
-    <div class="flex-center">
-      <h2 class="text-center me-2" tabindex="0">Recommended</h2>
-      <form action="/recommendations/like/:recId" method="post" id="thumbsUpForm">
-        <label for="thumbsUpIconButton" class="hiddenLabel">Thumbs Up</label>
-        {{! FIXME: label above was addFriendInputs, later implementation? }}
-        {{#if alreadyLiked}}
+  <section class="flex-center flex-column">
+    <h2 class="text-center me-2" tabindex="0">Recommended</h2>
+
+    <div class="star-wrapper">
+      {{#if isAuthor}}
+        <form
+          action="/recommendations/review/:recId"
+          method="post"
+          id="addReviewForm"
+        >
+          <label for="star1" class="hiddenLabel">Star 1</label>
+          <label for="star2" class="hiddenLabel">Star 2</label>
+          <label for="star3" class="hiddenLabel">Star 3</label>
+          <label for="star4" class="hiddenLabel">Star 4</label>
+          <label for="star5" class="hiddenLabel">Star 5</label>
           <button
             type="submit"
-            title="thumbsUpIconButton"
-            id="thumbsUpIconButton"
-            class="fa-solid fa-thumbs-up disable-pointer reduce-opacity rounded-pill border-0 p-3"
+            formaction="/star1"
+            title="1 Star Rating"
+            class="fa-regular fa-star"
+            id="star1"
           ></button>
-        {{else}}
+
           <button
             type="submit"
-            title="thumbsUpIconButton"
-            id="thumbsUpIconButton"
-            class="fa-solid fa-thumbs-up rounded-pill border-0 p-3"
+            formaction="/star2"
+            title="2 Star Rating"
+            class="fa-regular fa-star"
+            id="star2"
           ></button>
-        {{/if}}
-      </form></div>
+          <button
+            type="submit"
+            formaction="/star3"
+            title="3 Star Rating"
+            class="fa-regular fa-star"
+            id="star3"
+          ></button>
+          <button
+            type="submit"
+            formaction="/star4"
+            title="4 Star Rating"
+            class="fa-regular fa-star"
+            id="star4"
+          ></button>
+          <button
+            type="submit"
+            formaction="/star5"
+            title="5 Star Rating"
+            class="fa-regular fa-star"
+            id="star5"
+          ></button>
+
+        </form>
+      {{else}}
+        <div class="star-container">
+          <span
+            title="1 Star Rating"
+            class="fa-regular fa-star"
+            id="star1"
+          ></span>
+          <span
+            title="2 Star Rating"
+            class="fa-regular fa-star"
+            id="star2"
+          ></span>
+          <span
+            title="3 Star Rating"
+            class="fa-regular fa-star"
+            id="star3"
+          ></span>
+          <span
+            title="4 Star Rating"
+            class="fa-regular fa-star"
+            id="star4"
+          ></span>
+          <span
+            title="5 Star Rating"
+            class="fa-regular fa-star"
+            id="star5"
+          ></span>
+        </div>
+      {{/if}}
+    </div>
+
     <ol>
       {{#each recommendations}}
-        <li><a tabindex="0" href="https://myanimelist.net/anime/{{this.id}}">{{this.title}}</a></li>
+        <li><a
+            tabindex="0"
+            href="https://myanimelist.net/anime/{{this.id}}"
+          >{{this.title}}</a></li>
         <!-- <li><p tabindex="0">{{this.title}}</p></li> -->
       {{/each}}
     </ol>
@@ -76,9 +141,12 @@
 </main>
 
 <script
-  defer
   src="https://code.jquery.com/jquery-2.2.4.min.js"
   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
   crossorigin="anonymous"
 ></script>
-<script defer src="/public/js/recList.js"></script>
+<script>
+  const handlebars = { AUTHOR_ID: '{{authorId}}', REC_ID: '{{recId}}',
+  REVIEW_RATING: '{{reviewRating}}' }
+</script>
+<script src="/public/js/recList.js"></script>

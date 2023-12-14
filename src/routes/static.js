@@ -15,7 +15,6 @@ import {
   unlinkMalAccount,
 } from "../data/users.js";
 import {
-  hasCurrentUserLikedAlready,
   isFriendAlready,
   getRecommendationListAndAuthor,
   likeRecAnimeList,
@@ -137,15 +136,15 @@ router.route("/recommendations/:recId").get(async (req, res) => {
     // const alreadyLiked = req.session.user
     //   ? await hasCurrentUserLikedAlready(req.session.user._id, recId)
     //   : true;
-    const alreadyLiked = true;
     return res.render("recommendationList", {
       title: "Recommendation List",
       image: authorRec.authorPfpPath,
+      isAuthor: true,
       authorName: authorRec.authorName,
       authorId: authorRec.authorId,
       recId: recId,
+      reviewRating: 3,
       alreadyFriended: alreadyFriended,
-      alreadyLiked: alreadyLiked,
       recommendations: authorRec.recList,
     });
   } catch (err) {
