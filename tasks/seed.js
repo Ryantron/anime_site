@@ -1,37 +1,4 @@
-import { closeConnection } from "../src/config/mongoConnection.js";
-import { users } from "../src/config/mongoCollections.js";
-import { ObjectId } from "mongodb";
-import bcrypt from "bcrypt";
-const saltRounds = 16;
-
-async function insertUser({
-  username,
-  emailAddress,
-  password,
-  pfpId,
-  recommendations,
-  malUsername,
-}) {
-  recommendations = recommendations.map((rec) => {
-    rec._id = new ObjectId();
-    return rec;
-  });
-
-  const res = {
-    ...{
-      username,
-      emailAddress,
-      hashedPassword: await bcrypt.hash(password, saltRounds),
-      pfpId,
-      recommendations,
-    },
-    ...(malUsername ? { malUsername } : {}),
-  };
-  const usersCollection = await users();
-  const user = await usersCollection.insertOne(res);
-  if (!user) throw "Unable to add user to collection";
-  return user;
-}
+import { insertUser } from "./helpers.js";
 
 // Delete collection
 
@@ -48,20 +15,18 @@ const testuser = await insertUser({
 
   recommendations: [
     {
-      usersLiked: [],
+      rating: 3,
       recommendationList: [
         {
-          animeId: "25798",
+          id: 25798,
           title:
             "That time I got reincarnated as a coach and had to go around the world to save fishes because they needed help from the humans who are incompetent",
           frequency: 3,
-          review: 5,
         },
         {
-          animeId: "13452",
+          id: 13452,
           title: "Paul V",
           frequency: 2,
-          review: 4,
         },
       ],
     },
@@ -84,16 +49,16 @@ const testuser3 = await insertUser({
   pfpId: 3,
   recommendations: [
     {
-      usersLiked: [testuser.insertedId],
+      rating: 3,
       recommendationList: [
         {
-          animeId: "25798",
+          id: 25798,
           title:
             "That time I got reincarnated as a coach and had to go around the world to save fishes because they needed help from the humans who are incompetent",
           frequency: 3,
         },
         {
-          animeId: "13452",
+          id: 13452,
           title: "Paul V",
           frequency: 2,
         },
