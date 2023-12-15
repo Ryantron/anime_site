@@ -358,6 +358,52 @@ export const removeFriend = async (yourUsername, targetUsername) => {
   return { friendRemoved: targetUsername, status: true };
 };
 
+<<<<<<< Updated upstream
 export const isFriendOrPending = async (currentUserId, authorUserId) => {
+=======
+export const isFriendOrPending = async (yourUsername, targetUsername) => {
+  yourUsername = validation.stringCheck(yourUsername);
+  targetUsername = validation.stringCheck(targetUsername);
+
+  yourUsername = yourUsername.toLowerCase();
+  targetUsername = targetUsername.toLowerCase();
+
+  const usersCollection = await users();
+  let existingUser = await usersCollection.findOne({
+    username: yourUsername,
+  });
+  let targetUser = await usersCollection.findOne({
+    username: targetUsername,
+  });
+
+  if (!existingUser) {
+    throw new DBError("Db Error: Could not find your username");
+  }
+  if (!targetUser) {
+    throw new ResourcesError("The target person does not exist");
+  }
+
+  const yourFriends = existingUser.friendList;
+  const targetFriends = targetUser.friendList;
+
+  for (const friend of yourFriends) {
+    if (friend.username === targetUsername) {
+      return true;
+    }
+  }
+
+  for (const friend of targetFriends) {
+    if (friend.username === yourUsername) {
+      return true;
+    }
+  }
+
+  if (
+    targetUser.pendingRequests.includes(yourUsername)     //Turned back to one sided for other implementation.
+  ) {
+    return true;
+  }
+
+>>>>>>> Stashed changes
   return false;
 };
