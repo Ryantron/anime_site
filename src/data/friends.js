@@ -1,6 +1,6 @@
 import { users } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
-import validation, { DBError} from "../helpers.js";
+import validation, { DBError } from "../helpers.js";
 
 export const sendFriendRequest = async (yourUsername, targetUsername) => {
     yourUsername = validation.stringCheck(yourUsername)
@@ -32,285 +32,312 @@ export const sendFriendRequest = async (yourUsername, targetUsername) => {
 
     sentRequests.push(targetUsername)
     
-    const insertPending = {
-        pendingRequests: pendingRequests
-    }
+  const insertPending = {
+    pendingRequests: pendingRequests,
+  };
 
-    const insertSent = {
-        sentRequests: sentRequests
-    }
+  const insertSent = {
+    sentRequests: sentRequests,
+  };
 
-    const updatePending = await usersCollection.updateOne(
-        { username: targetUsername },
-        { $set: insertPending },
-        { returnDocument: "after" }
-    );
+  const updatePending = await usersCollection.updateOne(
+    { username: targetUsername },
+    { $set: insertPending },
+    { returnDocument: "after" }
+  );
 
-    const updatedSent = await usersCollection.updateOne(
+  const updatedSent = await usersCollection.updateOne(
     { username: yourUsername },
     { $set: insertSent },
     { returnDocument: "after" }
-    );
+  );
 
-    if (updatePending.modifiedCount === 0)
+  if (updatePending.modifiedCount === 0)
     throw "Could not update pendingRequests successfully";
-    if (updatedSent.modifiedCount === 0)
+  if (updatedSent.modifiedCount === 0)
     throw "Could not update sentRequests successfully";
-    
-    return {
-        friendRequestSent: true,
-        from: yourUsername,
-        to: targetUsername
-    }
+
+  return {
+    friendRequestSent: true,
+    from: yourUsername,
+    to: targetUsername,
+  };
 }
 
-export const acceptFriendRequest = async (yourUsername, requestUsername) =>{
-    yourUsername = validation.stringCheck(yourUsername)
-    requestUsername = validation.stringCheck(requestUsername)
+export const acceptFriendRequest = async (yourUsername, requestUsername) => {
+  yourUsername = validation.stringCheck(yourUsername);
+  requestUsername = validation.stringCheck(requestUsername);
 
-    yourUsername = yourUsername.toLowerCase();
-    requestUsername = requestUsername.toLowerCase();
+  yourUsername = yourUsername.toLowerCase();
+  requestUsername = requestUsername.toLowerCase();
 
-    const usersCollection = await users();
-    let existingUser = await usersCollection.findOne({
-        username: yourUsername
-      });
-    let requestExists = await usersCollection.findOne({
-        username: requestUsername
-    })
+  const usersCollection = await users();
+  let existingUser = await usersCollection.findOne({
+    username: yourUsername,
+  });
+  let requestExists = await usersCollection.findOne({
+    username: requestUsername,
+  });
 
-    if(!existingUser){throw new DBError("Db Error: Could not find your username")}
-    if(!requestExists){throw new RangeError("The person you are trying to add does not exist")}
- 
-    let pendingRequests = existingUser.pendingRequests
-    let sentRequests = requestExists.sentRequests
-    let removePending = []
-    let removeSent = []
+  if (!existingUser) {
+    throw new DBError("Db Error: Could not find your username");
+  }
+  if (!requestExists) {
+    throw new RangeError("The person you are trying to add does not exist");
+  }
 
-    if(!pendingRequests || !sentRequests || pendingRequests.length === 0 || sentRequests.length === 0) {
-        throw 'This user has not sent you a friend request'
+  let pendingRequests = existingUser.pendingRequests;
+  let sentRequests = requestExists.sentRequests;
+  let removePending = [];
+  let removeSent = [];
+
+  if (
+    !pendingRequests ||
+    !sentRequests ||
+    pendingRequests.length === 0 ||
+    sentRequests.length === 0
+  ) {
+    throw "This user has not sent you a friend request";
+  }
+
+  pendingRequests.forEach((request) => {
+    if (request !== requestUsername) {
+      removePending.push(request);
     }
-
-    pendingRequests.forEach((request) =>{
-        if (request !== requestUsername){
-            removePending.push(request)
-        }
-    })
-    sentRequests.forEach((request) =>{
-        if (request !== yourUsername){
-            removeSent.push(request)
-        }
-    })
-
-    const updatePendingRequests = {
-        pendingRequests: removePending
+  });
+  sentRequests.forEach((request) => {
+    if (request !== yourUsername) {
+      removeSent.push(request);
     }
+  });
 
-    const updateSentRequests = {
-        sentRequests: removeSent
-    }
+  const updatePendingRequests = {
+    pendingRequests: removePending,
+  };
 
-    const updatePending = await usersCollection.updateOne(
-        { username: yourUsername },
-        { $set: updatePendingRequests },
-        { returnDocument: "after" }
-    );
+  const updateSentRequests = {
+    sentRequests: removeSent,
+  };
 
-    const updatedSent = await usersCollection.updateOne(
+  const updatePending = await usersCollection.updateOne(
+    { username: yourUsername },
+    { $set: updatePendingRequests },
+    { returnDocument: "after" }
+  );
+
+  const updatedSent = await usersCollection.updateOne(
     { username: requestUsername },
     { $set: updateSentRequests },
     { returnDocument: "after" }
-    );
+  );
 
-    if (updatePending.modifiedCount === 0)
+  if (updatePending.modifiedCount === 0)
     throw "Could not update pendingRequests successfully";
-    if (updatedSent.modifiedCount === 0)
+  if (updatedSent.modifiedCount === 0)
     throw "Could not update sentRequests successfully";
 
-    let recipientFriends = existingUser.friendList
-    if(!recipientFriends){recipientFriends = []}
+  let recipientFriends = existingUser.friendList;
+  if (!recipientFriends) {
+    recipientFriends = [];
+  }
 
-    let senderFriends = requestExists.friendList
-    if(!senderFriends){senderFriends = []}
+  let senderFriends = requestExists.friendList;
+  if (!senderFriends) {
+    senderFriends = [];
+  }
 
-    
-    recipientFriends.push({
-        _id: new ObjectId(),
-        username: requestUsername
-    })
-    senderFriends.push({
-        _id: new ObjectId(),
-        username: yourUsername
-    })
+  recipientFriends.push({
+    _id: new ObjectId(),
+    username: requestUsername,
+  });
+  senderFriends.push({
+    _id: new ObjectId(),
+    username: yourUsername,
+  });
 
-    const updatePendingFriend = {
-        friendList: recipientFriends,
-        friendCount: recipientFriends.length
-    }
+  const updatePendingFriend = {
+    friendList: recipientFriends,
+    friendCount: recipientFriends.length,
+  };
 
-    const updateSentFriend = {
-        friendList: senderFriends,
-        friendCount: senderFriends.length
-    }
+  const updateSentFriend = {
+    friendList: senderFriends,
+    friendCount: senderFriends.length,
+  };
 
-    const updateSenderFriendsList = await usersCollection.updateOne(
-        {username: requestUsername},
-        { $set: updateSentFriend },
-        { returnDocument: "after" }
-    );
+  const updateSenderFriendsList = await usersCollection.updateOne(
+    { username: requestUsername },
+    { $set: updateSentFriend },
+    { returnDocument: "after" }
+  );
 
-    const updateRecipientFriendsList = await usersCollection.updateOne(
-        {username: yourUsername},
-        { $set: updatePendingFriend },
-        { returnDocument: "after" }
-    )
-    
-    if (updateSenderFriendsList.modifiedCount === 0)
+  const updateRecipientFriendsList = await usersCollection.updateOne(
+    { username: yourUsername },
+    { $set: updatePendingFriend },
+    { returnDocument: "after" }
+  );
+
+  if (updateSenderFriendsList.modifiedCount === 0)
     throw "Could not update friendList successfully";
-    if (updateRecipientFriendsList.modifiedCount === 0)
+  if (updateRecipientFriendsList.modifiedCount === 0)
     throw "Could not update friendList successfully";
 
-    return {friendAdded: true}
-}
+  return { friendAdded: true };
+};
 
-export const rejectFriendRequest = async (yourUsername, requestUsername) =>{
-    yourUsername = validation.stringCheck(yourUsername)
-    requestUsername = validation.stringCheck(requestUsername)
+export const rejectFriendRequest = async (yourUsername, requestUsername) => {
+  yourUsername = validation.stringCheck(yourUsername);
+  requestUsername = validation.stringCheck(requestUsername);
 
-    yourUsername = yourUsername.toLowerCase();
-    requestUsername = requestUsername.toLowerCase();
+  yourUsername = yourUsername.toLowerCase();
+  requestUsername = requestUsername.toLowerCase();
 
-    const usersCollection = await users();
-    let existingUser = await usersCollection.findOne({
-        username: yourUsername
-      });
-    let requestExists = await usersCollection.findOne({
-        username: requestUsername
-    })
+  const usersCollection = await users();
+  let existingUser = await usersCollection.findOne({
+    username: yourUsername,
+  });
+  let requestExists = await usersCollection.findOne({
+    username: requestUsername,
+  });
 
-    if(!existingUser){throw new DBError("Db Error: Could not find your username")}
-    if(!requestExists){throw new RangeError("The person you are trying to add does not exist")}
- 
-    let pendingRequests = existingUser.pendingRequests
-    let sentRequests = requestExists.sentRequests
-    let removePending = []
-    let removeSent = []
+  if (!existingUser) {
+    throw new DBError("Db Error: Could not find your username");
+  }
+  if (!requestExists) {
+    throw new RangeError("The person you are trying to add does not exist");
+  }
 
-    if(!pendingRequests || !sentRequests || pendingRequests.length === 0 || sentRequests.length === 0) {
-        throw 'This user has not sent you a friend request'
+  let pendingRequests = existingUser.pendingRequests;
+  let sentRequests = requestExists.sentRequests;
+  let removePending = [];
+  let removeSent = [];
+
+  if (
+    !pendingRequests ||
+    !sentRequests ||
+    pendingRequests.length === 0 ||
+    sentRequests.length === 0
+  ) {
+    throw "This user has not sent you a friend request";
+  }
+
+  pendingRequests.forEach((request) => {
+    if (request !== requestUsername) {
+      removePending.push(request);
     }
-
-    pendingRequests.forEach((request) =>{
-        if (request !== requestUsername){
-            removePending.push(request)
-        }
-    })
-    sentRequests.forEach((request) =>{
-        if (request !== yourUsername){
-            removeSent.push(request)
-        }
-    })
-
-    const updatePendingRequests = {
-        pendingRequests: removePending
+  });
+  sentRequests.forEach((request) => {
+    if (request !== yourUsername) {
+      removeSent.push(request);
     }
+  });
 
-    const updateSentRequests = {
-        sentRequests: removeSent
-    }
+  const updatePendingRequests = {
+    pendingRequests: removePending,
+  };
 
-    const updatePending = await usersCollection.updateOne(
-        { username: yourUsername },
-        { $set: updatePendingRequests },
-        { returnDocument: "after" }
-    );
+  const updateSentRequests = {
+    sentRequests: removeSent,
+  };
 
-    const updatedSent = await usersCollection.updateOne(
+  const updatePending = await usersCollection.updateOne(
+    { username: yourUsername },
+    { $set: updatePendingRequests },
+    { returnDocument: "after" }
+  );
+
+  const updatedSent = await usersCollection.updateOne(
     { username: requestUsername },
     { $set: updateSentRequests },
     { returnDocument: "after" }
-    );
+  );
 
-    if (updatePending.modifiedCount === 0)
+  if (updatePending.modifiedCount === 0)
     throw "Could not update pendingRequests successfully";
-    if (updatedSent.modifiedCount === 0)
+  if (updatedSent.modifiedCount === 0)
     throw "Could not update sentRequests successfully";
 
-    return {requestRejected: true}
-}
+  return { requestRejected: true };
+};
 
-export const removeFriend = async (yourUsername, targetUsername) =>{
-    yourUsername = validation.stringCheck(yourUsername)
-    targetUsername = validation.stringCheck(targetUsername)
+export const removeFriend = async (yourUsername, targetUsername) => {
+  yourUsername = validation.stringCheck(yourUsername);
+  targetUsername = validation.stringCheck(targetUsername);
 
-    yourUsername = yourUsername.toLowerCase();
-    targetUsername = targetUsername.toLowerCase();
+  yourUsername = yourUsername.toLowerCase();
+  targetUsername = targetUsername.toLowerCase();
 
-    const usersCollection = await users();
-    let existingUser = await usersCollection.findOne({
-        username: yourUsername
-      });
-    let friendToRemove = await usersCollection.findOne({
-        username: targetUsername
-    })
+  const usersCollection = await users();
+  let existingUser = await usersCollection.findOne({
+    username: yourUsername,
+  });
+  let friendToRemove = await usersCollection.findOne({
+    username: targetUsername,
+  });
 
-    if(!existingUser){throw new DBError("Db Error: Could not find your username")}
-    if(!friendToRemove){throw new RangeError("The person you are trying to remove does not exist")}
- 
-    const yourFriends = existingUser.friendList
-    const targetFriends = friendToRemove.friendList
+  if (!existingUser) {
+    throw new DBError("Db Error: Could not find your username");
+  }
+  if (!friendToRemove) {
+    throw new RangeError("The person you are trying to remove does not exist");
+  }
 
-    let yourFriendsUsernames = []
-    let theirFriendUsernames = []
-    yourFriends.forEach((friend) =>{
-        yourFriendsUsernames.push(friend.username)
-    })
-    targetFriends.forEach((friend) =>{
-        theirFriendUsernames.push(friend.username)
-    })
+  const yourFriends = existingUser.friendList;
+  const targetFriends = friendToRemove.friendList;
 
-    if(!yourFriendsUsernames.includes(targetUsername) || !theirFriendUsernames.includes(yourUsername)) {
-        throw 'You are not friends with this user. Cannot remove'
+  let yourFriendsUsernames = [];
+  let theirFriendUsernames = [];
+  yourFriends.forEach((friend) => {
+    yourFriendsUsernames.push(friend.username);
+  });
+  targetFriends.forEach((friend) => {
+    theirFriendUsernames.push(friend.username);
+  });
+
+  if (
+    !yourFriendsUsernames.includes(targetUsername) ||
+    !theirFriendUsernames.includes(yourUsername)
+  ) {
+    throw "You are not friends with this user. Cannot remove";
+  }
+  let updateYourFriendsArray = [];
+  let updateTheirFriendsArray = [];
+  yourFriends.forEach((friend) => {
+    if (friend.username !== targetUsername) {
+      updateYourFriendsArray.push(friend);
     }
-    let updateYourFriendsArray = []
-    let updateTheirFriendsArray = []
-    yourFriends.forEach((friend) =>{
-        if(friend.username !== targetUsername){
-            updateYourFriendsArray.push(friend)
-        }
-    })
-    targetFriends.forEach((friend) =>{
-        if(friend.username !== yourUsername){
-            updateTheirFriendsArray.push(friend)
-        }
-    })
-
-    const updateYourFriends = {
-        friendList : updateYourFriendsArray,
-        friendCount: updateYourFriendsArray.length
-
+  });
+  targetFriends.forEach((friend) => {
+    if (friend.username !== yourUsername) {
+      updateTheirFriendsArray.push(friend);
     }
+  });
 
-    const updateTheirFriends = {
-        friendList : updateTheirFriendsArray,
-        friendCount: updateTheirFriendsArray.length
-    }
+  const updateYourFriends = {
+    friendList: updateYourFriendsArray,
+    friendCount: updateYourFriendsArray.length,
+  };
 
-    const updateYourList = await usersCollection.updateOne(
-        { username: yourUsername },
-        { $set: updateYourFriends },
-        { returnDocument: "after" }
-    );
+  const updateTheirFriends = {
+    friendList: updateTheirFriendsArray,
+    friendCount: updateTheirFriendsArray.length,
+  };
 
-    const updatedTheirList = await usersCollection.updateOne(
+  const updateYourList = await usersCollection.updateOne(
+    { username: yourUsername },
+    { $set: updateYourFriends },
+    { returnDocument: "after" }
+  );
+
+  const updatedTheirList = await usersCollection.updateOne(
     { username: targetUsername },
     { $set: updateTheirFriends },
     { returnDocument: "after" }
-    );
+  );
 
-    if (updateYourList.modifiedCount === 0)
+  if (updateYourList.modifiedCount === 0)
     throw "Could not update pendingRequests successfully";
-    if (updatedTheirList.modifiedCount === 0)
+  if (updatedTheirList.modifiedCount === 0)
     throw "Could not update sentRequests successfully";
 
     return {friendRemoved: targetUsername, status: true}
@@ -343,13 +370,16 @@ export const isFriendOrPending = async (yourUsername, targetUsername) => {
     })
     targetFriends.forEach((friend) =>{
         if(friend.username === yourUsername){
-            return true
+            return {isFriended: true}
         }
     })
 
     if (targetUser.pendingRequests.includes(yourUsername) || existingUser.pendingRequests.includes(targetUsername)){
-        return true
+        return {pendingRequest: true}
     }
 
-    return false
+    return {isFriended: false, pendingRequest: false}
 }
+
+ 
+
