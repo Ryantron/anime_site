@@ -250,27 +250,6 @@ await createTest("isFriendOrPending Data Test 1", async () => {
  * ROUTE TESTS
  ************/
 
-// TODO maybe: Can't get supertest to work with express-session
-// console.log("-----------------");
-// console.log("/accounts/reset Route Test 1");
-// try {
-//   const res = await request.post("/login").send({
-//     emailAddressInput: "test3@test.com",
-//     passwordInput: "Test123@@",
-//   });
-//   await request
-//     .post("/accounts/reset")
-//     .send({
-//       usernameInput: "Jimmy_uwu",
-//     })
-//     .expect("Location", /\/accounts/);
-//   console.log("Success");
-// } catch (err) {
-//   console.log("/accounts/reset Route Test 1 Failed: ");
-//   console.log(err);
-// }
-// console.log("-----------------");
-
 /************
  * ROUTE ERROR TESTS
  ************/
