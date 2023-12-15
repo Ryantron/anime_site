@@ -3,22 +3,31 @@
 </header>
 
 <main class="mx-5">
-  <img src="{{image}}" alt="Profile Picture" width="128" height="128" />
+  <div class="flex-center flex-column">
+    <img
+      src="{{image}}"
+      alt="Profile Picture"
+      width="64"
+      height="64"
+      class="rounded-circle"
+      tabindex="0"
+    />
+  </div>
+
   <ul class="list-group my-3">
     {{! Plaintext password not available }}
     <li class="list-group-item">Username: {{username}}</li>
     <li class="list-group-item">Email Address: {{emailAddress}}</li>
     {{! MAL display as linked with username or unlinked }}
     <li class="list-group-item">MyAnimeList Username: {{malUsername}}</li>
-    <li class="list-group-item">Friend Count: {{friendCount}}</li>
   </ul>
-  {{! TODO: button to hide? }}
-  <h3 class="my-2" tabindex="0">Friend List:</h3>
-  <ul class="list-group">
-    {{#each friendList}}
-      <li class="list-group-item">{{this}}</li>
-    {{/each}}
-  </ul>
+
+  <div class="flex-center my-4">
+    <a
+      href="/friends"
+      class="primary-bg-color primary-text-color rounded-pill no-underline px-5 py-2 border-0"
+    >View Your Friend List</a>
+  </div>
 
   {{! Reset Account }}
   <h3 class="my-2" tabindex="0">Edit Account Info:</h3>
@@ -34,20 +43,12 @@
 
     <div class="flex-center flex-column py-2">
       <label for="usernameInput">Username</label>
-      <input
-        name="usernameInput"
-        id="usernameInput"
-        type="text"
-      />
+      <input name="usernameInput" id="usernameInput" type="text" />
     </div>
 
     <div class="flex-center flex-column py-2">
       <label for="emailAddressInput">Email Address</label>
-      <input
-        name="emailAddressInput"
-        id="emailAddressInput"
-        type="email"
-      />
+      <input name="emailAddressInput" id="emailAddressInput" type="email" />
     </div>
 
     <div class="flex-center flex-column py-2">
@@ -55,14 +56,14 @@
       <input name="passwordInput" id="passwordInput" type="password" />
     </div>
 
-    {{! TODO: reconsider pfp? Upload own pfp? See options? }}
+    {{! FIXME: pfp options? show the options? }}
     <div class="flex-center flex-column py-2">
       <label for="pfpInput">Profile Picture</label>
       <input name="pfpInput" id="pfpInput" type="text" />
     </div>
 
     <div class="flex-center flex-column py-2">
-      <label for="submitResetInput" hidden>Update Account</label>
+      <label for="submitResetInput" class="hiddenLabel">Update Account</label>
       <button
         name="submitResetInput"
         id="submitResetInput"
@@ -94,7 +95,7 @@
       </div>
 
       <div class="flex-center flex-column py-2">
-        <label for="submitMalInput" hidden>Link MyAnimeList</label>
+        <label for="submitMalInput" class="hiddenLabel">Link MyAnimeList</label>
         <button
           name="submitMalInput"
           id="submitMalInput"
@@ -116,7 +117,8 @@
       id="unlinkMal"
       class="flex-center flex-column my-3"
     >
-      <label for="unlinkMalButton" hidden>Unlink Your MyAnimeList Account</label>
+      <label for="unlinkMalButton" class="hiddenLabel">Unlink Your MyAnimeList
+        Account</label>
       <button
         name="unlinkMalButton"
         id="unlinkMalButton"
@@ -129,18 +131,25 @@
   {{/if}}
 
   {{! History of recommendation lists sorted by generated date (reverse inserted order) }}
-  <button
-    name="toggleRecHistory"
-    id="toggleRecHistory"
-    class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2 my-3"
-  >
-    Toggle Recommendation History
-  </button>
-  <ul id="rec-list">
-    {{#each recommendations}}
-      <li>{{this}}</li>
-    {{/each}}
-  </ul>
+  <div class="flex-center flex-column">
+    <button
+      name="toggleRecHistory"
+      id="toggleRecHistory"
+      class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2 my-3"
+    >
+      Toggle Recommendation History
+    </button>
+  </div>
+
+  {{#each recommendations}}
+    {{! Increment is a helper defined in app.js }}
+    <p class="fw-bold hidden">Recommendation List {{increment @index}}</p>
+    <ul class="rec-list hidden">
+      {{#each this.recommendationList}}
+        <li>{{this.title}}</li>
+      {{/each}}
+    </ul>
+  {{/each}}
 </main>
 
 <script defer src="/public/js/accounts.js"></script>

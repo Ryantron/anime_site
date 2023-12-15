@@ -22,6 +22,7 @@ import {
   getManualListUsers,
   getUserRecs,
   getManualListRecs,
+  getHistory,
 } from "../data/recommendations.js";
 import { ObjectId } from "mongodb";
 
@@ -82,19 +83,21 @@ router
       }
       if (finalAnimeArr.length === 0) throw new RangeError("Invalid Input"); //If every single one was invalid, then errors, else goes with all other valid inputs
       let count = 0;
-      for (let x of finalAnimeArr)
-      {
+      for (let x of finalAnimeArr) {
         if (isNaN(x)) throw new RangeError("Invalid Input");
         else finalAnimeArr[count] = parseInt(x);
         count++;
       }
       if (req.session.user) {
         //If section to add the manual list to the database is the user is logged in
-        let result = await getManualListUsers(req.session.user.emailAddress, finalAnimeArr);
+        let result = await getManualListUsers(
+          req.session.user.emailAddress,
+          finalAnimeArr
+        );
         return res.redirect("/recommendations/".concat(result.recId));
       } else {
         let result = await getManualListRecs(finalAnimeArr);
-        return res.render('manualList', {
+        return res.render("manualList", {
           title: "Recommendation List",
           Result: result, //This will be some form of the returned list/Object list instead in the final, for now it just returns the list the user put it (with valid values)
         });
@@ -135,6 +138,11 @@ router.route("/recommendations/:recId").get(async (req, res) => {
     const alreadyLiked = req.session.user
       ? await hasCurrentUserLikedAlready(req.session.user._id, recId)
       : true;
+    // If logged in, add new recommendation list to session
+    if (req.session.user) {
+      const newRecHistory = await getHistory(req.session.user.emailAddress);
+      req.session.user.recommendations = newRecHistory;
+    }
     return res.render("recommendationList", {
       title: "Recommendation List",
       image: authorRec.authorPfpPath,
@@ -277,23 +285,16 @@ router
 
 router.route("/accounts").get(async (req, res) => {
   // Middleware requires req.session.user, else redirect to /login
-  const {
-    username,
-    emailAddress,
-    malUsername,
-    friendCount,
-    friendList,
-    recommendations,
-  } = req.session.user;
+  const { username, emailAddress, malUsername, recommendations, pfpId } =
+    req.session.user;
   return res.render("accounts", {
     title: "Your Account",
     username: username,
     emailAddress: emailAddress,
     malUsername: malUsername ?? "N/A",
-    friendCount: friendCount,
-    friendList: friendList,
     recommendations: recommendations,
     hasLinked: malUsername !== undefined,
+    image: IMAGE_PATHS[pfpId],
   });
 });
 
@@ -372,5 +373,21 @@ router.route("/accounts/reset").patch(async (req, res) => {
     );
   }
 });
+
+// TODO: handlebars for friends (maybe 1 page with 2 tabs)
+// FIXME: getFriendInfo that returns {friendList, friendCount, pendingRequests, sentRequests}
+router.route("/friends").get(async (req, res) => {
+  return res.render("friends", {
+    title: "Friends",
+    friendList: [],
+    friendCount: 2,
+  });
+});
+
+// router.route("/friends/pending").get(async (req, res) => {
+//   return res.render("friends", {
+//     title: "Friends",
+//   });
+// });
 
 export default router;
