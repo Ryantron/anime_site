@@ -316,7 +316,7 @@ export const removeFriend = async (yourUsername, targetUsername) =>{
     return {friendRemoved: targetUsername, status: true}
 }
 
-export const checkFriendStatus = async (yourUsername, targetUsername) => {
+export const isFriendOrPending = async (yourUsername, targetUsername) => {
     yourUsername = validation.stringCheck(yourUsername)
     targetUsername = validation.stringCheck(targetUsername)
 
