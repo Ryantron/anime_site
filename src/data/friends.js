@@ -3,52 +3,29 @@ import { ObjectId } from "mongodb";
 import validation, { DBError } from "../helpers.js";
 
 export const sendFriendRequest = async (yourUsername, targetUsername) => {
-    yourUsername = validation.stringCheck(yourUsername)
-    targetUsername = validation.stringCheck(targetUsername)
+  yourUsername = validation.stringCheck(yourUsername);
+  targetUsername = validation.stringCheck(targetUsername);
 
-    yourUsername = yourUsername.toLowerCase();
-    targetUsername = targetUsername.toLowerCase();
+  yourUsername = yourUsername.toLowerCase();
+  targetUsername = targetUsername.toLowerCase();
 
-    const usersCollection = await users();
-    let existingUser = await usersCollection.findOne({
-        username: yourUsername
-      });
-    let targetExists = await usersCollection.findOne({
-        username: targetUsername
-    })
-    if(!existingUser){throw new DBError("Db Error: Could not find your username")}
-    if(!targetExists){throw new RangeError("The person you are trying to add does not exist. Double check their username for spelling errors")}
-
-
-    let pendingRequests = targetUser.pendingRequests
-    if(!pendingRequests){pendingRequests = []}
-    if(pendingRequests.includes(yourUsername)) {throw new RangeError ("You have already sent a friend request to this user")}
-    pendingRequests.push(yourUsername)
-    
-
-    let sentRequests = existingUser.sentRequests
-    if(!sentRequests){sentRequests = []}
-    if(sentRequests.includes(targetUsername)) {throw new RangeError ("You have already sent a friend request to this user")}
-
-    sentRequests.push(targetUsername)
-    
-    const insertPending = {
-        pendingRequests: pendingRequests
-    }
-
-    const insertSent = {
-        sentRequests: sentRequests
-    }
-
-    const updatePending = await usersCollection.updateOne(
-        { username: targetUsername },
-        { $set: insertPending },
-        { returnDocument: "after" }
+  const usersCollection = await users();
+  let existingUser = await usersCollection.findOne({
+    username: yourUsername,
+  });
+  let targetUser = await usersCollection.findOne({
+    username: targetUsername,
+  });
+  if (!existingUser) {
+    throw new DBError("Db Error: Could not find your username");
+  }
+  if (!targetUser) {
+    throw new RangeError(
+      "The person you are trying to add does not exist. Double check their username for spelling errors"
     );
   }
 
-  // target user
-  let pendingRequests = targetExists.pendingRequests;
+  let pendingRequests = targetUser.pendingRequests;
   if (!pendingRequests) {
     pendingRequests = [];
   }
@@ -57,7 +34,6 @@ export const sendFriendRequest = async (yourUsername, targetUsername) => {
   }
   pendingRequests.push(yourUsername);
 
-  // current user
   let sentRequests = existingUser.sentRequests;
   if (!sentRequests) {
     sentRequests = [];
@@ -376,48 +352,50 @@ export const removeFriend = async (yourUsername, targetUsername) => {
   if (updatedTheirList.modifiedCount === 0)
     throw "Could not update sentRequests successfully";
 
-    return {friendRemoved: targetUsername, status: true}
-}
-
-export const isFriendOrPending = async (yourUsername, targetUsername) => {
-    yourUsername = validation.stringCheck(yourUsername)
-    targetUsername = validation.stringCheck(targetUsername)
-
-    yourUsername = yourUsername.toLowerCase();
-    targetUsername = targetUsername.toLowerCase();
-
-    const usersCollection = await users();
-    let existingUser = await usersCollection.findOne({
-        username: yourUsername
-      });
-    let targetUser = await usersCollection.findOne({
-        username: targetUsername
-    })
-
-    if(!existingUser){throw new DBError("Db Error: Could not find your username")}
-    if(!targetUser){throw new RangeError("The target person does not exist")}
- 
-    const yourFriends = existingUser.friendList
-    const targetFriends = targetUser.friendList
-    yourFriends.forEach((friend) =>{
-        if(friend.username === targetUsername){
-            return {isFriended: true}
-        }
-    })
-    targetFriends.forEach((friend) =>{
-        if(friend.username === yourUsername){
-            return {isFriended: true}
-        }
-    })
-
-    if (targetUser.pendingRequests.includes(yourUsername)){
-        return {requestPending: true}
-    }
-
-    return {isFriended: false, requestPending: false}
-}
-
   return { friendRemoved: targetUsername, status: true };
 };
 
+export const isFriendOrPending = async (yourUsername, targetUsername) => {
+  yourUsername = validation.stringCheck(yourUsername);
+  targetUsername = validation.stringCheck(targetUsername);
 
+  yourUsername = yourUsername.toLowerCase();
+  targetUsername = targetUsername.toLowerCase();
+
+  const usersCollection = await users();
+  let existingUser = await usersCollection.findOne({
+    username: yourUsername,
+  });
+  let targetUser = await usersCollection.findOne({
+    username: targetUsername,
+  });
+
+  if (!existingUser) {
+    throw new DBError("Db Error: Could not find your username");
+  }
+  if (!targetUser) {
+    throw new RangeError("The target person does not exist");
+  }
+
+  const yourFriends = existingUser.friendList;
+  const targetFriends = targetUser.friendList;
+  yourFriends.forEach((friend) => {
+    if (friend.username === targetUsername) {
+      return { isFriended: true };
+    }
+  });
+  targetFriends.forEach((friend) => {
+    if (friend.username === yourUsername) {
+      return { isFriended: true };
+    }
+  });
+
+  if (targetUser.pendingRequests.includes(yourUsername)) {
+    return { requestPending: true };
+  }
+
+  return { isFriended: false, requestPending: false };
+};
+
+//   return { friendRemoved: targetUsername, status: true };
+// };
