@@ -7,6 +7,7 @@ import validation, {
   errorToStatus,
   IMAGE_PATHS,
 } from "../helpers.js";
+import { isFriendOrPending } from "../data/friends.js";
 import {
   changeUserInfo,
   registerUser,
@@ -131,15 +132,13 @@ router.route("/recommendations/:recId").get(async (req, res) => {
   try {
     const recId = req.params.recId;
     const authorRec = await getRecommendationListAndAuthor(recId);
-    const alreadyFriended = req.session.user
-      ? await isFriendAlready(req.session.user._id, recId)
+    const isStrangers = req.session.user
+      ? !(await isFriendOrPending(req.session.user._id, recId))
       : true;
     const isAuthor = req.session.user
       ? req.session.user._id === authorRec.authorId
       : false;
 
-    console.log(req.session.user);
-    console.log(isAuthor);
     return res.render("recommendationList", {
       title: "Recommendation List",
       image: authorRec.authorPfpPath,
@@ -148,7 +147,7 @@ router.route("/recommendations/:recId").get(async (req, res) => {
       authorId: authorRec.authorId,
       recId: recId,
       reviewRating: authorRec.reviewRating,
-      alreadyFriended: alreadyFriended,
+      isStrangers: isStrangers,
       recommendations: authorRec.recList,
     });
   } catch (err) {

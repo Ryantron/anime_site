@@ -319,10 +319,6 @@ export const rateRecommendations = async (
   return { updateRecRating };
 };
 
-export const isFriendAlready = async (currentUserId, authorUserId) => {
-  return false;
-};
-
 export const getRecommendationListAndAuthor = async (recListId) => {
   recListId = validation.stringCheck(recListId);
   if (!ObjectId.isValid(recListId))

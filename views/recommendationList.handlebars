@@ -13,19 +13,19 @@
         id="addFriendForm"
       >
         <label for="addFriendIconButton" class="hiddenLabel">Add Friend</label>
-        {{#if alreadyFriended}}
+        {{#if isStrangers}}
           <button
             type="submit"
             title="addFriendIconButton"
             id="addFriendIconButton"
-            class="fa-solid fa-user-group disable-pointer reduce-opacity rounded-pill border-0 p-3"
+            class="fa-solid fa-user-group rounded-pill border-0 p-3"
           ></button>
         {{else}}
           <button
             type="submit"
             title="addFriendIconButton"
             id="addFriendIconButton"
-            class="fa-solid fa-user-group rounded-pill border-0 p-3"
+            class="fa-solid fa-user-group disable-pointer reduce-opacity rounded-pill border-0 p-3"
           ></button>
         {{/if}}
       </form>
