@@ -74,7 +74,7 @@ const stars = [star1, star2, star3, star4, star5];
  */
 
 const filledStars = stars.filter(
-  (star) => star.value <= handlebars.REVIEW_RATING
+  (star) => star.id[star.id.length - 1] <= handlebars.REVIEW_RATING
 );
 
 filledStars.forEach((star) => {
@@ -106,7 +106,7 @@ addFriendForm.addEventListener("submit", (e) => {
     });
 });
 
-if (handlebars.IS_AUTHOR) {
+if (handlebars.IS_AUTHOR === true) {
   addReviewForm.addEventListener("submit", (e) => {
     e.preventDefault();
     deleteError();
