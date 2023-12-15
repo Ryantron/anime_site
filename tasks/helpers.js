@@ -1,15 +1,9 @@
 import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
 
+import { convertIdToStrArr, removeObjectIdFromUser } from "../src/helpers.js";
 import { users } from "../src/config/mongoCollections.js";
 const saltRounds = 16;
-
-/**
- *
- * @param {Array} objIdStr
- * @returns
- */
-const convertIdToStrArr = (objIdStr) => objIdStr.map((id) => id.toString());
 
 export async function getUserByEmail(emailAddress) {
   if (!emailAddress) throw new Error("Need to provide emailAddress");
@@ -17,14 +11,9 @@ export async function getUserByEmail(emailAddress) {
   const user = await usersCollection.findOne({ emailAddress });
   if (user === null)
     throw new Error(`User not found by email: ${emailAddress}`);
-  user._id = user._id.toString();
-  user.recommendations = user.recommendations.map((rec) => {
-    rec._id = rec._id.toString();
-    return rec;
-  });
-  user.pendingRequests = convertIdToStrArr(user.pendingRequests);
-  user.sendRequests = convertIdToStrArr(user.sendRequests);
-  user.friendList = convertIdToStrArr(user.friendList);
+
+  removeObjectIdFromUser(user);
+  console.log(user);
   return user;
 }
 
@@ -87,5 +76,6 @@ export async function insertUser({
   const usersCollection = await users();
   const user = await usersCollection.insertOne(res);
   if (!user) throw "Unable to add user to collection";
+  removeObjectIdFromUser(user);
   return user;
 }
