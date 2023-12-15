@@ -20,7 +20,7 @@ export const sendFriendRequest = async (yourUsername, targetUsername) => {
     if(!targetExists){throw new RangeError("The person you are trying to add does not exist. Double check their username for spelling errors")}
 
 
-    let pendingRequests = existingUser.pendingRequests
+    let pendingRequests = targetUser.pendingRequests
     if(!pendingRequests){pendingRequests = []}
     if(pendingRequests.includes(yourUsername)) {throw new RangeError ("You have already sent a friend request to this user")}
     pendingRequests.push(yourUsername)
@@ -304,7 +304,7 @@ export const removeFriend = async (yourUsername, targetUsername) =>{
 
     const updatedTheirList = await usersCollection.updateOne(
     { username: targetUsername },
-    { $set: updateYourFriends },
+    { $set: updateTheirFriends },
     { returnDocument: "after" }
     );
 
@@ -314,6 +314,42 @@ export const removeFriend = async (yourUsername, targetUsername) =>{
     throw "Could not update sentRequests successfully";
 
     return {friendRemoved: targetUsername, status: true}
-    
-    
+}
+
+export const checkFriendStatus = async (yourUsername, targetUsername) => {
+    yourUsername = validation.stringCheck(yourUsername)
+    targetUsername = validation.stringCheck(targetUsername)
+
+    yourUsername = yourUsername.toLowerCase();
+    targetUsername = targetUsername.toLowerCase();
+
+    const usersCollection = await users();
+    let existingUser = await usersCollection.findOne({
+        username: yourUsername
+      });
+    let targetUser = await usersCollection.findOne({
+        username: targetUsername
+    })
+
+    if(!existingUser){throw new DBError("Db Error: Could not find your username")}
+    if(!targetUser){throw new RangeError("The target person does not exist")}
+ 
+    const yourFriends = existingUser.friendList
+    const targetFriends = targetUser.friendList
+    yourFriends.forEach((friend) =>{
+        if(friend.username === targetUsername){
+            return {isFriended: true}
+        }
+    })
+    targetFriends.forEach((friend) =>{
+        if(friend.username === yourUsername){
+            return {isFriended: true}
+        }
+    })
+
+    if (targetUser.pendingRequests.includes(yourUsername)){
+        return {requestPending: true}
+    }
+
+    return {isFriended: false, requestPending: false}
 }
