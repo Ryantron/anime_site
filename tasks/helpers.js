@@ -1,7 +1,10 @@
 import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
 
-import { convertIdToStrArr, removeObjectIdFromUser } from "../src/helpers.js";
+import validation, {
+  convertIdToStrArr,
+  removeObjectIdFromUser,
+} from "../src/helpers.js";
 import { users } from "../src/config/mongoCollections.js";
 const saltRounds = 16;
 
@@ -13,7 +16,6 @@ export async function getUserByEmail(emailAddress) {
     throw new Error(`User not found by email: ${emailAddress}`);
 
   removeObjectIdFromUser(user);
-  console.log(user);
   return user;
 }
 
@@ -22,7 +24,8 @@ export async function addRecommendation({
   recommendation,
   ratings = 0,
 } = {}) {
-  if (!emailAddress || !recommendation)
+  emailAddress = validation.emailValidation(emailAddress);
+  if (!recommendation)
     throw new Error("Need to provide emailAddress and recommendation array");
   if (!Array.isArray(recommendation))
     throw new Error("Recommendation is not an array");
@@ -60,6 +63,9 @@ export async function insertUser({
   pendingRequests = [],
   friendList = [],
 } = {}) {
+  username = validation.stringCheck(username);
+  emailAddress = validation.emailValidation(emailAddress);
+  password = validation.passwordValidation(password);
   const res = {
     ...{
       username,
@@ -74,8 +80,14 @@ export async function insertUser({
     ...(malUsername ? { malUsername } : {}),
   };
   const usersCollection = await users();
-  const user = await usersCollection.insertOne(res);
-  if (!user) throw "Unable to add user to collection";
+  const result = await usersCollection.insertOne(res);
+  if (!result) throw "Unable to add user to collection";
+
+  const user = await usersCollection.findOne({ _id: result.insertedId });
+  result.user = user;
+
   removeObjectIdFromUser(user);
-  return user;
+  result._id = result.insertedId.toString();
+
+  return result;
 }
