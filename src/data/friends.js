@@ -338,18 +338,18 @@ export const isFriendOrPending = async (yourUsername, targetUsername) => {
     const targetFriends = targetUser.friendList
     yourFriends.forEach((friend) =>{
         if(friend.username === targetUsername){
-            return {isFriended: true}
+            return true
         }
     })
     targetFriends.forEach((friend) =>{
         if(friend.username === yourUsername){
-            return {isFriended: true}
+            return true
         }
     })
 
-    if (targetUser.pendingRequests.includes(yourUsername)){
-        return {requestPending: true}
+    if (targetUser.pendingRequests.includes(yourUsername) || existingUser.pendingRequests.includes(targetUsername)){
+        return true
     }
 
-    return {isFriended: false, requestPending: false}
+    return false
 }
