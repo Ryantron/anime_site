@@ -16,7 +16,6 @@ import {
   unlinkMalAccount,
 } from "../data/users.js";
 import {
-  isFriendAlready,
   getRecommendationListAndAuthor,
   likeRecAnimeList,
   getManualListUsers,
@@ -173,7 +172,6 @@ router.route("/recommendations/review/:recId").post(async (req, res) => {
       recId,
       rating
     );
-    console.log(result);
     return res.status(200).send("Ok");
   } catch (err) {
     console.log(err);
@@ -229,6 +227,7 @@ router
       validation.emailValidation(body.emailAddressInput);
       validation.passwordValidation(body.passwordInput);
     } catch (err) {
+      console.log(err);
       return res.redirect(
         `/errors?errorStatus=${errorToStatus(err)}&message=${err.message}`
       );
@@ -239,6 +238,7 @@ router
       req.session.user = user;
       return res.redirect("/accounts");
     } catch (err) {
+      console.log(err);
       return res.redirect(
         `/login?wasErrored=${true}&errorStatus=${errorToStatus(
           err

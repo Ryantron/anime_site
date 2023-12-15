@@ -25,7 +25,8 @@ export const sendFriendRequest = async (yourUsername, targetUsername) => {
     );
   }
 
-  let pendingRequests = existingUser.pendingRequests;
+  // target user
+  let pendingRequests = targetExists.pendingRequests;
   if (!pendingRequests) {
     pendingRequests = [];
   }
@@ -34,6 +35,7 @@ export const sendFriendRequest = async (yourUsername, targetUsername) => {
   }
   pendingRequests.push(yourUsername);
 
+  // current user
   let sentRequests = existingUser.sentRequests;
   if (!sentRequests) {
     sentRequests = [];

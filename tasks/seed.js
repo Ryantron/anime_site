@@ -1,4 +1,6 @@
-import { insertUser } from "./helpers.js";
+import { closeConnection } from "../src/config/mongoConnection.js";
+import { users } from "../src/config/mongoCollections.js";
+import { insertUser, addRecommendation } from "./helpers.js";
 
 // Delete collection
 
@@ -11,35 +13,31 @@ const testuser = await insertUser({
   username: "testuser",
   emailAddress: "test@test.com",
   password: "Test1234@",
-  pfpId: 1,
+  malUsername: "Jimmy2006",
+});
 
-  recommendations: [
+await addRecommendation({
+  emailAddress: "test@test.com",
+  ratings: 3,
+  recommendation: [
     {
-      rating: 3,
-      recommendationList: [
-        {
-          id: 25798,
-          title:
-            "That time I got reincarnated as a coach and had to go around the world to save fishes because they needed help from the humans who are incompetent",
-          frequency: 3,
-        },
-        {
-          id: 13452,
-          title: "Paul V",
-          frequency: 2,
-        },
-      ],
+      id: 25798,
+      title:
+        "That time I got reincarnated as a coach and had to go around the world to save fishes because they needed help from the humans who are incompetent",
+      frequency: 3,
+    },
+    {
+      id: 13452,
+      title: "Paul V",
+      frequency: 2,
     },
   ],
-  malUsername: "Jimmy2006",
 });
 
 const testuser2 = await insertUser({
   username: "testuser2",
   emailAddress: "test2@test.com",
   password: "Test1234@@",
-  pfpId: 1,
-  recommendations: [],
 });
 
 const testuser3 = await insertUser({
@@ -47,22 +45,21 @@ const testuser3 = await insertUser({
   emailAddress: "test3@test.com",
   password: "Test123@@",
   pfpId: 3,
-  recommendations: [
+});
+
+await addRecommendation({
+  emailAddress: "test3@test.com",
+  recommendation: [
     {
-      rating: 3,
-      recommendationList: [
-        {
-          id: 25798,
-          title:
-            "That time I got reincarnated as a coach and had to go around the world to save fishes because they needed help from the humans who are incompetent",
-          frequency: 3,
-        },
-        {
-          id: 13452,
-          title: "Paul V",
-          frequency: 2,
-        },
-      ],
+      id: 25798,
+      title:
+        "That time I got reincarnated as a coach and had to go around the world to save fishes because they needed help from the humans who are incompetent",
+      frequency: 3,
+    },
+    {
+      id: 13452,
+      title: "Paul V",
+      frequency: 2,
     },
   ],
 });

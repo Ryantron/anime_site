@@ -40,15 +40,19 @@ export function errorToStatus(error) {
   }
 }
 
+const convertIdToStrArr = (objIdStr) => objIdStr.map((id) => id.toString());
+
 export function createOptionalObject(name, value) {
   return value ? { [name]: value } : {};
 }
 
 export function removeObjectIdFromUser(user) {
   user._id = user._id.toString();
+  user.sendRequests = convertIdToStrArr(user.sendRequests);
+  user.pendingRequests = convertIdToStrArr(user.pendingRequests);
+  user.friendList = convertIdToStrArr(user.friendList);
   user.recommendations = user.recommendations.map((rec) => {
     rec._id = rec._id.toString();
-    rec.usersLiked = rec.usersLiked.map((objId) => objId.toString());
     return rec;
   });
 }
