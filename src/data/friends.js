@@ -358,9 +358,6 @@ export const removeFriend = async (yourUsername, targetUsername) => {
   return { friendRemoved: targetUsername, status: true };
 };
 
-<<<<<<< Updated upstream
-export const isFriendOrPending = async (currentUserId, authorUserId) => {
-=======
 export const isFriendOrPending = async (yourUsername, targetUsername) => {
   yourUsername = validation.stringCheck(yourUsername);
   targetUsername = validation.stringCheck(targetUsername);
@@ -404,6 +401,5 @@ export const isFriendOrPending = async (yourUsername, targetUsername) => {
     return true;
   }
 
->>>>>>> Stashed changes
   return false;
 };
