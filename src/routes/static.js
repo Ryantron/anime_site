@@ -7,6 +7,7 @@ import validation, {
   errorToStatus,
   IMAGE_PATHS,
 } from "../helpers.js";
+import { isFriendOrPending } from "../data/friends.js";
 import {
   changeUserInfo,
   registerUser,
@@ -15,14 +16,13 @@ import {
   unlinkMalAccount,
 } from "../data/users.js";
 import {
-  hasCurrentUserLikedAlready,
-  isFriendAlready,
   getRecommendationListAndAuthor,
   likeRecAnimeList,
   getManualListUsers,
   getUserRecs,
   getManualListRecs,
   getHistory,
+  rateRecommendations,
 } from "../data/recommendations.js";
 import { ObjectId } from "mongodb";
 
@@ -132,25 +132,27 @@ router.route("/recommendations/:recId").get(async (req, res) => {
   try {
     const recId = req.params.recId;
     const authorRec = await getRecommendationListAndAuthor(recId);
-    const alreadyFriended = req.session.user
-      ? await isFriendAlready(req.session.user._id, recId)
-      : true;
-    const alreadyLiked = req.session.user
-      ? await hasCurrentUserLikedAlready(req.session.user._id, recId)
+    const isStrangers = req.session.user
+      ? !(await isFriendOrPending(req.session.user._id, recId))
       : true;
     // If logged in, add new recommendation list to session
     if (req.session.user) {
       const newRecHistory = await getHistory(req.session.user.emailAddress);
       req.session.user.recommendations = newRecHistory;
     }
+    const isAuthor = req.session.user
+      ? req.session.user._id === authorRec.authorId
+      : false;
+
     return res.render("recommendationList", {
       title: "Recommendation List",
       image: authorRec.authorPfpPath,
+      isAuthor: isAuthor,
       authorName: authorRec.authorName,
       authorId: authorRec.authorId,
       recId: recId,
-      alreadyFriended: alreadyFriended,
-      alreadyLiked: alreadyLiked,
+      reviewRating: authorRec.reviewRating,
+      isStrangers: isStrangers,
       recommendations: authorRec.recList,
     });
   } catch (err) {
@@ -160,18 +162,28 @@ router.route("/recommendations/:recId").get(async (req, res) => {
   }
 });
 
-router.route("/recommendations/like/:recId").post(async (req, res) => {
-  // If user had not liked before: add user like
-  // Else: remove user like
+router.route("/recommendations/review/:recId").post(async (req, res) => {
   try {
-    const recId = req.params.recId;
-    if (!ObjectId.isValid(recId))
-      throw new TypeError("recId is not a valid ObjectId type");
-    await likeRecAnimeList(req.session.user?._id, recId);
-  } catch (err) {
-    return res.redirect(
-      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    if (!req.session.user)
+      throw new Error(
+        "Unexpected Error. Frontend should not be calling this route when user is not logged in."
+      );
+    const recId = validation.objectIdValidation(req.params.recId);
+    const rating = validation.integerCheck(Number(req.query.rating), {
+      min: 1,
+      max: 5,
+    });
+    const result = await rateRecommendations(
+      req.session.user.emailAddress,
+      recId,
+      rating
     );
+    return res.status(200).send("Ok");
+  } catch (err) {
+    console.log(err);
+    return res.status(errorToStatus(err)).send({
+      message: err.message ?? "Unknown Error",
+    });
   }
 });
 
@@ -221,6 +233,7 @@ router
       validation.emailValidation(body.emailAddressInput);
       validation.passwordValidation(body.passwordInput);
     } catch (err) {
+      console.log(err);
       return res.redirect(
         `/errors?errorStatus=${errorToStatus(err)}&message=${err.message}`
       );
@@ -231,6 +244,7 @@ router
       req.session.user = user;
       return res.redirect("/accounts");
     } catch (err) {
+      console.log(err);
       return res.redirect(
         `/login?wasErrored=${true}&errorStatus=${errorToStatus(
           err

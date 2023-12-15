@@ -9,7 +9,6 @@ import { ObjectId } from "mongodb";
  * ResourcesError (resources not found) -> 404
  */
 
-
 export class AuthError extends Error {
   constructor(msg) {
     super(msg);
@@ -45,11 +44,15 @@ export function createOptionalObject(name, value) {
   return value ? { [name]: value } : {};
 }
 
+const convertIdToStrArr = (objIdStr) => objIdStr.map((id) => id.toString());
+
 export function removeObjectIdFromUser(user) {
   user._id = user._id.toString();
+  user.sendRequests = convertIdToStrArr(user.sendRequests);
+  user.pendingRequests = convertIdToStrArr(user.pendingRequests);
+  user.friendList = convertIdToStrArr(user.friendList);
   user.recommendations = user.recommendations.map((rec) => {
     rec._id = rec._id.toString();
-    rec.usersLiked = rec.usersLiked.map((objId) => objId.toString());
     return rec;
   });
 }
@@ -163,6 +166,15 @@ const exportedMethods = {
       );
     }
     return password;
+  },
+
+  objectIdValidation(str) {
+    str = this.stringCheck(str);
+
+    if (!ObjectId.isValid(str))
+      throw new TypeError(`Id ${str} is not of type ObjectId.`);
+
+    return str;
   },
 };
 

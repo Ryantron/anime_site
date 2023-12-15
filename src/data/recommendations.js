@@ -322,43 +322,6 @@ export const rateRecommendations = async (
 
   return { updateRecRating };
 };
-export const hasCurrentUserLikedAlready = async (currentUserId, recListId) => {
-  // Validate emailAddress and recListId
-  currentUserId = validation.stringCheck(currentUserId);
-  recListId = validation.stringCheck(recListId);
-
-  if (!ObjectId.isValid(currentUserId))
-    throw new TypeError("currentUserId is not a valid ObjectId type");
-  if (!ObjectId.isValid(recListId))
-    throw new TypeError("recListId is not a valid ObjectId type");
-
-  const usersCollection = await users();
-  const user = await usersCollection.findOne({
-    "recommendations._id": new ObjectId(recListId),
-  });
-
-  if (user === null)
-    throw new ResourcesError(
-      `No user with recommendation id ${recListId} found.`
-    );
-
-  const recList = user.recommendations.find(
-    (rec) => rec._id.toString() === recListId
-  );
-  if (!recList) throw new Error("Interal Error, recList is null");
-
-  if (
-    recList.usersLiked.find(
-      (userObjId) => userObjId.toString() === currentUserId
-    )
-  ) {
-    return true;
-  } else return false;
-};
-
-export const isFriendAlready = async (currentUserId, authorUserId) => {
-  return false;
-};
 
 export const getRecommendationListAndAuthor = async (recListId) => {
   recListId = validation.stringCheck(recListId);
@@ -386,6 +349,7 @@ export const getRecommendationListAndAuthor = async (recListId) => {
     authorId: user._id.toString(),
     authorPfpPath: IMAGE_PATHS[user.pfpId],
     recList: recListSubDoc.recommendationList,
+    reviewRating: recListSubDoc.rating,
   };
 };
 
