@@ -13,27 +13,26 @@
         id="addFriendForm"
       >
         <label for="addFriendIconButton" class="hiddenLabel">Add Friend</label>
-        {{#if alreadyFriended}}
+        {{#if isStrangers}}
+          <button
+            type="submit"
+            title="addFriendIconButton"
+            id="addFriendIconButton"
+            class="fa-solid fa-user-group rounded-pill border-0 p-3"
+          >
+          </button>
+        {{else}}
           <button
             type="submit"
             title="addFriendIconButton"
             id="addFriendIconButton"
             class="fa-solid fa-user-group disable-pointer reduce-opacity rounded-pill border-0 p-3"
           ></button>
-        {{else}}
-          <button
-            type="submit"
-            title="addFriendIconButton"
-            id="addFriendIconButton"
-            class="fa-solid fa-user-group rounded-pill border-0 p-3"
-          ></button>
         {{/if}}
       </form>
     </div>
     <div class="flex-center flex-column">
       <p class="text-light-bold me-2" tabindex="0">{{authorName}}</p>
-      <p id="authorIdP" class="hidden">{{authorId}}</p>
-      <p id="recIdP" class="hidden">{{recId}}</p>
       <img
         src="{{image}}"
         alt="Profile Picture"
@@ -44,31 +43,102 @@
       />
     </div>
   </section>
-  <section>
-    <div class="flex-center">
-      <h2 class="text-center me-2" tabindex="0">Recommended</h2>
-      <form action="/recommendations/like/:recId" method="post" id="thumbsUpForm">
-        <label for="thumbsUpIconButton" class="hiddenLabel">Thumbs Up</label>
-        {{! FIXME: label above was addFriendInputs, later implementation? }}
-        {{#if alreadyLiked}}
+  <section class="flex-center flex-column">
+    <h2 class="text-center me-2" tabindex="0">Recommended</h2>
+
+    <div class="star-wrapper">
+      {{#if isAuthor}}
+        <form
+          action="/recommendations/review/:recId"
+          method="post"
+          id="addReviewForm"
+        >
+          <label for="star1" class="hiddenLabel">Star 1</label>
+          <label for="star2" class="hiddenLabel">Star 2</label>
+          <label for="star3" class="hiddenLabel">Star 3</label>
+          <label for="star4" class="hiddenLabel">Star 4</label>
+          <label for="star5" class="hiddenLabel">Star 5</label>
           <button
             type="submit"
-            title="thumbsUpIconButton"
-            id="thumbsUpIconButton"
-            class="fa-solid fa-thumbs-up disable-pointer reduce-opacity rounded-pill border-0 p-3"
+            title="1 Star Rating"
+            class="fa-regular fa-star text-gold background-transparent border-0"
+            value="1"
+            id="star1"
           ></button>
-        {{else}}
+
           <button
             type="submit"
-            title="thumbsUpIconButton"
-            id="thumbsUpIconButton"
-            class="fa-solid fa-thumbs-up rounded-pill border-0 p-3"
+            title="2 Star Rating"
+            class="fa-regular fa-star text-gold background-transparent border-0"
+            value="2"
+            id="star2"
           ></button>
-        {{/if}}
-      </form></div>
+          <button
+            type="submit"
+            title="3 Star Rating"
+            class="fa-regular fa-star text-gold background-transparent border-0"
+            value="3"
+            id="star3"
+          ></button>
+          <button
+            type="submit"
+            title="4 Star Rating"
+            class="fa-regular fa-star text-gold background-transparent border-0"
+            value="4"
+            id="star4"
+          ></button>
+          <button
+            type="submit"
+            title="5 Star Rating"
+            class="fa-regular fa-star text-gold background-transparent border-0"
+            value="5"
+            id="star5"
+          ></button>
+
+        </form>
+      {{else}}
+        <div class="star-container">
+          <span
+            title="1 Star Rating"
+            class="fa-regular fa-star text-gold"
+            id="star1"
+            value="1"
+          >
+          </span>
+          <span
+            title="2 Star Rating"
+            class="fa-regular fa-star text-gold"
+            id="star2"
+            value="2"
+          ></span>
+          <span
+            title="3 Star Rating"
+            class="fa-regular fa-star text-gold"
+            id="star3"
+            value="3"
+          ></span>
+          <span
+            title="4 Star Rating"
+            class="fa-regular fa-star text-gold"
+            id="star4"
+            value="4"
+          ></span>
+          <span
+            title="5 Star Rating"
+            class="fa-regular fa-star text-gold"
+            id="star5"
+            value="5"
+          ></span>
+        </div>
+      {{/if}}
+    </div>
+
     <ol>
       {{#each recommendations}}
-        <li><a tabindex="0" href="https://myanimelist.net/anime/{{this.id}}">{{this.title}}</a></li>
+        <li><a
+            tabindex="0"
+            href="https://myanimelist.net/anime/{{this.id}}"
+          >{{this.title}}</a></li>
         <!-- <li><p tabindex="0">{{this.title}}</p></li> -->
       {{/each}}
     </ol>
@@ -76,9 +146,12 @@
 </main>
 
 <script
-  defer
   src="https://code.jquery.com/jquery-2.2.4.min.js"
   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
   crossorigin="anonymous"
 ></script>
-<script defer src="/public/js/recList.js"></script>
+<script>
+  const handlebars = { IS_AUTHOR: '{{isAuthor}}', AUTHOR_ID: '{{authorId}}',
+  REC_ID: '{{recId}}', REVIEW_RATING: '{{reviewRating}}' }
+</script>
+<script src="/public/js/recList.js"></script>
