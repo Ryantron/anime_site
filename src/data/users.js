@@ -27,14 +27,20 @@ export const registerUser = async (username, emailAddress, password) => {
     username: username,
   });
   if (existingUsername !== null) {
-    throw new RangeError('username already taken, please provide a new username')}
-    
+    throw new RangeError(
+      "username already taken, please provide a new username"
+    );
+  }
+
   let newUser = {
     username: username,
     emailAddress: emailAddress,
     hashedPassword: hashedPassword,
     pfpId: 1,
     recommendations: [],
+    pendingRequests: [],
+    sentRequests: [],
+    friendList: [],
   };
 
   const insertedInfo = await usersCollection.insertOne(newUser);

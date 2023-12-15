@@ -1,6 +1,7 @@
 :root {
-  --primary-color: #0006d8;
-  --secondary-color: #d8d200;
+  --primary-color: #ce0900;
+  --secondary-color: #00c5ce;
+  --gold-color: #ffd700;
 }
 
 .flex-column {
@@ -131,4 +132,12 @@
 
 .hidden {
   display: none;
+}
+
+.background-transparent {
+  background-color: hsla(0, 0%, 0%, 0);
+}
+
+.text-gold {
+  color: var(--gold-color);
 }

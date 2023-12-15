@@ -7,6 +7,7 @@ import validation, {
   errorToStatus,
   IMAGE_PATHS,
 } from "../helpers.js";
+import { isFriendOrPending } from "../data/friends.js";
 import {
   changeUserInfo,
   registerUser,
@@ -15,13 +16,12 @@ import {
   unlinkMalAccount,
 } from "../data/users.js";
 import {
-  hasCurrentUserLikedAlready,
-  isFriendAlready,
   getRecommendationListAndAuthor,
   likeRecAnimeList,
   getManualListUsers,
   getUserRecs,
   getManualListRecs,
+  rateRecommendations,
 } from "../data/recommendations.js";
 import { ObjectId } from "mongodb";
 
@@ -82,19 +82,21 @@ router
       }
       if (finalAnimeArr.length === 0) throw new RangeError("Invalid Input"); //If every single one was invalid, then errors, else goes with all other valid inputs
       let count = 0;
-      for (let x of finalAnimeArr)
-      {
+      for (let x of finalAnimeArr) {
         if (isNaN(x)) throw new RangeError("Invalid Input");
         else finalAnimeArr[count] = parseInt(x);
         count++;
       }
       if (req.session.user) {
         //If section to add the manual list to the database is the user is logged in
-        let result = await getManualListUsers(req.session.user.emailAddress, finalAnimeArr);
+        let result = await getManualListUsers(
+          req.session.user.emailAddress,
+          finalAnimeArr
+        );
         return res.redirect("/recommendations/".concat(result.recId));
       } else {
         let result = await getManualListRecs(finalAnimeArr);
-        return res.render('manualList', {
+        return res.render("manualList", {
           title: "Recommendation List",
           Result: result, //This will be some form of the returned list/Object list instead in the final, for now it just returns the list the user put it (with valid values)
         });
@@ -129,20 +131,22 @@ router.route("/recommendations/:recId").get(async (req, res) => {
   try {
     const recId = req.params.recId;
     const authorRec = await getRecommendationListAndAuthor(recId);
-    const alreadyFriended = req.session.user
-      ? await isFriendAlready(req.session.user._id, recId)
+    const isStrangers = req.session.user
+      ? !(await isFriendOrPending(req.session.user._id, recId))
       : true;
-    const alreadyLiked = req.session.user
-      ? await hasCurrentUserLikedAlready(req.session.user._id, recId)
-      : true;
+    const isAuthor = req.session.user
+      ? req.session.user._id === authorRec.authorId
+      : false;
+
     return res.render("recommendationList", {
       title: "Recommendation List",
       image: authorRec.authorPfpPath,
+      isAuthor: isAuthor,
       authorName: authorRec.authorName,
       authorId: authorRec.authorId,
       recId: recId,
-      alreadyFriended: alreadyFriended,
-      alreadyLiked: alreadyLiked,
+      reviewRating: authorRec.reviewRating,
+      isStrangers: isStrangers,
       recommendations: authorRec.recList,
     });
   } catch (err) {
@@ -152,18 +156,28 @@ router.route("/recommendations/:recId").get(async (req, res) => {
   }
 });
 
-router.route("/recommendations/like/:recId").post(async (req, res) => {
-  // If user had not liked before: add user like
-  // Else: remove user like
+router.route("/recommendations/review/:recId").post(async (req, res) => {
   try {
-    const recId = req.params.recId;
-    if (!ObjectId.isValid(recId))
-      throw new TypeError("recId is not a valid ObjectId type");
-    await likeRecAnimeList(req.session.user?._id, recId);
-  } catch (err) {
-    return res.redirect(
-      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    if (!req.session.user)
+      throw new Error(
+        "Unexpected Error. Frontend should not be calling this route when user is not logged in."
+      );
+    const recId = validation.objectIdValidation(req.params.recId);
+    const rating = validation.integerCheck(Number(req.query.rating), {
+      min: 1,
+      max: 5,
+    });
+    const result = await rateRecommendations(
+      req.session.user.emailAddress,
+      recId,
+      rating
     );
+    return res.status(200).send("Ok");
+  } catch (err) {
+    console.log(err);
+    return res.status(errorToStatus(err)).send({
+      message: err.message ?? "Unknown Error",
+    });
   }
 });
 
@@ -213,6 +227,7 @@ router
       validation.emailValidation(body.emailAddressInput);
       validation.passwordValidation(body.passwordInput);
     } catch (err) {
+      console.log(err);
       return res.redirect(
         `/errors?errorStatus=${errorToStatus(err)}&message=${err.message}`
       );
@@ -223,6 +238,7 @@ router
       req.session.user = user;
       return res.redirect("/accounts");
     } catch (err) {
+      console.log(err);
       return res.redirect(
         `/login?wasErrored=${true}&errorStatus=${errorToStatus(
           err

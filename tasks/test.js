@@ -1,8 +1,8 @@
-import {
-  closeConnection,
-  dbConnection,
-} from "../src/config/mongoConnection.js";
-import { users } from "../src/config/mongoCollections.js";
+// 3rd Party Modules
+import supertest from "supertest";
+
+// Main App Module
+import { closeConnection } from "../src/config/mongoConnection.js";
 import { changeUserInfo, linkMalAccount } from "../src/data/users.js";
 import {
   getHistory,
@@ -12,19 +12,9 @@ import {
   getRecommendationListAndAuthor,
 } from "../src/data/recommendations.js";
 import { app, server } from "../src/app.js";
-import supertest from "supertest";
 
-async function getUserByEmail(emailAddress) {
-  const usersCollection = await users();
-  const user = await usersCollection.findOne({ emailAddress });
-  user._id = user._id.toString();
-  user.recommendations = user.recommendations.map((rec) => {
-    rec._id = rec._id.toString();
-    rec.usersLiked = rec.usersLiked.map((objId) => objId.toString());
-    return rec;
-  });
-  return user;
-}
+// Tasks Module
+import { getUserByEmail } from "./helpers.js";
 
 async function createTest(name, callback, should_print_res = false) {
   console.log("-----------------");
@@ -110,25 +100,6 @@ await createTest(
   },
   true
 );
-
-/**
- * hasCurrentUserLikedAlready Data Tests
- */
-
-await createTest("hasCurrentUserLikedAlready Data Test 1", async () => {
-  // testuser3 rec list has testuser1 in usersLiked
-  const currentUser = await getUserByEmail("test@test.com");
-  const authorUser = await getUserByEmail("test3@test.com");
-  const recId = authorUser.recommendations.find((rec) => {
-    return rec.usersLiked.includes(currentUser._id);
-  })._id;
-  const res = await hasCurrentUserLikedAlready(currentUser._id, recId);
-
-  if (!res)
-    throw new Error(
-      "Wrong value returned by hasCurrentUserLikedAlready Data Test 1"
-    );
-});
 
 /**
  * getRecommendationListAndAuthor Data Tests
