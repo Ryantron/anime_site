@@ -30,7 +30,9 @@
   </div>
 
   {{! Reset Account }}
-  <h3 class="my-2" tabindex="0">Edit Account Info:</h3>
+  <div class="flex-center flex-column">
+    <h3 class="my-2" tabindex="0">Edit Account Info:</h3>
+  </div>
   {{! Middleware changes this form to PATCH }}
   <form
     action="/accounts/reset"
@@ -110,7 +112,9 @@
 
   {{! Unlink MAL }}
   {{#if hasLinked}}
-    <h3 tabindex="0">Unlink Your MyAnimeList Account:</h3>
+    <div class="flex-center flex-column">
+      <h3 tabindex="0">Unlink Your MyAnimeList Account:</h3>
+    </div>
     <form
       action="/accounts/mal/unlink"
       method="post"
@@ -141,15 +145,19 @@
     </button>
   </div>
 
-  {{#each recommendations}}
-    {{! Increment is a helper defined in app.js }}
-    <p class="fw-bold hidden">Recommendation List {{increment @index}}</p>
-    <ul class="rec-list hidden">
-      {{#each this.recommendationList}}
-        <li>{{this.title}}</li>
-      {{/each}}
-    </ul>
-  {{/each}}
+  <div class="flex-center flex-column max-width-500">
+    {{#each recommendations}}
+      {{! Increment is a helper defined in app.js }}
+      <div class="col-md-8 pt-2">
+        <p class="fw-bold hidden">Recommendation List {{increment @index}}</p>
+        <ul class="rec-list hidden">
+          {{#each this.recommendationList}}
+            <li>{{this.title}}</li>
+          {{/each}}
+        </ul>
+      </div>
+    {{/each}}
+  </div>
 </main>
 
 <script defer src="/public/js/accounts.js"></script>
