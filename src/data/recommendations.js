@@ -382,6 +382,7 @@ export const getRecommendationListAndAuthor = async (recListId) => {
     authorName: user.username,
     authorId: user._id.toString(),
     authorPfpPath: IMAGE_PATHS[user.pfpId],
+    reviewRating: recListSubDoc.rating,
     recList: recListSubDoc.recommendations,
   };
 };

@@ -25,26 +25,9 @@ const deleteError = () => {
 };
 
 /**
- *
- * @param {string} idName
- */
-const shouldFillStar = (idName) => {
-  const starId = Number.parseInt(idName[idName.length - 1]);
-  if (Number.isNaN(starId))
-    throw new Error(
-      `Unexpected Error. Wrong ID type in star-wrapper's stars: idName ${idName}, starId ${starId}`,
-      idName,
-      starId
-    );
-  return starId <= handlebars.REVIEW_RATING;
-};
-
-/**
  * DOM ELEMENTS
  */
 
-const authorIdP = document.querySelector("#authorIdP");
-const recIdP = document.querySelector("#recIdP");
 const main = document.querySelector("main");
 const addFriendForm = document.querySelector("#addFriendForm");
 const addReviewForm = document.querySelector("#addReviewForm");
@@ -63,8 +46,8 @@ const star5 = document.querySelector("#star5");
  * RUNTIME Dynamic HTML & CSS
  */
 
-const filledStars = [star1, star2, star3, star4, star5].filter((star) =>
-  shouldFillStar(star.id)
+const filledStars = [star1, star2, star3, star4, star5].filter(
+  (star) => star.value <= handlebars.REVIEW_RATING
 );
 
 filledStars.forEach((star) => {
@@ -79,16 +62,16 @@ filledStars.forEach((star) => {
 addFriendForm.addEventListener("submit", (e) => {
   e.preventDefault();
   deleteError();
-  if (authorIdP.textContent === null) {
+  if (!handlebars.AUTHOR_ID) {
     console.error("Author not found... Invalid page...");
     return (window.location.href = "/main");
   }
   $.ajax({
     method: "POST",
-    url: `/recommendations/friend/${authorIdP.textContent}`,
+    url: `/recommendations/friend/${handlebars.AUTHOR_ID}`,
   })
     .then(() => {
-      return (window.location.href = `/recommendations/${recIdP.textContent}`);
+      return (window.location.href = `/recommendations/${handlebars.REC_ID}`);
     })
     .fail((xhr, _, err) => {
       const errEl = createErrorList([`Status ${xhr.status}: ${err}`]);
@@ -100,37 +83,22 @@ if (addReviewForm)
   addReviewForm.addEventListener("submit", (e) => {
     e.preventDefault();
     deleteError();
-    if (recIdP.textContent === null) {
+    if (!handlebars.REC_ID) {
       console.error("Recommendation ID not found... Invalid page...");
       return (window.location.href = "/main");
     }
 
-    const rating = e.target;
+    const rating = e.submitter.value;
 
-    // $.ajax({
-    //   method: "POST",
-    //   url: `/recommendations/review/${recIdP.textContent}?rating=${}`
-    // }).then(())
-
-    console.log(rating);
+    $.ajax({
+      method: "POST",
+      url: `/recommendations/review/${handlebars.REC_ID}?rating=${rating}`,
+    })
+      .then((res) => {
+        return (window.location.href = `/recommendations/${handlebars.REC_ID}`);
+      })
+      .fail((xhr, _, err) => {
+        const errEl = createErrorList([`Status ${xhr.status}: ${err}`]);
+        main.appendChild(errEl);
+      });
   });
-
-// thumbsUpForm.addEventListener("submit", (e) => {
-//   e.preventDefault();
-//   deleteError();
-//   if (recIdP.textContent === null) {
-//     console.error("Recommendation ID not found... Invalid page...");
-//     return (window.location.href = "/main");
-//   }
-//   $.ajax({
-//     method: "POST",
-//     url: `/recommendations/like/${recIdP.textContent}`,
-//   })
-//     .then(() => {
-//       return (window.location.href = `/recommendations/${recIdP.textContent}`);
-//     })
-//     .fail((xhr, _, err) => {
-//       const errEl = createErrorList([`Status ${xhr.status}: ${err}`]);
-//       main.appendChild(errEl);
-//     });
-// });

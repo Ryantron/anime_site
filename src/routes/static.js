@@ -133,17 +133,17 @@ router.route("/recommendations/:recId").get(async (req, res) => {
     const alreadyFriended = req.session.user
       ? await isFriendAlready(req.session.user._id, recId)
       : true;
-    // const alreadyLiked = req.session.user
-    //   ? await hasCurrentUserLikedAlready(req.session.user._id, recId)
-    //   : true;
+    const isAuthor = req.session.user
+      ? req.session.user._id === authorRec.authorId
+      : false;
     return res.render("recommendationList", {
       title: "Recommendation List",
       image: authorRec.authorPfpPath,
-      isAuthor: true,
+      isAuthor: isAuthor,
       authorName: authorRec.authorName,
       authorId: authorRec.authorId,
       recId: recId,
-      reviewRating: 3,
+      reviewRating: authorRec.reviewRating,
       alreadyFriended: alreadyFriended,
       recommendations: authorRec.recList,
     });
@@ -154,18 +154,35 @@ router.route("/recommendations/:recId").get(async (req, res) => {
   }
 });
 
-router.route("/recommendations/like/:recId").post(async (req, res) => {
-  // If user had not liked before: add user like
-  // Else: remove user like
+// DEPRECATED ROUTE
+// router.route("/recommendations/like/:recId").post(async (req, res) => {
+//   // If user had not liked before: add user like
+//   // Else: remove user like
+//   try {
+//     const recId = req.params.recId;
+//     if (!ObjectId.isValid(recId))
+//       throw new TypeError("recId is not a valid ObjectId type");
+//     await likeRecAnimeList(req.session.user?._id, recId);
+//   } catch (err) {
+//     return res.redirect(
+//       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+//     );
+//   }
+// });
+
+router.route("/recommendations/review/:recId").post(async (req, res) => {
   try {
-    const recId = req.params.recId;
-    if (!ObjectId.isValid(recId))
-      throw new TypeError("recId is not a valid ObjectId type");
-    await likeRecAnimeList(req.session.user?._id, recId);
+    if (!req.session.user)
+      throw new Error(
+        "Unexpected Error. Frontend should not be calling this route when user is not logged in."
+      );
+    console.log(req.params.recId);
+    console.log(req.query.rating);
+    return res.status(200).send("Ok");
   } catch (err) {
-    return res.redirect(
-      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
-    );
+    return res.status(errorToStatus(err)).send({
+      message: err.message ?? "Unknown Error",
+    });
   }
 });
 
