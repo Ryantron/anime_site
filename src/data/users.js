@@ -23,12 +23,24 @@ export const registerUser = async (username, emailAddress, password) => {
   if (existingUser !== null) {
     throw new RangeError("User with provided email already exists");
   }
+  let existingUsername = await usersCollection.findOne({
+    username: username,
+  });
+  if (existingUsername !== null) {
+    throw new RangeError(
+      "username already taken, please provide a new username"
+    );
+  }
+
   let newUser = {
     username: username,
     emailAddress: emailAddress,
     hashedPassword: hashedPassword,
     pfpId: 1,
     recommendations: [],
+    pendingRequests: [],
+    sentRequests: [],
+    friendList: [],
   };
 
   const insertedInfo = await usersCollection.insertOne(newUser);
