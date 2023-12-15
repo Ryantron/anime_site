@@ -24,6 +24,31 @@ const deleteError = () => {
   if (serverErrorEl) serverErrorEl.remove();
 };
 
+const addClassTo = (el, className) => {
+  el.classList.add(className);
+};
+
+const removeClassFrom = (el, className) => {
+  el.classList.remove(className);
+};
+
+const addClassToArr = (elArr, className) => {
+  elArr.forEach((el) => el.classList.add(className));
+};
+
+const removeClassFromArr = (elArr, className) => {
+  elArr.forEach((el) => el.classList.remove(className));
+};
+
+const fillStars = (stars, maxStarValue) => {
+  const filledStars = stars.filter((star) => star.value <= maxStarValue);
+  const unfilledStars = stars.filter((star) => star.value > maxStarValue);
+  removeClassFromArr(stars, "fa-regular");
+  removeClassFromArr(stars, "fa-solid");
+  addClassToArr(filledStars, "fa-solid");
+  addClassToArr(unfilledStars, "fa-regular");
+};
+
 /**
  * DOM ELEMENTS
  */
@@ -38,6 +63,8 @@ const star3 = document.querySelector("#star3");
 const star4 = document.querySelector("#star4");
 const star5 = document.querySelector("#star5");
 
+const stars = [star1, star2, star3, star4, star5];
+
 /**
  * CONSTANTS
  */
@@ -46,7 +73,7 @@ const star5 = document.querySelector("#star5");
  * RUNTIME Dynamic HTML & CSS
  */
 
-const filledStars = [star1, star2, star3, star4, star5].filter(
+const filledStars = stars.filter(
   (star) => star.value <= handlebars.REVIEW_RATING
 );
 
@@ -79,7 +106,7 @@ addFriendForm.addEventListener("submit", (e) => {
     });
 });
 
-if (addReviewForm)
+if (handlebars.IS_AUTHOR) {
   addReviewForm.addEventListener("submit", (e) => {
     e.preventDefault();
     deleteError();
@@ -102,3 +129,14 @@ if (addReviewForm)
         main.appendChild(errEl);
       });
   });
+
+  addReviewForm.addEventListener("mouseover", (e) => {
+    if (e.target.tagName != "BUTTON") return;
+    const btn = e.target;
+    fillStars(stars, btn.value);
+  });
+
+  addReviewForm.addEventListener("mouseout", (e) => {
+    fillStars(stars, handlebars.REVIEW_RATING);
+  });
+}
