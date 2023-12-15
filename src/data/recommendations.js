@@ -51,8 +51,12 @@ const getAnimeRecs = async (animeId) => {
 
 // Helper function for getUserRecs
 const getTopFiveRecs = async (recs, showsSeen, emailAddress) => {
-  const usersCollection = await users();
-  const user = await usersCollection.findOne({ emailAddress: emailAddress });
+  let usersCollection = undefined;
+  let user = undefined;
+  if (emailAddress) {
+    usersCollection = await users();
+    user = await usersCollection.findOne({ emailAddress: emailAddress });
+  }
   if (user) {
     const userRecs = user.recommendations;
     if (userRecs) {
