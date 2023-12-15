@@ -5,7 +5,8 @@ import validation, { DBError } from "../helpers.js";
 export const sendFriendRequest = async (yourUsername, targetUsername) => {
   yourUsername = validation.stringCheck(yourUsername);
   targetUsername = validation.stringCheck(targetUsername);
-
+  //Check if user is awating a request by their target, if they are then accept that request instead.
+  if (await isFriendOrPending(targetUsername, yourUsername)) return await acceptFriendRequest(yourUsername, targetUsername);
   yourUsername = yourUsername.toLowerCase();
   targetUsername = targetUsername.toLowerCase();
 

@@ -89,13 +89,13 @@ filledStars.forEach((star) => {
 addFriendForm.addEventListener("submit", (e) => {
   e.preventDefault();
   deleteError();
-  if (!handlebars.AUTHOR_ID) {
+  if (!handlebars.AUTHOR_NAME) {
     console.error("Author not found... Invalid page...");
     return (window.location.href = "/main");
   }
   $.ajax({
     method: "POST",
-    url: `/recommendations/friend/${handlebars.AUTHOR_ID}`,
+    url: `/accounts/friend/${handlebars.AUTHOR_NAME}`,
   })
     .then(() => {
       return (window.location.href = `/recommendations/${handlebars.REC_ID}`);

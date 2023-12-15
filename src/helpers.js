@@ -48,7 +48,7 @@ const convertIdToStrArr = (objIdStr) => objIdStr.map((id) => id.toString());
 
 export function removeObjectIdFromUser(user) {
   user._id = user._id.toString();
-  user.sendRequests = convertIdToStrArr(user.sendRequests);
+  user.sentRequests = convertIdToStrArr(user.sentRequests);
   user.pendingRequests = convertIdToStrArr(user.pendingRequests);
   user.friendList = convertIdToStrArr(user.friendList);
   user.recommendations = user.recommendations.map((rec) => {
