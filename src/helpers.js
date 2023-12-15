@@ -9,7 +9,6 @@ import { ObjectId } from "mongodb";
  * ResourcesError (resources not found) -> 404
  */
 
-
 export class AuthError extends Error {
   constructor(msg) {
     super(msg);
@@ -163,6 +162,15 @@ const exportedMethods = {
       );
     }
     return password;
+  },
+
+  objectIdValidation(str) {
+    str = this.stringCheck(str);
+
+    if (!ObjectId.isValid(str))
+      throw new TypeError(`Id ${str} is not of type ObjectId.`);
+
+    return str;
   },
 };
 

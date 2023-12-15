@@ -21,6 +21,7 @@ import {
   getManualListUsers,
   getUserRecs,
   getManualListRecs,
+  rateRecommendations,
 } from "../data/recommendations.js";
 import { ObjectId } from "mongodb";
 
@@ -136,6 +137,9 @@ router.route("/recommendations/:recId").get(async (req, res) => {
     const isAuthor = req.session.user
       ? req.session.user._id === authorRec.authorId
       : false;
+
+    console.log(req.session.user);
+    console.log(isAuthor);
     return res.render("recommendationList", {
       title: "Recommendation List",
       image: authorRec.authorPfpPath,
@@ -154,32 +158,26 @@ router.route("/recommendations/:recId").get(async (req, res) => {
   }
 });
 
-// DEPRECATED ROUTE
-// router.route("/recommendations/like/:recId").post(async (req, res) => {
-//   // If user had not liked before: add user like
-//   // Else: remove user like
-//   try {
-//     const recId = req.params.recId;
-//     if (!ObjectId.isValid(recId))
-//       throw new TypeError("recId is not a valid ObjectId type");
-//     await likeRecAnimeList(req.session.user?._id, recId);
-//   } catch (err) {
-//     return res.redirect(
-//       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
-//     );
-//   }
-// });
-
 router.route("/recommendations/review/:recId").post(async (req, res) => {
   try {
     if (!req.session.user)
       throw new Error(
         "Unexpected Error. Frontend should not be calling this route when user is not logged in."
       );
-    console.log(req.params.recId);
-    console.log(req.query.rating);
+    const recId = validation.objectIdValidation(req.params.recId);
+    const rating = validation.integerCheck(Number(req.query.rating), {
+      min: 1,
+      max: 5,
+    });
+    const result = await rateRecommendations(
+      req.session.user.emailAddress,
+      recId,
+      rating
+    );
+    console.log(result);
     return res.status(200).send("Ok");
   } catch (err) {
+    console.log(err);
     return res.status(errorToStatus(err)).send({
       message: err.message ?? "Unknown Error",
     });
