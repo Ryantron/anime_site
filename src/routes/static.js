@@ -7,7 +7,13 @@ import validation, {
   errorToStatus,
   IMAGE_PATHS,
 } from "../helpers.js";
-import { isFriendOrPending } from "../data/friends.js";
+import {
+  acceptFriendRequest,
+  isFriendOrPending,
+  rejectFriendRequest,
+  removeFriend,
+  sendFriendRequest,
+} from "../data/friends.js";
 import {
   changeUserInfo,
   registerUser,
@@ -47,7 +53,9 @@ router
         return res.render("main", {
           title: "Main",
           linkedRoute: "/main/recommendations",
-          linkMessage: "Search using your MyAnimeList recommendations",
+          linkMessage: "Search using your MyAnimeList recommendations!",
+          MalLinked: true,
+          AccountLoggedIn: true,
         });
       } else {
         //Route ran if logged in and not linked
@@ -56,6 +64,8 @@ router
           linkedRoute: "/accounts",
           linkMessage:
             "Link your MyAnimeList account to use MAL Functionality!",
+          MalLinked: false,
+          AccountLoggedIn: true,
         });
       }
     } else {
@@ -64,6 +74,8 @@ router
         title: "Main",
         linkedRoute: "/login",
         linkMessage: "Login to use MyAnimeList Functionality!",
+        MalLinked: false,
+        AccountLoggedIn: false,
       });
     }
   })
@@ -110,7 +122,7 @@ router
     }
   });
 
-router.route("/main/recommendations").get(async (req, res) => {
+router.route("/main/recommendations").post(async (req, res) => {
   try {
     if (req.session.user) {
       //Checks for if the user is logged in, if they somehow get here without being so.
@@ -133,7 +145,10 @@ router.route("/recommendations/:recId").get(async (req, res) => {
     const recId = req.params.recId;
     const authorRec = await getRecommendationListAndAuthor(recId);
     const isStrangers = req.session.user
-      ? !(await isFriendOrPending(req.session.user._id, recId))
+      ? !(await isFriendOrPending(
+          req.session.user.username,
+          authorRec.authorName
+        ))
       : true;
     // If logged in, add new recommendation list to session
     if (req.session.user) {
@@ -143,7 +158,12 @@ router.route("/recommendations/:recId").get(async (req, res) => {
     const isAuthor = req.session.user
       ? req.session.user._id === authorRec.authorId
       : false;
-
+    let showFriendB = false;
+    if (req.session.user) {
+      if (!isAuthor && isStrangers) {
+        showFriendB = true;
+      }
+    }
     return res.render("recommendationList", {
       title: "Recommendation List",
       image: authorRec.authorPfpPath,
@@ -154,6 +174,7 @@ router.route("/recommendations/:recId").get(async (req, res) => {
       reviewRating: authorRec.reviewRating,
       isStrangers: isStrangers,
       recommendations: authorRec.recList,
+      showFriendButton: showFriendB,
     });
   } catch (err) {
     return res.redirect(
@@ -187,15 +208,59 @@ router.route("/recommendations/review/:recId").post(async (req, res) => {
   }
 });
 
-router.route("/recommendations/friend/:authorId").post(async (req, res) => {
-  // Boilerplate
+router.route("/accounts/friend/:username").post(async (req, res) => {
   try {
-    const authorId = req.params.authorId;
-    if (!ObjectId.isValid(authorId))
-      throw new TypeError("authorId is not a valid ObjectId type");
-    if (authorId == req.session.user?._id)
+    let userName = validation.stringCheck(req.params.username);
+    if (userName == req.session.user?.username)
       throw new RangeError("You can't friend yourself.");
-    //FIXME: something to finish, data function here
+    let ownUserName = validation.stringCheck(req.session.user.username);
+    await sendFriendRequest(ownUserName, userName);
+    return res.status(200).send({ message: "Ok" });
+  } catch (err) {
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
+  }
+});
+
+router.route("/accounts/friend/reject/:username").post(async (req, res) => {
+  try {
+    let userName = validation.stringCheck(req.params.username);
+    if (userName == req.session.user?.username)
+      throw new RangeError("You can't have a friend request from yourself.");
+    let ownUserName = validation.stringCheck(req.session.user.username);
+    await rejectFriendRequest(ownUserName, userName);
+    return res.status(200).send({ message: "Ok" });
+  } catch (err) {
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
+  }
+});
+
+router.route("/accounts/friend/accept/:username").post(async (req, res) => {
+  try {
+    let userName = validation.stringCheck(req.params.username);
+    if (userName == req.session.user?.username)
+      throw new RangeError("You can't have a friend request from yourself.");
+    let ownUserName = validation.stringCheck(req.session.user.username);
+    await acceptFriendRequest(ownUserName, userName);
+    return res.status(200).send({ message: "Ok" });
+  } catch (err) {
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
+  }
+});
+
+router.route("/accounts/friend/unfriend/:username").post(async (req, res) => {
+  try {
+    let userName = validation.stringCheck(req.params.username);
+    if (userName == req.session.user?.username)
+      throw new RangeError("You can't be friends with yourself.");
+    let ownUserName = validation.stringCheck(req.session.user.username);
+    await removeFriend(ownUserName, userName);
+    return res.status(200).send({ message: "Ok" });
   } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`

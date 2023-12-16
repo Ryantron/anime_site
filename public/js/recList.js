@@ -85,28 +85,30 @@ filledStars.forEach((star) => {
 /**
  * EVENT LISTENERS
  */
-
-addFriendForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-  deleteError();
-  if (!handlebars.AUTHOR_ID) {
-    console.error("Author not found... Invalid page...");
-    return (window.location.href = "/main");
-  }
-  $.ajax({
-    method: "POST",
-    url: `/recommendations/friend/${handlebars.AUTHOR_ID}`,
-  })
-    .then(() => {
-      return (window.location.href = `/recommendations/${handlebars.REC_ID}`);
+if (document.getElementById("addFriendForm")){
+  console.log("friend form handler being added")
+  addFriendForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    deleteError();
+    if (!handlebars.AUTHOR_NAME) {
+      console.error("Author not found... Invalid page...");
+      return (window.location.href = "/main");
+    }
+    $.ajax({
+      method: "POST",
+      url: `/accounts/friend/${handlebars.AUTHOR_NAME}`,
     })
-    .fail((xhr, _, err) => {
-      const errEl = createErrorList([`Status ${xhr.status}: ${err}`]);
-      main.appendChild(errEl);
-    });
-});
-
-if (handlebars.IS_AUTHOR === true) {
+      .then(() => {
+        return (window.location.href = `/recommendations/${handlebars.REC_ID}`);
+      })
+      .fail((xhr, _, err) => {
+        const errEl = createErrorList([`Status ${xhr.status}: ${err}`]);
+        main.appendChild(errEl);
+      });
+  });
+}
+if (document.getElementById("addReviewForm")) {
+  console.log("review form handler being added")
   addReviewForm.addEventListener("submit", (e) => {
     e.preventDefault();
     deleteError();
