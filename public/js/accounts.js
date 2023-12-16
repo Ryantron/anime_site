@@ -114,18 +114,11 @@ const emailAddressInput = document.querySelector("#emailAddressInput");
 const passwordInput = document.querySelector("#passwordInput");
 const pfpInput = document.querySelector("#pfpInput");
 const malUsernameInput = document.querySelector("#malUsernameInput");
-const recList = document.querySelectorAll(".rec-list");
-const listHeader = document.querySelectorAll(".fw-bold");
+const recHistory = document.querySelector("#recHistory");
 
 // Toggle button event listeners
 toggleRecHistory.addEventListener("click", (e) => {
-  recList.forEach((element) => {
-    element.classList.toggle("hidden");
-  });
-
-  listHeader.forEach((element) => {
-    element.classList.toggle("hidden");
-  });
+  recHistory.classList.toggle("hidden");
 });
 
 // Form event listeners

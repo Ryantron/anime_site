@@ -16,15 +16,17 @@
 
   <ul class="list-group my-3">
     {{! Plaintext password not available }}
-    <li class="list-group-item">Username: {{username}}</li>
-    <li class="list-group-item">Email Address: {{emailAddress}}</li>
+    <li class="list-group-item" tabindex="0">Username: {{username}}</li>
+    <li class="list-group-item" tabindex="0">Email Address:
+      {{emailAddress}}</li>
     {{! MAL display as linked with username or unlinked }}
-    <li class="list-group-item">MyAnimeList Username: {{malUsername}}</li>
+    <li class="list-group-item" tabindex="0">MyAnimeList Username:
+      {{malUsername}}</li>
   </ul>
 
   <div class="flex-center my-4">
     <a
-      href="/friends"
+      href="/accounts/friends"
       class="primary-bg-color primary-text-color rounded-pill no-underline px-5 py-2 border-0"
     >View Your Friend List</a>
   </div>
@@ -136,6 +138,8 @@
 
   {{! History of recommendation lists sorted by generated date (reverse inserted order) }}
   <div class="flex-center flex-column">
+    <label for="toggleRecHistory" class="hiddenLabel">Toggle Recommendation
+      History</label>
     <button
       name="toggleRecHistory"
       id="toggleRecHistory"
@@ -145,18 +149,19 @@
     </button>
   </div>
 
-  <div class="flex-center flex-column max-width-500">
+  <div id="recHistory" class="flex-center flex-column max-width-history hidden">
     {{#unless recommendations}}
-      <p class="fw-bold text-center hidden">No Recommendations Yet</p>
+      <p class="fw-bold text-center" tabindex="0">No Recommendations Yet</p>
     {{/unless}}
 
     {{#each recommendations}}
       {{! Increment is a helper defined in app.js }}
-      <div class="col-md-8 pt-2">
-        <p class="fw-bold hidden">Recommendation List {{increment @index}}</p>
-        <ul class="rec-list hidden">
-          {{#each this.recommendationList}}
-            <li>{{this.title}}</li>
+      <div class="pt-2">
+        <p class="fw-bold text-center" tabindex="0">Recommendation List
+          {{increment @index}}</p>
+        <ul>
+          {{#each this.recommendation}}
+            <li tabindex="0">{{this.title}}</li>
           {{/each}}
         </ul>
       </div>

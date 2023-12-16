@@ -161,3 +161,11 @@ a.regular:visited {
 a.regular:hover {
   color: red;
 }
+
+.max-width-history {
+  max-width: 400px;
+}
+
+.radio-btn {
+  color: black;
+}
