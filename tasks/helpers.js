@@ -62,6 +62,7 @@ export async function insertUser({
   sendRequests = [],
   pendingRequests = [],
   friendList = [],
+  friendCount = 0,
 } = {}) {
   username = validation.stringCheck(username);
   emailAddress = validation.emailValidation(emailAddress);
@@ -75,6 +76,7 @@ export async function insertUser({
       sendRequests,
       pendingRequests,
       friendList,
+      friendCount,
       recommendations: [],
     },
     ...(malUsername ? { malUsername } : {}),

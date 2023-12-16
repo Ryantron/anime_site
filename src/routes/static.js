@@ -388,20 +388,16 @@ router.route("/accounts/reset").patch(async (req, res) => {
   }
 });
 
-// TODO: handlebars for friends (maybe 1 page with 2 tabs)
-// FIXME: getFriendInfo that returns {friendList, friendCount, pendingRequests, sentRequests}
-router.route("/friends").get(async (req, res) => {
+// The DB + cookie should have {friendList, friendCount, pendingRequests, sentRequests}
+// TODO: other accounts/friends routes modify the session to update the 4 things above?
+router.route("/accounts/friends").get(async (req, res) => {
   return res.render("friends", {
-    title: "Friends",
-    friendList: [],
-    friendCount: 2,
+    title: "Your Friends",
+    friendList: req.session.user.friendList,
+    friendCount: req.session.user.friendCount,
+    pendingRequests: req.session.user.pendingRequests,
+    sentRequests: req.session.user.sentRequests,
   });
 });
-
-// router.route("/friends/pending").get(async (req, res) => {
-//   return res.render("friends", {
-//     title: "Friends",
-//   });
-// });
 
 export default router;
