@@ -305,7 +305,7 @@ router.route("/accounts").get(async (req, res) => {
     title: "Your Account",
     username: username,
     emailAddress: emailAddress,
-    malUsername: malUsername ?? "N/A",
+    malUsername: malUsername || "N/A",
     recommendations: recommendations,
     hasLinked: malUsername !== undefined,
     image: IMAGE_PATHS[pfpId],
@@ -393,10 +393,14 @@ router.route("/accounts/reset").patch(async (req, res) => {
 router.route("/accounts/friends").get(async (req, res) => {
   return res.render("friends", {
     title: "Your Friends",
-    friendList: req.session.user.friendList,
     friendCount: req.session.user.friendCount,
-    pendingRequests: req.session.user.pendingRequests,
-    sentRequests: req.session.user.sentRequests,
+    // FIXME: TESTING
+    // friendList: req.session.user.friendList,
+    // pendingRequests: req.session.user.pendingRequests,
+    // sentRequests: req.session.user.sentRequests,
+    friendList: ["Elon Musk", "Keanu Reeves"],
+    pendingRequests: ["testuser2", "testuser3"],
+    sentRequests: ["testuser2", "testuser3"],
   });
 });
 

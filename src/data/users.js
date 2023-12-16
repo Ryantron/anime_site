@@ -41,6 +41,8 @@ export const registerUser = async (username, emailAddress, password) => {
     pendingRequests: [],
     sentRequests: [],
     friendList: [],
+    friendCount: 0,
+    malUsername: "",
   };
 
   const insertedInfo = await usersCollection.insertOne(newUser);
