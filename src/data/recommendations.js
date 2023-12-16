@@ -212,9 +212,8 @@ export const getManualListUsers = async (emailAddress, idArray) => {
 
   const insertRec = {
     _id: new ObjectId(),
-    usersLiked: [],
     rating: 0,
-    recommendations: animeRecommendations,
+    recommendation: animeRecommendations,
   };
   let recId = insertRec._id.toString();
   recommendationArray.push(insertRec);
@@ -233,7 +232,7 @@ export const getManualListUsers = async (emailAddress, idArray) => {
 
   return {
     emailAddress: emailAddress,
-    recommendations: insertRec,
+    recommendation: insertRec,
     recId: recId,
     inserted: true,
   };
@@ -352,8 +351,6 @@ export const getRecommendationListAndAuthor = async (recListId) => {
   };
 };
 
-// Add user's _id to usersLiked for corresponding recListId (if not in usersLiked)
-// REMOVES unlike if the user already liked
 export const likeRecAnimeList = async (currentUserId, recListId) => {
   if (!ObjectId.isValid(currentUserId))
     throw new TypeError("currentUserId is not a valid ObjectId type");

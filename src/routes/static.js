@@ -7,7 +7,9 @@ import validation, {
   errorToStatus,
   IMAGE_PATHS,
 } from "../helpers.js";
-import { acceptFriendRequest, isFriendOrPending,
+import {
+  acceptFriendRequest,
+  isFriendOrPending,
   rejectFriendRequest,
   removeFriend,
   sendFriendRequest,
@@ -142,16 +144,17 @@ router.route("/recommendations/:recId").get(async (req, res) => {
     const recId = req.params.recId;
     const authorRec = await getRecommendationListAndAuthor(recId);
     const isStrangers = req.session.user
-      ? !(await isFriendOrPending(req.session.user.username, authorRec.authorName))
+      ? !(await isFriendOrPending(
+          req.session.user.username,
+          authorRec.authorName
+        ))
       : true;
     const isAuthor = req.session.user
       ? req.session.user._id === authorRec.authorId
       : false;
     let showFriendB = false;
-    if (req.session.user)
-    {
-      if (!isAuthor && isStrangers)
-      {
+    if (req.session.user) {
+      if (!isAuthor && isStrangers) {
         showFriendB = true;
       }
     }
@@ -206,8 +209,8 @@ router.route("/accounts/friend/:username").post(async (req, res) => {
       throw new RangeError("You can't friend yourself.");
     let ownUserName = validation.stringCheck(req.session.user.username);
     await sendFriendRequest(ownUserName, userName);
-    return res.status(200).send({message: 'Ok'})
-  } catch (err) { 
+    return res.status(200).send({ message: "Ok" });
+  } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
     );
@@ -221,8 +224,8 @@ router.route("/accounts/friend/reject/:username").post(async (req, res) => {
       throw new RangeError("You can't have a friend request from yourself.");
     let ownUserName = validation.stringCheck(req.session.user.username);
     await rejectFriendRequest(ownUserName, userName);
-    return res.status(200).send({message: 'Ok'})
-  } catch (err) { 
+    return res.status(200).send({ message: "Ok" });
+  } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
     );
@@ -236,8 +239,8 @@ router.route("/accounts/friend/accept/:username").post(async (req, res) => {
       throw new RangeError("You can't have a friend request from yourself.");
     let ownUserName = validation.stringCheck(req.session.user.username);
     await acceptFriendRequest(ownUserName, userName);
-    return res.status(200).send({message: 'Ok'})
-  } catch (err) { 
+    return res.status(200).send({ message: "Ok" });
+  } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
     );
@@ -251,8 +254,8 @@ router.route("/accounts/friend/unfriend/:username").post(async (req, res) => {
       throw new RangeError("You can't be friends with yourself.");
     let ownUserName = validation.stringCheck(req.session.user.username);
     await removeFriend(ownUserName, userName);
-    return res.status(200).send({message: 'Ok'})
-  } catch (err) { 
+    return res.status(200).send({ message: "Ok" });
+  } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
     );
