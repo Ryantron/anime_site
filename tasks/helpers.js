@@ -59,7 +59,7 @@ export async function insertUser({
   password,
   malUsername,
   pfpId = 1,
-  sendRequests = [],
+  sentRequests = [],
   pendingRequests = [],
   friendList = [],
   friendCount = 0,
@@ -73,13 +73,13 @@ export async function insertUser({
       emailAddress,
       hashedPassword: await bcrypt.hash(password, saltRounds),
       pfpId,
-      sendRequests,
+      sentRequests,
       pendingRequests,
       friendList,
       friendCount,
       recommendations: [],
+      malUsername: malUsername || "",
     },
-    ...(malUsername ? { malUsername } : {}),
   };
   const usersCollection = await users();
   const result = await usersCollection.insertOne(res);
