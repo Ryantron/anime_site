@@ -6,7 +6,8 @@ export const sendFriendRequest = async (yourUsername, targetUsername) => {
   yourUsername = validation.stringCheck(yourUsername);
   targetUsername = validation.stringCheck(targetUsername);
   //Check if user is awating a request by their target, if they are then accept that request instead.
-  if (await isFriendOrPending(targetUsername, yourUsername)) return await acceptFriendRequest(yourUsername, targetUsername);
+  if (await isFriendOrPending(targetUsername, yourUsername))
+    return await acceptFriendRequest(yourUsername, targetUsername);
   yourUsername = yourUsername.toLowerCase();
   targetUsername = targetUsername.toLowerCase();
 
@@ -96,7 +97,7 @@ export const acceptFriendRequest = async (yourUsername, requestUsername) => {
     throw new DBError("Db Error: Could not find your username");
   }
   if (!requestExists) {
-    throw new RangeError("The person you are trying to add does not exist");
+    throw new ResourcesError("The person you are trying to add does not exist");
   }
 
   let pendingRequests = existingUser.pendingRequests;
@@ -395,7 +396,7 @@ export const isFriendOrPending = async (yourUsername, targetUsername) => {
   }
 
   if (
-    targetUser.pendingRequests.includes(yourUsername)     //Turned back to one sided for other implementation.
+    targetUser.pendingRequests.includes(yourUsername) //Turned back to one sided for other implementation.
   ) {
     return true;
   }
