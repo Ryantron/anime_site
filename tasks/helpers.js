@@ -22,20 +22,20 @@ export async function getUserByEmail(emailAddress) {
 export async function addRecommendation({
   emailAddress,
   recommendation,
-  ratings = 0,
+  rating = 0,
 } = {}) {
   emailAddress = validation.emailValidation(emailAddress);
   if (!recommendation)
     throw new Error("Need to provide emailAddress and recommendation array");
   if (!Array.isArray(recommendation))
     throw new Error("Recommendation is not an array");
-  if (!(ratings >= 0 && ratings <= 5))
+  if (!(rating >= 0 && rating <= 5))
     throw new Error("Ratings is not between 0 to 5");
 
   const user = await getUserByEmail(emailAddress);
   const recObj = {
     _id: new ObjectId(),
-    ratings,
+    rating,
     recommendation,
   };
 

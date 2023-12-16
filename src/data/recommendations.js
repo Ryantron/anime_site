@@ -61,7 +61,7 @@ const getTopFiveRecs = async (recs, showsSeen, emailAddress) => {
     const userRecs = user.recommendations;
     if (userRecs) {
       for (const entry in userRecs) {
-        const entryData = userRecs[entry].recommendationList;
+        const entryData = userRecs[entry].recommendation;
         for (const anime in entryData) {
           showsSeen.push(entryData[anime].id);
         }
@@ -145,14 +145,13 @@ export const getUserRecs = async (emailAddress) => {
 
   const insertRec = {
     _id: new ObjectId(),
-    usersLiked: [],
     rating: 0,
-    recommendationList: animeRecommendations,
+    recommendation: animeRecommendations,
   };
   let recId = insertRec._id.toString();
   recommendationArray.push(insertRec);
   const updatedRecommendations = {
-    recommendations: recommendationArray,
+    recommendation: recommendationArray,
   };
 
   const updatedInfo = await usersCollection.updateOne(
@@ -213,9 +212,8 @@ export const getManualListUsers = async (emailAddress, idArray) => {
 
   const insertRec = {
     _id: new ObjectId(),
-    usersLiked: [],
     rating: 0,
-    recommendationList: animeRecommendations,
+    recommendation: animeRecommendations,
   };
   let recId = insertRec._id.toString();
   recommendationArray.push(insertRec);
@@ -348,7 +346,7 @@ export const getRecommendationListAndAuthor = async (recListId) => {
     authorName: user.username,
     authorId: user._id.toString(),
     authorPfpPath: IMAGE_PATHS[user.pfpId],
-    recList: recListSubDoc.recommendationList,
+    recList: recListSubDoc.recommendation,
     reviewRating: recListSubDoc.rating,
   };
 };

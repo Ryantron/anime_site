@@ -45,7 +45,7 @@ export function createOptionalObject(name, value) {
 }
 
 export function convertIdToStrArr(objIdStr) {
-  objIdStr.map((id) => id.toString());
+  return objIdStr.map((id) => id.toString());
 }
 
 export function removeObjectIdFromUser(user) {
