@@ -30,7 +30,7 @@ export async function addRecommendation({
   if (!Array.isArray(recommendation))
     throw new Error("Recommendation is not an array");
   if (!(rating >= 0 && rating <= 5))
-    throw new Error("Ratings is not between 0 to 5");
+    throw new Error("Rating is not between 0 to 5");
 
   const user = await getUserByEmail(emailAddress);
   const recObj = {
