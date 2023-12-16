@@ -7,7 +7,9 @@ import validation, {
   errorToStatus,
   IMAGE_PATHS,
 } from "../helpers.js";
-import { isFriendOrPending,
+import { acceptFriendRequest, isFriendOrPending,
+  rejectFriendRequest,
+  removeFriend,
   sendFriendRequest,
 } from "../data/friends.js";
 import {
@@ -204,6 +206,51 @@ router.route("/accounts/friend/:username").post(async (req, res) => {
       throw new RangeError("You can't friend yourself.");
     let ownUserName = validation.stringCheck(req.session.user.username);
     await sendFriendRequest(ownUserName, userName);
+    return res.status(200).send({message: 'Ok'})
+  } catch (err) { 
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
+  }
+});
+
+router.route("/accounts/friend/reject/:username").post(async (req, res) => {
+  try {
+    let userName = validation.stringCheck(req.params.username);
+    if (userName == req.session.user?.username)
+      throw new RangeError("You can't have a friend request from yourself.");
+    let ownUserName = validation.stringCheck(req.session.user.username);
+    await rejectFriendRequest(ownUserName, userName);
+    return res.status(200).send({message: 'Ok'})
+  } catch (err) { 
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
+  }
+});
+
+router.route("/accounts/friend/accept/:username").post(async (req, res) => {
+  try {
+    let userName = validation.stringCheck(req.params.username);
+    if (userName == req.session.user?.username)
+      throw new RangeError("You can't have a friend request from yourself.");
+    let ownUserName = validation.stringCheck(req.session.user.username);
+    await acceptFriendRequest(ownUserName, userName);
+    return res.status(200).send({message: 'Ok'})
+  } catch (err) { 
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
+  }
+});
+
+router.route("/accounts/friend/unfriend/:username").post(async (req, res) => {
+  try {
+    let userName = validation.stringCheck(req.params.username);
+    if (userName == req.session.user?.username)
+      throw new RangeError("You can't be friends with yourself.");
+    let ownUserName = validation.stringCheck(req.session.user.username);
+    await removeFriend(ownUserName, userName);
     return res.status(200).send({message: 'Ok'})
   } catch (err) { 
     return res.redirect(
