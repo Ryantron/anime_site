@@ -20,6 +20,7 @@ const handlebarsInstance = exphbs.create({
       if (typeof spacing === "number")
         return new Handlebars.SafeString(JSON.stringify(obj, null, spacing));
     },
+    increment: (value) => value + 1,
   },
 });
 

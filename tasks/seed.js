@@ -18,7 +18,7 @@ const testuser = await insertUser({
 
 await addRecommendation({
   emailAddress: "test@test.com",
-  ratings: 3,
+  rating: 3,
   recommendation: [
     {
       id: 25798,

@@ -21,6 +21,7 @@ import {
   getManualListUsers,
   getUserRecs,
   getManualListRecs,
+  getHistory,
   rateRecommendations,
 } from "../data/recommendations.js";
 import { ObjectId } from "mongodb";
@@ -134,6 +135,11 @@ router.route("/recommendations/:recId").get(async (req, res) => {
     const isStrangers = req.session.user
       ? !(await isFriendOrPending(req.session.user._id, recId))
       : true;
+    // If logged in, add new recommendation list to session
+    if (req.session.user) {
+      const newRecHistory = await getHistory(req.session.user.emailAddress);
+      req.session.user.recommendations = newRecHistory;
+    }
     const isAuthor = req.session.user
       ? req.session.user._id === authorRec.authorId
       : false;
@@ -293,23 +299,16 @@ router
 
 router.route("/accounts").get(async (req, res) => {
   // Middleware requires req.session.user, else redirect to /login
-  const {
-    username,
-    emailAddress,
-    malUsername,
-    friendCount,
-    friendList,
-    recommendations,
-  } = req.session.user;
+  const { username, emailAddress, malUsername, recommendations, pfpId } =
+    req.session.user;
   return res.render("accounts", {
     title: "Your Account",
     username: username,
     emailAddress: emailAddress,
     malUsername: malUsername ?? "N/A",
-    friendCount: friendCount,
-    friendList: friendList,
     recommendations: recommendations,
     hasLinked: malUsername !== undefined,
+    image: IMAGE_PATHS[pfpId],
   });
 });
 
@@ -388,5 +387,21 @@ router.route("/accounts/reset").patch(async (req, res) => {
     );
   }
 });
+
+// TODO: handlebars for friends (maybe 1 page with 2 tabs)
+// FIXME: getFriendInfo that returns {friendList, friendCount, pendingRequests, sentRequests}
+router.route("/friends").get(async (req, res) => {
+  return res.render("friends", {
+    title: "Friends",
+    friendList: [],
+    friendCount: 2,
+  });
+});
+
+// router.route("/friends/pending").get(async (req, res) => {
+//   return res.render("friends", {
+//     title: "Friends",
+//   });
+// });
 
 export default router;
