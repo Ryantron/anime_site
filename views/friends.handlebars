@@ -56,7 +56,23 @@
       {{/unless}}
 
       {{#each friendList}}
-        <li class="list-group-item">{{this.username}}</li>
+        <li class="list-group-item">
+          <span tabindex="0">{{this.username}}</span>
+          <label class="hiddenLabel" for="removeFriend">Remove Friend</label>
+          <button
+            type="button"
+            id="removeFriend"
+            class="btn btn-outline-danger mx-4"
+          >
+            <img
+              src="/public/resources/person-x.svg"
+              alt="Person X Icon"
+              width="16"
+              height="16"
+            />
+            Remove
+          </button>
+        </li>
       {{/each}}
     </ul>
   </div>
@@ -69,7 +85,36 @@
 
     <ul class="list-group">
       {{#each pendingRequests}}
-        <li class="list-group-item">{{this}}</li>
+        <li class="list-group-item">
+          <span tabindex="0">{{this}}</span>
+          <label class="hiddenLabel" for="rejectPending">Reject Pending Friend
+            Request</label>
+          <button
+            type="button"
+            id="rejectPending"
+            class="btn btn-outline-danger mx-4"
+          >
+            <img
+              src="/public/resources/person-x.svg"
+              alt="Person X Icon"
+              width="16"
+              height="16"
+            />
+            Reject
+          </button>
+
+          <label class="hiddenLabel" for="acceptPending">Accept Pending Friend
+            Request</label>
+          <button type="button" id="acceptPending" class="btn btn-success mx-4">
+            <img
+              src="/public/resources/person-x.svg"
+              alt="Person X Icon"
+              width="16"
+              height="16"
+            />
+            Accept
+          </button>
+        </li>
       {{/each}}
     </ul>
   </div>
@@ -82,10 +127,17 @@
 
     <ul class="list-group">
       {{#each sentRequests}}
-        <li class="list-group-item">{{this}}</li>
+        <li class="list-group-item">
+          <span tabindex="0">{{this}}</span>
+        </li>
       {{/each}}
     </ul>
   </div>
 </main>
 
+<script
+  src="https://code.jquery.com/jquery-2.2.4.min.js"
+  integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+  crossorigin="anonymous"
+></script>
 <script defer src="/public/js/friends.js"></script>
