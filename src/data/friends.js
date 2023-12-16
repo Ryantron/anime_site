@@ -1,6 +1,6 @@
 import { users } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
-import validation, { DBError } from "../helpers.js";
+import validation, { DBError, ResourcesError } from "../helpers.js";
 
 export const sendFriendRequest = async (yourUsername, targetUsername) => {
   yourUsername = validation.stringCheck(yourUsername);
@@ -14,20 +14,19 @@ export const sendFriendRequest = async (yourUsername, targetUsername) => {
   let existingUser = await usersCollection.findOne({
     username: yourUsername,
   });
-  let targetExists = await usersCollection.findOne({
+  let targetUser = await usersCollection.findOne({
     username: targetUsername,
   });
   if (!existingUser) {
     throw new DBError("Db Error: Could not find your username");
   }
-  if (!targetExists) {
+  if (!targetUser) {
     throw new RangeError(
       "The person you are trying to add does not exist. Double check their username for spelling errors"
     );
   }
 
-  // target user
-  let pendingRequests = targetExists.pendingRequests;
+  let pendingRequests = targetUser.pendingRequests;
   if (!pendingRequests) {
     pendingRequests = [];
   }
@@ -36,7 +35,6 @@ export const sendFriendRequest = async (yourUsername, targetUsername) => {
   }
   pendingRequests.push(yourUsername);
 
-  // current user
   let sentRequests = existingUser.sentRequests;
   if (!sentRequests) {
     sentRequests = [];
@@ -219,7 +217,7 @@ export const rejectFriendRequest = async (yourUsername, requestUsername) => {
     throw new DBError("Db Error: Could not find your username");
   }
   if (!requestExists) {
-    throw new RangeError("The person you are trying to add does not exist");
+    throw new ResourcesError("The person you are trying to add does not exist");
   }
 
   let pendingRequests = existingUser.pendingRequests;
@@ -268,9 +266,9 @@ export const rejectFriendRequest = async (yourUsername, requestUsername) => {
   );
 
   if (updatePending.modifiedCount === 0)
-    throw "Could not update pendingRequests successfully";
+    throw new DBError("Could not update pendingRequests successfully");
   if (updatedSent.modifiedCount === 0)
-    throw "Could not update sentRequests successfully";
+    throw new DBError("Could not update sentRequests successfully");
 
   return { requestRejected: true };
 };
@@ -294,7 +292,9 @@ export const removeFriend = async (yourUsername, targetUsername) => {
     throw new DBError("Db Error: Could not find your username");
   }
   if (!friendToRemove) {
-    throw new RangeError("The person you are trying to remove does not exist");
+    throw new ResourcesError(
+      "The person you are trying to remove does not exist"
+    );
   }
 
   const yourFriends = existingUser.friendList;
@@ -346,7 +346,7 @@ export const removeFriend = async (yourUsername, targetUsername) => {
 
   const updatedTheirList = await usersCollection.updateOne(
     { username: targetUsername },
-    { $set: updateYourFriends },
+    { $set: updateTheirFriends },
     { returnDocument: "after" }
   );
 
@@ -354,7 +354,6 @@ export const removeFriend = async (yourUsername, targetUsername) => {
     throw "Could not update pendingRequests successfully";
   if (updatedTheirList.modifiedCount === 0)
     throw "Could not update sentRequests successfully";
-
   return { friendRemoved: targetUsername, status: true };
 };
 
