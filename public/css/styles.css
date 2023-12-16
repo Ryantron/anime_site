@@ -141,3 +141,23 @@
 .text-gold {
   color: var(--gold-color);
 }
+
+a.header {
+  color: #b50010;
+}
+
+a.header:hover {
+  color: red;
+}
+
+a.regular {
+  color: #b50010;
+}
+
+a.regular:visited {
+  color: #9900cc;
+}
+
+a.regular:hover {
+  color: red;
+}

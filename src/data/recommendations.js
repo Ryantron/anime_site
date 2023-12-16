@@ -150,13 +150,13 @@ export const getUserRecs = async (emailAddress) => {
   };
   let recId = insertRec._id.toString();
   recommendationArray.push(insertRec);
-  const updatedRecommendations = {
+  const updatedUser = {
     recommendations: recommendationArray,
   };
 
   const updatedInfo = await usersCollection.updateOne(
     { emailAddress: emailAddress },
-    { $set: updatedRecommendations },
+    { $set: updatedUser },
     { returnDocument: "after" }
   );
 
@@ -165,7 +165,7 @@ export const getUserRecs = async (emailAddress) => {
 
   return {
     emailAddress: emailAddress,
-    recommendations: updatedRecommendations,
+    recommendations: updatedUser.recommendations,
     recId: recId,
   };
 };
@@ -346,8 +346,8 @@ export const getRecommendationListAndAuthor = async (recListId) => {
     authorName: user.username,
     authorId: user._id.toString(),
     authorPfpPath: IMAGE_PATHS[user.pfpId],
-    reviewRating: recListSubDoc.rating,
     recList: recListSubDoc.recommendation,
+    reviewRating: recListSubDoc.rating,
   };
 };
 

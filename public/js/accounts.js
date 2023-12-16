@@ -74,7 +74,6 @@ const integerCheck = (arg, { min = -Infinity, max = Infinity } = {}) => {
   return arg;
 };
 
-// TODO: validation?
 const pfpValidation = (pfpId) => {
   pfpId = integerCheck(pfpId, { min: 1, max: 5 });
   return pfpId;
@@ -115,15 +114,18 @@ const emailAddressInput = document.querySelector("#emailAddressInput");
 const passwordInput = document.querySelector("#passwordInput");
 const pfpInput = document.querySelector("#pfpInput");
 const malUsernameInput = document.querySelector("#malUsernameInput");
-const recList = document.querySelector("#rec-list");
+const recList = document.querySelectorAll(".rec-list");
+const listHeader = document.querySelectorAll(".fw-bold");
 
 // Toggle button event listeners
 toggleRecHistory.addEventListener("click", (e) => {
-  if (recList.style.display === "none") {
-    recList.style.display = "block";
-  } else {
-    recList.style.display = "none";
-  }
+  recList.forEach((element) => {
+    element.classList.toggle("hidden");
+  });
+
+  listHeader.forEach((element) => {
+    element.classList.toggle("hidden");
+  });
 });
 
 // Form event listeners
