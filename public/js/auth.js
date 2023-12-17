@@ -6,6 +6,10 @@ import {
   deleteError,
 } from "./helpers.js";
 
+/**
+ * DOM ELEMENTS
+ */
+
 const main = document.querySelector("main");
 const form = document.querySelector("form");
 const usernameInput = document.querySelector("#usernameInput");
@@ -13,6 +17,10 @@ const emailAddressInput = document.querySelector("#emailAddressInput");
 const passwordInput = document.querySelector("#passwordInput");
 const confirmPasswordInput = document.querySelector("#confirmPasswordInput");
 const submitInput = document.querySelector("#submitInput");
+
+/**
+ * EVENT LISTENERS
+ */
 
 if (form.id === "loginForm") {
   form.addEventListener("submit", (e) => {
