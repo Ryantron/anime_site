@@ -62,9 +62,9 @@ app.set("views", __viewPath);
 
 app.get("/", (req, res, next) => {
   const defaultSrc =
-    "default-src 'self' sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN https://kit.fontawesome.com https://ka-f.fontawesome.com;";
+    "default-src 'self' https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js https://kit.fontawesome.com https://ka-f.fontawesome.com https://rawgit.com/leizongmin/js-xss/master/dist/xss.js;";
   const styleSrc =
-    "style-src 'self' 'unsafe-inline' sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN;";
+    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css;";
   const fontSrc =
     "font-src 'self' https://kit.fontawesome.com/643c2e6cd9.js https://ka-f.fontawesome.com;";
   res.set("Content-Security-Policy", `${defaultSrc}${styleSrc}${fontSrc}`);
