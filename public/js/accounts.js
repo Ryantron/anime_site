@@ -9,20 +9,36 @@ import {
 } from "./helpers.js";
 
 /**
+ * HELPERS
+ */
+
+const addErrorTo = (parentEl, errors) => {
+  const errorHeader = document.createElement("h3");
+  errorHeader.classList.add("errorHeader");
+  errorHeader.classList.add("px-4");
+  errorHeader.textContent = "Error:";
+  parentEl.appendChild(errorHeader);
+
+  const errLi = createErrorList(errors);
+  parentEl.appendChild(errLi);
+};
+
+/**
  * DOM ELEMENTS
  */
 
 const errorList = document.querySelector("#errorList");
+
 const resetForm = document.querySelector("#resetForm");
-const malForm = document.querySelector("#malForm");
-const submitResetInput = document.querySelector("#submitResetInput");
-const submitMalInput = document.querySelector("#submitMalInput");
-const toggleRecHistory = document.querySelector("#toggleRecHistory");
 const usernameInput = document.querySelector("#usernameInput");
 const emailAddressInput = document.querySelector("#emailAddressInput");
 const passwordInput = document.querySelector("#passwordInput");
 const pfpIdInput = document.querySelector("#pfpIdInput");
+
+const malForm = document.querySelector("#malForm");
 const malUsernameInput = document.querySelector("#malUsernameInput");
+
+const toggleRecHistory = document.querySelector("#toggleRecHistory");
 const recHistory = document.querySelector("#recHistory");
 
 /**
@@ -85,13 +101,7 @@ resetForm.addEventListener("submit", (e) => {
 
   if (errors.length > 0) {
     e.preventDefault();
-    const errorHeader = document.createElement("h3");
-    errorHeader.classList.add("errorHeader");
-    errorHeader.classList.add("px-4");
-    errorHeader.textContent = "Error:";
-    errorList.appendChild(errorHeader);
-    const errLi = createErrorList(errors);
-    errorList.appendChild(errLi);
+    addErrorTo(errorList, errors);
   }
 });
 
@@ -105,13 +115,7 @@ if (malForm) {
 
     if (errors.length > 0) {
       e.preventDefault();
-      const errorHeader = document.createElement("h3");
-      errorHeader.classList.add("errorHeader");
-      errorHeader.classList.add("px-4");
-      errorHeader.textContent = "Error:";
-      errorList.appendChild(errorHeader);
-      const errLi = createErrorList(errors);
-      errorList.appendChild(errLi);
+      addErrorTo(errorList, errors);
     }
   });
 }
