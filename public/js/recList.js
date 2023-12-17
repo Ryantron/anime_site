@@ -32,7 +32,14 @@ const stars = [...document.querySelectorAll(".fa-star")];
  * RUNTIME Dynamic HTML & CSS
  */
 
-fillStars(stars, handlebars.REVIEW_RATING);
+const filledStars = stars.filter(
+  (star) => star.id[star.id.length - 1] <= handlebars.REVIEW_RATING
+);
+
+filledStars.forEach((star) => {
+  star.classList.remove("fa-regular");
+  star.classList.add("fa-solid");
+});
 
 /**
  * EVENT LISTENERS
