@@ -2,6 +2,8 @@ import express from "express";
 const router = express.Router();
 import validation, {
   errorToStatus,
+  getUserByUsername,
+  IMAGE_PATHS
 } from "../helpers.js";
 import {
   registerUser,
@@ -119,5 +121,17 @@ router.route("/logout").get(async (req,res) =>{
   req.session.destroy();
   res.redirect("/login");
 })
+
+router.route("/profile/:username").get(async (req, res) => {
+  const user = await getUserByUsername(req.params.username);
+  return res.render("profile", {
+    title: `${user.username}'s Profile`,
+    username: user.username,
+    emailAddress: user.emailAddress,
+    malUsername: user.malUsername || "N/A",
+    recommendations: user.recommendations,
+    image: IMAGE_PATHS[user.pfpId],
+  });
+});
 
 export default router;

@@ -68,6 +68,17 @@ export async function getUserByEmail(emailAddress) {
   return user;
 }
 
+export async function getUserByUsername(username) {
+  if (!username) throw new Error("Need to provide username");
+  const usersCollection = await users();
+  const user = await usersCollection.findOne({ username });
+  if (user === null)
+    throw new Error(`User not found by username: ${username}`);
+
+  removeObjectIdFromUser(user);
+  return user;
+}
+
 export const IMAGE_PATHS = {
   1: "/public/images/pfp/1-apple-istock.png",
   2: "/public/images/pfp/2-pen-vecteezy.png",
