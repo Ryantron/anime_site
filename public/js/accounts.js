@@ -1,136 +1,16 @@
-const errorConstructor = (message) => {
-  return {
-    message,
-  };
-};
+import {
+  stringValidation,
+  integerValidation,
+  usernameValidation,
+  emailValidation,
+  passwordValidation,
+  createErrorList,
+  deleteError,
+} from "./helpers.js";
 
 /**
- * @param {any} str
- * @param {object} [param0]
- * @param {number} [param0.minLen]
- * @param {number} [param0.maxLen]
- * @returns {string}
+ * DOM ELEMENTS
  */
-const stringValidation = (str, { minLen = 1, maxLen = Infinity } = {}) => {
-  if (typeof str !== "string")
-    return errorConstructor(`${str} is not of type string`);
-
-  str = str.trim();
-
-  if (minLen && str.length < minLen)
-    return errorConstructor(`Length is less than ${minLen}`);
-
-  if (maxLen && str.length > maxLen)
-    return errorConstructor(`Length is more than ${maxLen}`);
-
-  return str;
-};
-
-/**
- * @param {any} username
- * @returns {string}
- */
-const usernameValidation = (username) => {
-  username = stringValidation(username, {
-    minLen: 2,
-    maxLen: 25,
-  });
-  // Username trimmed in stringValidation
-  if (typeof username === "object") return username;
-  if (/\s/.test(username)) {
-    return errorConstructor(`Username cannot contain empty spaces`);
-  }
-  const nameRegex = /^[A-Za-z0-9]{2,}$/;
-  if (!nameRegex.test(username)) {
-    return errorConstructor(
-      "Username must be at least 2 characters long and contain no special characters"
-    );
-  }
-  return username;
-};
-
-/**
- * @param {any} email
- * @returns {string}
- */
-const emailValidation = (email) => {
-  const res = stringValidation(email);
-  // Email trimmed in stringValidation
-  if (typeof res === "object") return res;
-  const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/i;
-  if (emailRegex.test(res)) return res;
-  else return errorConstructor(`Invalid email ${res}`);
-};
-
-/**
- * @param {any} password
- * @returns {string}
- */
-const passwordValidation = (password) => {
-  if (/\s/.test(password)) {
-    return errorConstructor("Password cannot contain empty spaces");
-  }
-  password = password.trim();
-  const passRegex =
-    /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^\&*\)\(+=._-])[a-zA-Z0-9!@#\$%\^\&*\)\(+=._-]{8,}$/;
-  if (!passRegex.test(password)) {
-    return errorConstructor(
-      "Password must be at least 8 characters long and contain 1 special character, number, and uppercase letter"
-    );
-  }
-
-  return password;
-};
-
-const integerCheck = (arg, { min = -Infinity, max = Infinity } = {}) => {
-  if (arg === undefined)
-    return errorConstructor(`No value passed to integerCheck: ${arg}`);
-  if (typeof arg !== "number")
-    return errorConstructor(`${arg} must be a number`);
-  if (!Number.isInteger(arg))
-    return errorConstructor(`${arg} is not an integer`);
-  if (arg < min)
-    return errorConstructor(`${arg} is below min allowed value (${min})`);
-  if (arg > max)
-    return errorConstructor(`${arg} is above max allowed value (${max})`);
-
-  return arg;
-};
-
-const pfpValidation = (pfpId) => {
-  if (typeof pfpId !== "string" || pfpId.trim().length !== 1) {
-    return errorConstructor(`${pfpId} is not an integer between 1 to 5`);
-  }
-  const parsedPfp = parseInt(pfpId, 10);
-  if (!Number.isInteger(parsedPfp))
-    return errorConstructor(`${pfpId} is not an integer`);
-  pfpId = integerCheck(parsedPfp, { min: 1, max: 5 });
-  return pfpId;
-};
-
-const createErrorList = (errors) => {
-  const ul = document.createElement("ul");
-  ul.classList.add("clienterror");
-  for (const error of errors) {
-    const errorLi = document.createElement("li");
-    errorLi.classList.add("no-bullet");
-    const errorP = document.createElement("p");
-    errorP.textContent = error;
-    errorLi.appendChild(errorP);
-    ul.appendChild(errorLi);
-  }
-  return ul;
-};
-
-const deleteError = () => {
-  const errorLi = document.querySelector(".clienterror");
-  const errorHeader = document.querySelector(".errorHeader");
-  if (errorLi) errorLi.remove();
-  if (errorHeader) errorHeader.remove();
-  // Also check for server generated errors
-  const serverErrorEl = document.querySelector(".serverErrorContainer");
-  if (serverErrorEl) serverErrorEl.remove();
-};
 
 const errorList = document.querySelector("#errorList");
 const resetForm = document.querySelector("#resetForm");
@@ -144,6 +24,10 @@ const passwordInput = document.querySelector("#passwordInput");
 const pfpIdInput = document.querySelector("#pfpIdInput");
 const malUsernameInput = document.querySelector("#malUsernameInput");
 const recHistory = document.querySelector("#recHistory");
+
+/**
+ * EVENT LISTENERS
+ */
 
 // Toggle button event listeners
 toggleRecHistory.addEventListener("click", (e) => {
@@ -164,30 +48,30 @@ resetForm.addEventListener("submit", (e) => {
     usernameInput.value.trim() !== ""
   ) {
     username = usernameValidation(usernameInput.value);
+    if (username.success) username = username.data;
+    else errors.push("(Username) " + username.error);
   }
   if (
     typeof emailAddressInput.value === "string" &&
     emailAddressInput.value.trim() !== ""
   ) {
     emailAddress = emailValidation(emailAddressInput.value);
+    if (emailAddress.success) emailAddress = emailAddress.data;
+    else errors.push("(Email Address) " + emailAddress.error);
   }
   if (
     typeof passwordInput.value === "string" &&
     passwordInput.value.trim() !== ""
   ) {
     password = passwordValidation(passwordInput.value);
+    if (password.success) password = password.data;
+    else errors.push("(Password) " + password.error);
   }
   if (typeof pfpIdInput.value === "string" && pfpIdInput.value.trim() !== "") {
-    pfp = pfpValidation(pfpIdInput.value);
+    pfp = integerValidation(pfpIdInput.value, { min: 1, max: 5 });
+    if (pfp.success) pfp = pfp.data;
+    else errors.push("(Profile Picture) " + pfp.error);
   }
-
-  if (typeof username === "object")
-    errors.push("(Username) " + username.message);
-  if (typeof emailAddress === "object")
-    errors.push("(Email Address) " + emailAddress.message);
-  if (typeof password === "object")
-    errors.push("(Password) " + password.message);
-  if (typeof pfp === "object") errors.push("(Profile Picture) " + pfp.message);
 
   // Error: no input provided
   if (
@@ -215,9 +99,10 @@ if (malForm) {
   malForm.addEventListener("submit", (e) => {
     deleteError();
     const errors = [];
-    const malUsername = stringValidation(malUsernameInput.value);
-    if (typeof malUsername === "object")
-      errors.push("(MyAnimeList Username) " + malUsername.message);
+    let malUsername = stringValidation(malUsernameInput.value);
+    if (malUsername.success) malUsername = malUsername.data;
+    else errors.push("(MyAnimeList Username) " + malUsername.message);
+
     if (errors.length > 0) {
       e.preventDefault();
       const errorHeader = document.createElement("h3");
