@@ -21,7 +21,9 @@ import {
 router.route("/friend/:username").post(async (req, res) => {
   try {
     await friendRoute(req, res, sendFriendRequest);
-    return res.status(200).send();
+    return res.json({
+      message: "success",
+    });
   } catch (err) {
     return res.status(errorToStatus(err)).send({
       message: err.message ?? "Unknown Error",

@@ -69,7 +69,9 @@ router.route("/review/:recId").post(async (req, res) => {
       recId,
       rating
     );
-    return res.status(200).send();
+    return res.json({
+      message: "Success",
+    });
   } catch (err) {
     console.log(err);
     return res.status(errorToStatus(err)).send({

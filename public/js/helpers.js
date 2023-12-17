@@ -171,8 +171,10 @@ export const removeClassFromArr = (elArr, className) => {
 };
 
 export const ajaxPost = async (url, parentEl) => {
+  console.log("check");
   return $.ajax({
     method: "POST",
+    contentType: "application/json",
     url,
   })
     .then(() => {
