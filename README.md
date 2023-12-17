@@ -7,14 +7,15 @@ This is a website that was made for Anime fans to receive recommendations based 
 
 ### Installation
 
-Make sure MongoDB is running on your side!!!
 
 ```bash
-git clone https://github.com/Ryantron/anime_site.git
-cd anime_site
-npm run i
-npm run start 
+git clone https://github.com/Ryantron/anime_site.git   # Clone project
+cd anime_site                                          # CD into repo
+npm run i                                              # Install all dependencies
+npm run start                                          # Start website
 ```
+
+**Note: Make sure MongoDB is running on your side!!!**
 
 ### Running Program
 To get started without signing up:
