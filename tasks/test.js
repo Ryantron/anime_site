@@ -8,13 +8,18 @@ import {
   getHistory,
   getAnimeInfo,
   getUserRecs,
-  hasCurrentUserLikedAlready,
   getRecommendationListAndAuthor,
 } from "../src/data/recommendations.js";
+import {
+  acceptFriendRequest,
+  rejectFriendRequest,
+  sendFriendRequest,
+  isFriendOrPending,
+} from "../src/data/friends.js";
 import { app, server } from "../src/app.js";
 
 // Tasks Module
-import { getUserByEmail } from "./helpers.js";
+import { getUserByEmail, insertUser } from "./helpers.js";
 
 async function createTest(name, callback, should_print_res = false) {
   console.log("-----------------");
@@ -123,6 +128,120 @@ await createTest(
   true
 );
 
+/**
+ * sendFriendRequest Data Tests
+ */
+
+await createTest(
+  "sendFriendRequest Data Test 1",
+  async () => {
+    const userA = (
+      await insertUser({
+        username: "jonnyr252",
+        emailAddress: "jonnyr252@gmail.com",
+        password: "1234@@aaBB",
+      })
+    ).user;
+    const userB = (
+      await insertUser({
+        username: "userbjob2522",
+        emailAddress: "yessss@gmail.com",
+        password: "11111wwlxjl@slSSS",
+      })
+    ).user;
+
+    const res = await sendFriendRequest(userA.username, userB.username);
+    return res;
+  },
+  true
+);
+
+/**
+ * acceptFriendRequest Data Tests
+ */
+
+await createTest("acceptFriendRequest Data Test 1", async () => {
+  const userA = (
+    await insertUser({
+      username: "abcde",
+      emailAddress: "bbbb@gmail.com",
+      password: "1234@@aaBB",
+    })
+  ).user;
+  const userB = (
+    await insertUser({
+      username: "johndoe",
+      emailAddress: "aaaaa@gmail.com",
+      password: "11111wwlxjl@slSSS",
+    })
+  ).user;
+  const reqSent = await sendFriendRequest(userA.username, userB.username);
+  if (!reqSent.friendRequestSent) throw new Error("Friend request not sent.");
+
+  const reqAccepted = await acceptFriendRequest(userB.username, userA.username);
+  if (!reqAccepted.friendAdded)
+    throw new Error("Unknown error when trying to accept friend request");
+});
+
+/**
+ * rejectFriendRequest Data Tests
+ */
+
+await createTest("rejectFriendRequest Data Test 1", async () => {
+  const userA = (
+    await insertUser({
+      username: "sssss",
+      emailAddress: "ccccc@gmail.com",
+      password: "1234@@aaBB",
+    })
+  ).user;
+  const userB = (
+    await insertUser({
+      username: "dddddd",
+      emailAddress: "aarrrrrrraaa@gmail.com",
+      password: "11111wwlxjl@slSSS",
+    })
+  ).user;
+  const reqSent = await sendFriendRequest(userA.username, userB.username);
+  if (!reqSent.friendRequestSent) throw new Error("Friend request not sent.");
+
+  const reqRejected = await rejectFriendRequest(userB.username, userA.username);
+  if (!reqRejected.requestRejected)
+    throw new Error("Unknown error when trying to reject friend request");
+});
+
+/**
+ * isFriendOrPending Data Tests
+ */
+
+await createTest("isFriendOrPending Data Test 1", async () => {
+  const userA = (
+    await insertUser({
+      username: "dude",
+      emailAddress: "abcdeeeeefa@gmail.com",
+      password: "1234@@aaBB",
+    })
+  ).user;
+  const userB = (
+    await insertUser({
+      username: "mate",
+      emailAddress: "galhl25@gmail.com",
+      password: "11111wwlxjl@slSSS",
+    })
+  ).user;
+  const reqSent = await sendFriendRequest(userA.username, userB.username);
+  if (!reqSent.friendRequestSent) throw new Error("Friend request not sent.");
+
+  const wasPendingOrFriend = await isFriendOrPending(
+    userA.username,
+    userB.username
+  );
+  if (!wasPendingOrFriend)
+    throw new Error(
+      "Unknown error with userA not having a pending friend request to userB"
+    );
+});
+
 /************
  * DATA ERROR TESTS
  ************/
@@ -130,27 +249,6 @@ await createTest(
 /************
  * ROUTE TESTS
  ************/
-
-// TODO maybe: Can't get supertest to work with express-session
-// console.log("-----------------");
-// console.log("/accounts/reset Route Test 1");
-// try {
-//   const res = await request.post("/login").send({
-//     emailAddressInput: "test3@test.com",
-//     passwordInput: "Test123@@",
-//   });
-//   await request
-//     .post("/accounts/reset")
-//     .send({
-//       usernameInput: "Jimmy_uwu",
-//     })
-//     .expect("Location", /\/accounts/);
-//   console.log("Success");
-// } catch (err) {
-//   console.log("/accounts/reset Route Test 1 Failed: ");
-//   console.log(err);
-// }
-// console.log("-----------------");
 
 /************
  * ROUTE ERROR TESTS

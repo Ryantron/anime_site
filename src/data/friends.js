@@ -8,6 +8,13 @@ export const sendFriendRequest = async (yourUsername, targetUsername) => {
 
     yourUsername = yourUsername.toLowerCase();
     targetUsername = targetUsername.toLowerCase();
+  yourUsername = validation.stringCheck(yourUsername);
+  targetUsername = validation.stringCheck(targetUsername);
+  //Check if user is awating a request by their target, if they are then accept that request instead.
+  if (await isFriendOrPending(targetUsername, yourUsername))
+    return await acceptFriendRequest(yourUsername, targetUsername);
+  yourUsername = yourUsername.toLowerCase();
+  targetUsername = targetUsername.toLowerCase();
 
     const usersCollection = await users();
     let existingUser = await usersCollection.findOne({
@@ -18,6 +25,21 @@ export const sendFriendRequest = async (yourUsername, targetUsername) => {
     })
     if(!existingUser){throw new RangeError("Could not find your username")}
     if(!targetExists){throw new RangeError("The person you are trying to add does not exist. Double check their username for spelling errors")}
+  const usersCollection = await users();
+  let existingUser = await usersCollection.findOne({
+    username: yourUsername,
+  });
+  let targetUser = await usersCollection.findOne({
+    username: targetUsername,
+  });
+  if (!existingUser) {
+    throw new DBError("Db Error: Could not find your username");
+  }
+  if (!targetUser) {
+    throw new RangeError(
+      "The person you are trying to add does not exist. Double check their username for spelling errors"
+    );
+  }
 
 
     let pendingRequests = targetUser.pendingRequests
@@ -29,6 +51,22 @@ export const sendFriendRequest = async (yourUsername, targetUsername) => {
     let sentRequests = existingUser.sentRequests
     if(!sentRequests){sentRequests = []}
     if(sentRequests.includes(targetUsername)) {throw new RangeError ("You have already sent a friend request to this user")}
+  let pendingRequests = targetUser.pendingRequests;
+  if (!pendingRequests) {
+    pendingRequests = [];
+  }
+  if (pendingRequests.includes(yourUsername)) {
+    throw new RangeError("You have already sent a friend request to this user");
+  }
+  pendingRequests.push(yourUsername);
+
+  let sentRequests = existingUser.sentRequests;
+  if (!sentRequests) {
+    sentRequests = [];
+  }
+  if (sentRequests.includes(targetUsername)) {
+    throw new RangeError("You have already sent a friend request to this user");
+  }
 
     sentRequests.push(targetUsername)
     
@@ -83,7 +121,7 @@ export const acceptFriendRequest = async (yourUsername, requestUsername) => {
     throw new RangeError("Could not find your username");
   }
   if (!requestExists) {
-    throw new RangeError("The person you are trying to add does not exist");
+    throw new ResourcesError("The person you are trying to add does not exist");
   }
 
   let pendingRequests = existingUser.pendingRequests;
@@ -204,7 +242,7 @@ export const rejectFriendRequest = async (yourUsername, requestUsername) => {
     throw new RangeError("Could not find your username");
   }
   if (!requestExists) {
-    throw new RangeError("The person you are trying to add does not exist");
+    throw new ResourcesError("The person you are trying to add does not exist");
   }
 
   let pendingRequests = existingUser.pendingRequests;
@@ -279,7 +317,9 @@ export const removeFriend = async (yourUsername, targetUsername) => {
     throw new RangeError("Could not find your username");
   }
   if (!friendToRemove) {
-    throw new RangeError("The person you are trying to remove does not exist");
+    throw new ResourcesError(
+      "The person you are trying to remove does not exist"
+    );
   }
 
   const yourFriends = existingUser.friendList;

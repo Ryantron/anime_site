@@ -44,13 +44,12 @@ export function createOptionalObject(name, value) {
   return value ? { [name]: value } : {};
 }
 
-const convertIdToStrArr = (objIdStr) => objIdStr.map((id) => id.toString());
+export function convertIdToStrArr(objIdStr) {
+  return objIdStr.map((id) => id.toString());
+}
 
 export function removeObjectIdFromUser(user) {
   user._id = user._id.toString();
-  user.sendRequests = convertIdToStrArr(user.sendRequests);
-  user.pendingRequests = convertIdToStrArr(user.pendingRequests);
-  user.friendList = convertIdToStrArr(user.friendList);
   user.recommendations = user.recommendations.map((rec) => {
     rec._id = rec._id.toString();
     return rec;

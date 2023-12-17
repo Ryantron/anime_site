@@ -25,9 +25,35 @@
     </form>
   </div>
   <div class="flex-center pb-5">
-    <a
-      href={{linkedRoute}}
-      class="primary-bg-color primary-text-color rounded-pill no-underline px-5 py-2"
-    >{{linkMessage}}</a>
+    {{#if MalLinked}}
+    <form
+      action="/main/recommendations"
+      method="post"
+      id="malRecommend"
+      class="flex-center flex-column my-3"
+    >
+      <label for="malRecSubmit" hidden>Search using your MyAnimeList recommendations!</label>
+      <button
+        name="malRecSubmit"
+        id="malRecSubmit"
+        class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
+        type="submit"
+      >
+        Search using your MyAnimeList recommendations!
+      </button>
+    </form>
+    {{else}}
+      {{#if AccountLoggedIn}}
+      <a
+        href={{linkedRoute}}
+        class="primary-bg-color primary-text-color rounded-pill no-underline px-5 py-2"
+      >{{linkMessage}}</a>
+      {{else}}
+      <a
+        href={{linkedRoute}}
+        class="primary-bg-color primary-text-color rounded-pill no-underline px-5 py-2"
+      >{{linkMessage}}</a>
+      {{/if}}
+    {{/if}}
   </div>
 </main>
