@@ -12,7 +12,7 @@ class MalHandler {
      * Keep attempting to send requests with exponential sleeps in between
      */
     this.sleepNow = (delay) =>
-      new Promise((resolve) => setTimeout(resolve, delay));
+      new Promise((resolve) => setTimeout(resolve, delay)); //Found here: https://www.sitepoint.com/delay-sleep-pause-wait/
   }
   async _handleRateLimit(uri, headers = {}, method = "GET", _delay = 1000) {
     /**

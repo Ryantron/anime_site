@@ -1,19 +1,19 @@
 <header>
   <h1 tabindex="0" class="text-center">Recommendation List</h1>
-  <a tabindex="0" href="/main">Go back to main page!</a>
+  <a tabindex="0" class="header" href="/main">Go back to main page!</a>
 </header>
 
 <main class="mx-5">
   <section>
     <div class="flex-center">
       <h2 class="text-center me-2" tabindex="0">Author</h2>
+      {{#if showFriendButton}}
       <form
-        action="/recommendations/friend/:authorId"
+        action="/accounts/friend/:username"
         method="post"
         id="addFriendForm"
       >
         <label for="addFriendIconButton" class="hiddenLabel">Add Friend</label>
-        {{#if isStrangers}}
           <button
             type="submit"
             title="addFriendIconButton"
@@ -21,15 +21,8 @@
             class="fa-solid fa-user-group rounded-pill border-0 p-3"
           >
           </button>
-        {{else}}
-          <button
-            type="submit"
-            title="addFriendIconButton"
-            id="addFriendIconButton"
-            class="fa-solid fa-user-group disable-pointer reduce-opacity rounded-pill border-0 p-3"
-          ></button>
-        {{/if}}
       </form>
+      {{/if}}
     </div>
     <div class="flex-center flex-column">
       <p class="text-light-bold me-2" tabindex="0">{{authorName}}</p>
@@ -102,32 +95,27 @@
             title="1 Star Rating"
             class="fa-regular fa-star text-gold"
             id="star1"
-            value="1"
           >
           </span>
           <span
             title="2 Star Rating"
             class="fa-regular fa-star text-gold"
             id="star2"
-            value="2"
           ></span>
           <span
             title="3 Star Rating"
             class="fa-regular fa-star text-gold"
             id="star3"
-            value="3"
           ></span>
           <span
             title="4 Star Rating"
             class="fa-regular fa-star text-gold"
             id="star4"
-            value="4"
           ></span>
           <span
             title="5 Star Rating"
             class="fa-regular fa-star text-gold"
             id="star5"
-            value="5"
           ></span>
         </div>
       {{/if}}
@@ -137,6 +125,7 @@
       {{#each recommendations}}
         <li><a
             tabindex="0"
+            class="regular"
             href="https://myanimelist.net/anime/{{this.id}}"
           >{{this.title}}</a></li>
         <!-- <li><p tabindex="0">{{this.title}}</p></li> -->
@@ -151,7 +140,8 @@
   crossorigin="anonymous"
 ></script>
 <script>
-  const handlebars = { IS_AUTHOR: '{{isAuthor}}', AUTHOR_ID: '{{authorId}}',
-  REC_ID: '{{recId}}', REVIEW_RATING: '{{reviewRating}}' }
+  const handlebars = { IS_AUTHOR: '{{isAuthor}}', AUTHOR_NAME: '{{authorName}}',
+  REC_ID: '{{recId}}', REVIEW_RATING: '{{reviewRating}}', FRIEND_FORM: '{{showFriendButton}}' }
+  console.log(handlebars)
 </script>
 <script src="/public/js/recList.js"></script>

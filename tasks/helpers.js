@@ -1,7 +1,10 @@
 import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
 
-import { convertIdToStrArr, removeObjectIdFromUser } from "../src/helpers.js";
+import validation, {
+  convertIdToStrArr,
+  removeObjectIdFromUser,
+} from "../src/helpers.js";
 import { users } from "../src/config/mongoCollections.js";
 const saltRounds = 16;
 
@@ -13,26 +16,26 @@ export async function getUserByEmail(emailAddress) {
     throw new Error(`User not found by email: ${emailAddress}`);
 
   removeObjectIdFromUser(user);
-  console.log(user);
   return user;
 }
 
 export async function addRecommendation({
   emailAddress,
   recommendation,
-  ratings = 0,
+  rating = 0,
 } = {}) {
-  if (!emailAddress || !recommendation)
+  emailAddress = validation.emailValidation(emailAddress);
+  if (!recommendation)
     throw new Error("Need to provide emailAddress and recommendation array");
   if (!Array.isArray(recommendation))
     throw new Error("Recommendation is not an array");
-  if (!(ratings >= 0 && ratings <= 5))
-    throw new Error("Ratings is not between 0 to 5");
+  if (!(rating >= 0 && rating <= 5))
+    throw new Error("Rating is not between 0 to 5");
 
   const user = await getUserByEmail(emailAddress);
   const recObj = {
     _id: new ObjectId(),
-    ratings,
+    rating,
     recommendation,
   };
 
@@ -56,17 +59,20 @@ export async function insertUser({
   password,
   malUsername,
   pfpId = 1,
-  sendRequests = [],
+  sentRequests = [],
   pendingRequests = [],
   friendList = [],
 } = {}) {
+  username = validation.stringCheck(username);
+  emailAddress = validation.emailValidation(emailAddress);
+  password = validation.passwordValidation(password);
   const res = {
     ...{
       username,
       emailAddress,
       hashedPassword: await bcrypt.hash(password, saltRounds),
       pfpId,
-      sendRequests,
+      sentRequests,
       pendingRequests,
       friendList,
       recommendations: [],
@@ -74,8 +80,14 @@ export async function insertUser({
     ...(malUsername ? { malUsername } : {}),
   };
   const usersCollection = await users();
-  const user = await usersCollection.insertOne(res);
-  if (!user) throw "Unable to add user to collection";
+  const result = await usersCollection.insertOne(res);
+  if (!result) throw "Unable to add user to collection";
+
+  const user = await usersCollection.findOne({ _id: result.insertedId });
+  result.user = user;
+
   removeObjectIdFromUser(user);
-  return user;
+  result._id = result.insertedId.toString();
+
+  return result;
 }
