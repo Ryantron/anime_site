@@ -158,11 +158,17 @@
       <div class="pt-2">
         <p class="fw-bold text-center" tabindex="0">Recommendation List
           {{increment @index}}</p>
+          {{#if (eq this.rating 0)}}
+          <p class="text-center">Rating: N/A</p>
+          {{else}}
+          <p class="text-center">Rating: {{this.rating}}/5</p>
+          {{/if}}
         <ul>
           {{#each this.recommendation}}
-            <li tabindex="0">{{this.title}}</li>
+            <li tabindex="0">{{this.title}} (Frequency: {{this.frequency}})</li>
           {{/each}}
         </ul>
+        <a class="regular flex-center mb-3" href="/recommendations/{{this._id}}">Go to Recommendation List {{increment @index}}</a>
       </div>
     {{/each}}
   </div>

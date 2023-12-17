@@ -1,0 +1,66 @@
+<header>
+  <h1 tabindex="0" class="text-center">{{username}}'s Profile</h1>
+</header>
+
+<main class="mx-5">
+  <div class="flex-center flex-column">
+    <img
+      src="{{image}}"
+      alt="Profile Picture"
+      width="64"
+      height="64"
+      class="rounded-circle"
+      tabindex="0"
+    />
+  </div>
+
+  <ul class="list-group my-3">
+    {{! Plaintext password not available }}
+    <li class="list-group-item" tabindex="0">Username: {{username}}</li>
+    <li class="list-group-item" tabindex="0">Email Address:
+      {{emailAddress}}</li>
+    {{! MAL display as linked with username or unlinked }}
+    <li class="list-group-item" tabindex="0">MyAnimeList Username:
+      {{malUsername}}</li>
+  </ul>
+
+  {{! History of recommendation lists sorted by generated date (reverse inserted order) }}
+  <div class="flex-center flex-column">
+    <label for="toggleRecHistory" class="hiddenLabel">Toggle Recommendation
+      History</label>
+    <button
+      name="toggleRecHistory"
+      id="toggleRecHistory"
+      class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2 my-3"
+    >
+      Toggle Recommendation History
+    </button>
+  </div>
+
+  <div id="recHistory" class="flex-center flex-column max-width-history hidden">
+    {{#unless recommendations}}
+      <p class="fw-bold text-center" tabindex="0">No Recommendations Yet</p>
+    {{/unless}}
+
+    {{#each recommendations}}
+      {{! Increment is a helper defined in app.js }}
+      <div class="pt-2">
+        <p class="fw-bold text-center" tabindex="0">Recommendation List
+          {{increment @index}}</p>
+          {{#if (eq this.rating 0)}}
+          <p class="text-center">Rating: N/A</p>
+          {{else}}
+          <p class="text-center">Rating: {{this.rating}}/5</p>
+          {{/if}}
+        <ul>
+          {{#each this.recommendation}}
+            <li tabindex="0">{{this.title}} (Frequency: {{this.frequency}})</li>
+          {{/each}}
+        </ul>
+        <a class="regular flex-center mb-3" href="/recommendations/{{this._id}}">Go to Recommendation List {{increment @index}}</a>
+      </div>
+    {{/each}}
+  </div>
+</main>
+
+<script type="module" src="/public/js/accounts.js"></script>
