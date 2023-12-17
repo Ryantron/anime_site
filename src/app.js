@@ -21,6 +21,7 @@ const handlebarsInstance = exphbs.create({
         return new Handlebars.SafeString(JSON.stringify(obj, null, spacing));
     },
     increment: (value) => value + 1,
+    eq: (a, b) => a === b,
   },
 });
 
