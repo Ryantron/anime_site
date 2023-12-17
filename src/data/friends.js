@@ -187,13 +187,13 @@ export const isFriendOrPending = async (senderUsername, recipientUsername) => {
   const targetFriends = recipient.friendList;
 
   for (const friend of yourFriends) {
-    if (friend.username === targetUsername) {
+    if (friend.username === recipient.username) {
       return true;
     }
   }
 
   for (const friend of targetFriends) {
-    if (friend.username === yourUsername) {
+    if (friend.username === sender.username) {
       return true;
     }
   }
