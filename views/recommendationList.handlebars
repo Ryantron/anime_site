@@ -8,12 +8,12 @@
     <div class="flex-center">
       <h2 class="text-center me-2" tabindex="0">Author</h2>
       {{#if showFriendButton}}
-      <form
-        action="/accounts/friend/:username"
-        method="post"
-        id="addFriendForm"
-      >
-        <label for="addFriendIconButton" class="hiddenLabel">Add Friend</label>
+        <form
+          action="/accounts/friend/:username"
+          method="post"
+          id="addFriendForm"
+        >
+          <label for="addFriendIconButton" class="hiddenLabel">Add Friend</label>
           <button
             type="submit"
             title="addFriendIconButton"
@@ -21,7 +21,10 @@
             class="fa-solid fa-user-group rounded-pill border-0 p-3"
           >
           </button>
-      </form>
+          {{! <script>
+            console.log("bad");
+          </script> }}
+        </form>
       {{/if}}
     </div>
     <div class="flex-center flex-column">
@@ -139,9 +142,9 @@
   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
   crossorigin="anonymous"
 ></script>
-<script>
+<script nonce="{{recListNounce}}">
   const handlebars = { IS_AUTHOR: '{{isAuthor}}', AUTHOR_NAME: '{{authorName}}',
-  REC_ID: '{{recId}}', REVIEW_RATING: '{{reviewRating}}', FRIEND_FORM: '{{showFriendButton}}' }
-  console.log(handlebars)
+  REC_ID: '{{recId}}', REVIEW_RATING: '{{reviewRating}}', FRIEND_FORM: '{{showFriendButton}}'
+  };
 </script>
 <script src="/public/js/recList.js"></script>
