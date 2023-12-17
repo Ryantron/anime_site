@@ -57,6 +57,13 @@ app.use(
   })
 );
 
+app.use((req, res, next) => {
+  const user = req.session.user ? req.session.user : null;
+  // Make the user data available to all routes
+  res.locals.navbar = { user };
+  next();
+});
+
 app.engine("handlebars", handlebarsInstance.engine);
 app.set("view engine", "handlebars");
 app.set("views", __viewPath);
