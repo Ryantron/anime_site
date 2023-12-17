@@ -301,4 +301,12 @@ const exportedMethods = {
   },
 };
 
+export async function friendRoute(req, res, friendFun) {
+  let userName = exportedMethods.stringCheck(req.params.username);
+  if (userName === req.session.user?.username)
+    throw new RangeError("You can't be friends with yourself.");
+  let ownUserName = exportedMethods.stringCheck(req.session.user.username);
+  return await friendFun(ownUserName, userName);
+}
+
 export default exportedMethods;

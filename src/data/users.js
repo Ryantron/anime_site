@@ -223,7 +223,7 @@ export const unlinkMalAccount = async (emailAddress) => {
 
   const updatedInfo = await usersCollection.updateOne(
     { emailAddress: emailAddress },
-    { $unset: { malUsername: 1 } },
+    { $set: {malUsername: ""} },
     { returnDocument: "after" }
   );
   if (updatedInfo.modifiedCount === 0) {
