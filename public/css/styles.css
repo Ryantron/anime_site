@@ -169,3 +169,7 @@ a.regular:hover {
 .radio-btn {
   color: black;
 }
+
+.list-group-item form {
+  display: inline;
+}

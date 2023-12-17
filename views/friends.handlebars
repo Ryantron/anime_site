@@ -48,6 +48,7 @@
       Requests</label>
   </div>
 
+  {{! Show friend list, unfriend form button submission }}
   <div class="friendListInfo">
     <h3 tabindex="0">Friend List:</h3>
     <ul class="list-group">
@@ -58,25 +59,31 @@
       {{#each friendList}}
         <li class="list-group-item">
           <span tabindex="0">{{this.username}}</span>
-          <label class="hiddenLabel" for="removeFriend">Remove Friend</label>
-          <button
-            type="button"
-            id="removeFriend"
-            class="btn btn-outline-danger mx-4"
+          <form
+            action="/accounts/friend/unfriend/{{this.username}}"
+            method="POST"
           >
-            <img
-              src="/public/resources/person-x.svg"
-              alt="Person X Icon"
-              width="16"
-              height="16"
-            />
-            Remove
-          </button>
+            <label class="hiddenLabel" for="removeFriend">Remove Friend</label>
+            <button
+              type="submit"
+              id="removeFriend"
+              class="btn btn-outline-danger mx-4"
+            >
+              <img
+                src="/public/resources/person-x.svg"
+                alt="Person X Icon"
+                width="16"
+                height="16"
+              />
+              Remove
+            </button>
+          </form>
         </li>
       {{/each}}
     </ul>
   </div>
 
+  {{! Show pending requests, reject/accept form button submission }}
   <div class="pendingRequestsInfo hidden">
     <h3 tabindex="0">Pending Friend Requests:</h3>
     {{#unless pendingRequests}}
@@ -87,38 +94,47 @@
       {{#each pendingRequests}}
         <li class="list-group-item">
           <span tabindex="0">{{this}}</span>
-          <label class="hiddenLabel" for="rejectPending">Reject Pending Friend
-            Request</label>
-          <button
-            type="button"
-            id="rejectPending"
-            class="btn btn-outline-danger mx-4"
-          >
-            <img
-              src="/public/resources/person-x.svg"
-              alt="Person X Icon"
-              width="16"
-              height="16"
-            />
-            Reject
-          </button>
+          <form action="/accounts/friend/reject/{{this}}" method="POST">
+            <label class="hiddenLabel" for="rejectPending">Reject Pending Friend
+              Request</label>
+            <button
+              type="submit"
+              id="rejectPending"
+              class="btn btn-outline-danger mx-4"
+            >
+              <img
+                src="/public/resources/person-x.svg"
+                alt="Person X Icon"
+                width="16"
+                height="16"
+              />
+              Reject
+            </button>
+          </form>
 
-          <label class="hiddenLabel" for="acceptPending">Accept Pending Friend
-            Request</label>
-          <button type="button" id="acceptPending" class="btn btn-success mx-4">
-            <img
-              src="/public/resources/person-x.svg"
-              alt="Person X Icon"
-              width="16"
-              height="16"
-            />
-            Accept
-          </button>
+          <form action="/accounts/friend/accept/{{this}}" method="POST">
+            <label class="hiddenLabel" for="acceptPending">Accept Pending Friend
+              Request</label>
+            <button
+              type="submit"
+              id="acceptPending"
+              class="btn btn-success mx-4"
+            >
+              <img
+                src="/public/resources/person-x.svg"
+                alt="Person X Icon"
+                width="16"
+                height="16"
+              />
+              Accept
+            </button>
+          </form>
         </li>
       {{/each}}
     </ul>
   </div>
 
+  {{! Show sent requests }}
   <div class="sentRequestsInfo hidden">
     <h3 tabindex="0">Friend Requests Sent:</h3>
     {{#unless sentRequests}}

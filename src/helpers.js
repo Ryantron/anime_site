@@ -1,5 +1,6 @@
 //You can add and export any helper functions you want here. If you aren't using any, then you can just leave this file as is.
 import { ObjectId } from "mongodb";
+import { users } from "./config/mongoCollections.js";
 
 /**
  * Errors
@@ -54,6 +55,17 @@ export function removeObjectIdFromUser(user) {
     rec._id = rec._id.toString();
     return rec;
   });
+}
+
+export async function getUserByEmail(emailAddress) {
+  if (!emailAddress) throw new Error("Need to provide emailAddress");
+  const usersCollection = await users();
+  const user = await usersCollection.findOne({ emailAddress });
+  if (user === null)
+    throw new Error(`User not found by email: ${emailAddress}`);
+
+  removeObjectIdFromUser(user);
+  return user;
 }
 
 export const IMAGE_PATHS = {
