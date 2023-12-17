@@ -2,14 +2,17 @@
   <h1 tabindex="0" class="text-center">Recommendation List</h1>
 </header>
 <main class="mx-5">
-    <ol>
+  <ol>
     {{#each Result}}
-        {{#this}} 
-            <li><a tabindex="0" href="https://myanimelist.net/anime/{{this.id}}">{{this.title}}</a></li>
-        {{/this}}
+      {{#this}}
+        <li><a
+            tabindex="0"
+            href="https://myanimelist.net/anime/{{this.id}}"
+          >{{this.title}}</a></li>
+      {{/this}}
     {{/each}}
-    </ol>
+  </ol>
 </main>
 <footer>
-    <a tabindex="0" href="/main">Go back to main page!</a>
+  <a tabindex="0" href="/main">Go back to main page!</a>
 </footer>

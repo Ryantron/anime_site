@@ -1,9 +1,13 @@
+/**
+ * DOM ELEMENTS
+ */
+
 const navbar = document.querySelector("#navbar");
 const navbarMenuBtn = document.querySelector("#navbar__menu-button");
 const navbarUsername = document.querySelector("#navbar__username");
 
 /**
- * Run after page loads
+ * RUNTIME Dynamic HTML & CSS
  */
 
 // Create Menu Popup Element
@@ -37,7 +41,7 @@ menuTemplate.innerHTML = menuHTML;
 const menuEl = menuTemplate.content.children[0];
 
 /**
- * Event Handlers
+ * EVENT LISTENERS
  */
 
 navbarMenuBtn.addEventListener("click", () => {

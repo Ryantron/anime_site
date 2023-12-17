@@ -1,45 +1,64 @@
 import { users } from "../config/mongoCollections.js";
 import { ObjectId } from "mongodb";
-import validation, { DBError, ResourcesError, getUserInfo, updateFriendsList, updateSentPendingRequests } from "../helpers.js";
+import validation, {
+  DBError,
+  ResourcesError,
+  getUserInfo,
+  updateFriendsList,
+  updateSentPendingRequests,
+} from "../helpers.js";
 
 export const sendFriendRequest = async (senderName, recipientName) => {
-    const userData = await getUserInfo(senderName, recipientName)
-    const senderData = userData.sender
-    const recipientData = userData.recipient
-    const senderUsername = senderData.username
-    const recipientUsername = recipientData.username
+  const userData = await getUserInfo(senderName, recipientName);
+  const senderData = userData.sender;
+  const recipientData = userData.recipient;
+  const senderUsername = senderData.username;
+  const recipientUsername = recipientData.username;
 
-    let pendingRequests = recipientData.pendingRequests;
-    let sentRequests = senderData.sentRequests;
-    if(sentRequests && pendingRequests){
-        if(sentRequests.includes(recipientUsername) && pendingRequests.includes(senderUsername)){
-            throw new RangeError("You have already sent a friend request to this user")
-        }
-    }else{
-        pendingRequests = []
-        sentRequests = []
+  let pendingRequests = recipientData.pendingRequests;
+  let sentRequests = senderData.sentRequests;
+  if (sentRequests && pendingRequests) {
+    if (
+      sentRequests.includes(recipientUsername) &&
+      pendingRequests.includes(senderUsername)
+    ) {
+      throw new RangeError(
+        "You have already sent a friend request to this user"
+      );
     }
+  } else {
+    pendingRequests = [];
+    sentRequests = [];
+  }
 
-    pendingRequests.push(senderUsername);
-    sentRequests.push(recipientUsername)
-    let updated = await updateSentPendingRequests(senderUsername, sentRequests, recipientUsername, pendingRequests)
-    if (updated !== true){
-        throw new DBError("Error updatating request information")
-    }
+  pendingRequests.push(senderUsername);
+  sentRequests.push(recipientUsername);
+  let updated = await updateSentPendingRequests(
+    senderUsername,
+    sentRequests,
+    recipientUsername,
+    pendingRequests
+  );
+  if (updated !== true) {
+    throw new DBError("Error updatating request information");
+  }
 
   return {
     friendRequestSent: true,
     from: senderUsername,
     to: recipientUsername,
   };
-}
+};
 
-export const acceptFriendRequest = async (recipientUsername, senderUsername) => {
-  const userInfo = await getUserInfo(senderUsername, recipientUsername)
-  const senderData = userInfo.sender
-  const recipientData = userInfo.recipient
-    const senderName = senderData.username
-    const recipientName = recipientData.username
+export const acceptFriendRequest = async (
+  recipientUsername,
+  senderUsername
+) => {
+  const userInfo = await getUserInfo(senderUsername, recipientUsername);
+  const senderData = userInfo.sender;
+  const recipientData = userInfo.recipient;
+  const senderName = senderData.username;
+  const recipientName = recipientData.username;
 
   let pendingRequests = recipientData.pendingRequests;
   let sentRequests = senderData.sentRequests;
@@ -66,22 +85,33 @@ export const acceptFriendRequest = async (recipientUsername, senderUsername) => 
     }
   });
 
-  const updatedRequests = await updateSentPendingRequests(senderName, updateSent, recipientName, updatePending)
-  if(updatedRequests !== true){throw new DBError("Could not update request successfully")}
+  const updatedRequests = await updateSentPendingRequests(
+    senderName,
+    updateSent,
+    recipientName,
+    updatePending
+  );
+  if (updatedRequests !== true) {
+    throw new DBError("Could not update request successfully");
+  }
 
-  const updatedFriends = await updateFriendsList(senderData, recipientData)
-  if(updatedFriends !== true){throw new DBError("Could not update friend list successfully")
-}
+  const updatedFriends = await updateFriendsList(senderData, recipientData);
+  if (updatedFriends !== true) {
+    throw new DBError("Could not update friend list successfully");
+  }
 
   return { friendAdded: true };
 };
 
-export const rejectFriendRequest = async (recipientUsername, senderUsername) => {
-  const userData = await getUserInfo(senderUsername, recipientUsername)
-    const senderData = userData.sender
-    const recipientData = userData.recipient
-    const senderName = senderData.username
-    const recipientName = recipientData.username
+export const rejectFriendRequest = async (
+  recipientUsername,
+  senderUsername
+) => {
+  const userData = await getUserInfo(senderUsername, recipientUsername);
+  const senderData = userData.sender;
+  const recipientData = userData.recipient;
+  const senderName = senderData.username;
+  const recipientName = recipientData.username;
 
   let pendingRequests = recipientData.pendingRequests;
   let sentRequests = senderData.sentRequests;
@@ -108,43 +138,53 @@ export const rejectFriendRequest = async (recipientUsername, senderUsername) => 
     }
   });
 
-  const updatedRequests = await updateSentPendingRequests(senderName, updateSent, recipientName, updatePending)
-  if(updatedRequests !== true){
-    throw new DBError("Could not update requests successfully")
+  const updatedRequests = await updateSentPendingRequests(
+    senderName,
+    updateSent,
+    recipientName,
+    updatePending
+  );
+  if (updatedRequests !== true) {
+    throw new DBError("Could not update requests successfully");
   }
   return { requestRejected: true };
 };
 
-export const removeFriend = async (senderUsername, removalRecipientUsername) => {
-  const userInfo = await getUserInfo(senderUsername, removalRecipientUsername)
-  const sender = userInfo.sender
-  const removalRecipient = userInfo.recipient
-  const senderName = sender.username
-  const removalRecipientName = removalRecipient.username
+export const removeFriend = async (
+  senderUsername,
+  removalRecipientUsername
+) => {
+  const userInfo = await getUserInfo(senderUsername, removalRecipientUsername);
+  const sender = userInfo.sender;
+  const removalRecipient = userInfo.recipient;
+  const senderName = sender.username;
+  const removalRecipientName = removalRecipient.username;
 
   const senderFriends = sender.friendList;
   const removalRecipientFriends = removalRecipient.friendList;
   let updateSenderFriends = [];
   let updateRemovalRecipientFriends = [];
-    let checkSender = []
-    let checkRecipient = []
-  
-  
+  let checkSender = [];
+  let checkRecipient = [];
+
   senderFriends.forEach((friend) => {
-    checkSender.push(friend.username)
+    checkSender.push(friend.username);
     if (friend.username !== removalRecipientName) {
       updateSenderFriends.push(friend);
     }
   });
   removalRecipientFriends.forEach((friend) => {
-    checkRecipient.push(friend.username)
+    checkRecipient.push(friend.username);
     if (friend.username !== senderName) {
       updateRemovalRecipientFriends.push(friend);
     }
   });
 
-  if(!checkSender.includes(removalRecipientName) || !checkRecipient.includes(senderName)){
-    throw new RangeError("You are not friends with this user. Cannot remove.")
+  if (
+    !checkSender.includes(removalRecipientName) ||
+    !checkRecipient.includes(senderName)
+  ) {
+    throw new RangeError("You are not friends with this user. Cannot remove.");
   }
 
   const usersCollection = await users();
@@ -175,13 +215,13 @@ export const removeFriend = async (senderUsername, removalRecipientUsername) => 
   if (updatedTheirList.modifiedCount === 0)
     throw new DBError("Could not update sentRequests successfully");
 
-    return {friendRemoved: removalRecipientName, status: true}
-}
+  return { friendRemoved: removalRecipientName, status: true };
+};
 
 export const isFriendOrPending = async (senderUsername, recipientUsername) => {
-  const userData = await getUserInfo(senderUsername, recipientUsername)
-  const sender = userData.sender
-  const recipient = userData.recipient
+  const userData = await getUserInfo(senderUsername, recipientUsername);
+  const sender = userData.sender;
+  const recipient = userData.recipient;
 
   const yourFriends = sender.friendList;
   const targetFriends = recipient.friendList;
@@ -206,4 +246,3 @@ export const isFriendOrPending = async (senderUsername, recipientUsername) => {
 
   return false;
 };
-
