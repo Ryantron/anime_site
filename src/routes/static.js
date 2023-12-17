@@ -375,7 +375,7 @@ router.route("/accounts").get(async (req, res) => {
     emailAddress: emailAddress,
     malUsername: malUsername || "N/A",
     recommendations: recommendations,
-    hasLinked: malUsername !== undefined,
+    hasLinked: malUsername !== "",
     image: IMAGE_PATHS[pfpId],
   });
 });
@@ -393,7 +393,7 @@ router.route("/accounts/mal/link").post(async (req, res) => {
       );
     }
     // Update session: set malUsername
-    req.session.user.malUsername = malUsernameInput;
+    req.session.user.malUsername = malUsernameInput.trim();
     return res.redirect("/accounts");
   } catch (err) {
     return res.redirect(
@@ -411,7 +411,7 @@ router.route("/accounts/mal/unlink").post(async (req, res) => {
       );
     }
     // Update session: clear malUsername
-    req.session.user.malUsername = undefined;
+    req.session.user.malUsername = "";
     return res.redirect("/accounts");
   } catch (err) {
     return res.redirect(
