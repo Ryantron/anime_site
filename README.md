@@ -29,6 +29,10 @@ To get started without signing up:
 Sign up for an account to link any MyAnimeList user's animelist to your account!
 
 
+## Help
+
+Please email any of us if you encounter an issue.
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE.md file for details
