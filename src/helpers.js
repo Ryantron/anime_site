@@ -76,6 +76,117 @@ export const IMAGE_PATHS = {
   5: "/public/images/pfp/5-anime_boy-wallpapers_clan.png",
 };
 
+export async function updateFriendsList(senderData, recipientData) {
+  const usersCollection = await users();
+  let recipientFriends = recipientData.friendList;
+  if (!recipientFriends) {
+    recipientFriends = [];
+  }
+
+  let senderFriends = senderData.friendList;
+  if (!senderFriends) {
+    senderFriends = [];
+  }
+
+  recipientFriends.push({
+    _id: new ObjectId(),
+    username: senderData.username,
+  });
+  senderFriends.push({
+    _id: new ObjectId(),
+    username: recipientData.username,
+  });
+
+  const updatePendingFriend = {
+    friendList: recipientFriends,
+    friendCount: recipientFriends.length,
+  };
+
+  const updateSentFriend = {
+    friendList: senderFriends,
+    friendCount: senderFriends.length,
+  };
+
+  const updateSenderFriendsList = await usersCollection.updateOne(
+    { username: senderData.username },
+    { $set: updateSentFriend },
+    { returnDocument: "after" }
+  );
+
+  const updateRecipientFriendsList = await usersCollection.updateOne(
+    { username: recipientData.username },
+    { $set: updatePendingFriend },
+    { returnDocument: "after" }
+  );
+
+  if (updateSenderFriendsList.modifiedCount === 0)
+    throw new DBError("Could not update friendList successfully");
+  if (updateRecipientFriendsList.modifiedCount === 0)
+    throw new DBError("Could not update friendList successfully");
+
+  return true;
+}
+export async function updateSentPendingRequests(
+  yourUsername,
+  sentRequests,
+  targetUsername,
+  pendingRequests
+) {
+  const usersCollection = await users();
+
+  const insertPending = {
+    pendingRequests: pendingRequests,
+  };
+
+  const insertSent = {
+    sentRequests: sentRequests,
+  };
+
+  const updatePending = await usersCollection.updateOne(
+    { username: targetUsername },
+    { $set: insertPending },
+    { returnDocument: "after" }
+  );
+
+  const updatedSent = await usersCollection.updateOne(
+    { username: yourUsername },
+    { $set: insertSent },
+    { returnDocument: "after" }
+  );
+
+  if (updatePending.modifiedCount === 0)
+    throw new DBError("Could not update pendingRequests successfully");
+  if (updatedSent.modifiedCount === 0)
+    throw new DBError("Could not update sentRequests successfully");
+
+  return true;
+}
+export async function getUserInfo(senderName, recipientName) {
+  senderName = exportedMethods.stringCheck(senderName);
+  recipientName = exportedMethods.stringCheck(recipientName);
+
+  senderName = senderName.toLowerCase();
+  recipientName = recipientName.toLowerCase();
+
+  const usersCollection = await users();
+  const sender = await usersCollection.findOne({
+    username: senderName,
+  });
+  const recipient = await usersCollection.findOne({
+    username: recipientName,
+  });
+  if (!sender) {
+    throw new RangeError("Could not find your username");
+  }
+  if (!recipient) {
+    throw new RangeError(
+      "The person you are trying to add does not exist. Double check their username for spelling errors"
+    );
+  }
+
+  return { sender, recipient };
+}
+
 const exportedMethods = {
   integerCheck(arg, { min = -Infinity, max = Infinity } = {}) {
     if (arg == undefined)
