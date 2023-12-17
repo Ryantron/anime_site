@@ -430,12 +430,21 @@ router.route("/accounts/reset").patch(async (req, res) => {
       !body.pfpIdInput
     )
       throw new RangeError("Must provide at least one input");
-    if (body.usernameInput) validation.usernameValidation(body.usernameInput);
-    if (body.emailAddressInput)
+    if (body.usernameInput) {
+      validation.usernameValidation(body.usernameInput);
+    }
+    if (body.emailAddressInput) {
       validation.emailValidation(body.emailAddressInput);
-    if (body.passwordInput) validation.passwordValidation(body.passwordInput);
-    if (body.pfpIdInput)
-      validation.integerCheck(body.pfpIdInput, { min: 1, max: 5 });
+    }
+    if (body.passwordInput) {
+      validation.passwordValidation(body.passwordInput);
+    }
+    if (body.pfpIdInput) {
+      body.pfpIdInput = validation.pfpValidation(body.pfpIdInput, {
+        min: 1,
+        max: 5,
+      });
+    }
 
     const user = await changeUserInfo(
       req.session.user._id,

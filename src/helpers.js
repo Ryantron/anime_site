@@ -218,7 +218,6 @@ const exportedMethods = {
     if (!username || !emailAddress || !password) {
       throw new TypeError("All inputs must be non-empty strings");
     }
-
     if (
       typeof username !== "string" ||
       typeof emailAddress !== "string" ||
@@ -227,37 +226,25 @@ const exportedMethods = {
       throw new TypeError("All inputs must be a string");
     }
 
-    if (/\s/.test(username)) {
-      throw new RangeError("username cannot contain empty spaces");
-    }
-    if (/\s/.test(password)) {
-      throw new RangeError("password cannot contain empty spaces");
-    }
-
-    username = username.trim();
-    emailAddress = emailAddress.trim();
-    password = password.trim();
-
-    const nameRegex = /^[A-Za-z0-9]{2}$/;
-    if (nameRegex.test(username)) {
-      throw new RangeError(
-        "username must be at least 2 characters long and contain no special characters"
-      );
-    }
-
-    this.passwordValidation(password);
-
+    username = this.usernameValidation(username);
+    password = this.passwordValidation(password);
     emailAddress = this.emailValidation(emailAddress);
   },
 
   usernameValidation(username) {
-    this.stringCheck(username);
+    username = this.stringCheck(username);
+    // Username trimmed in stringCheck
+    if (username.length < 2) {
+      throw new RangeError("username cannot be less than 2 characters long");
+    }
+    if (username.length > 25) {
+      throw new RangeError("username cannot be more than 25 characters long");
+    }
     if (/\s/.test(username)) {
       throw new RangeError("username cannot contain empty spaces");
     }
-    username = username.trim();
-    const nameRegex = /^[A-Za-z0-9]{2}$/;
-    if (nameRegex.test(username)) {
+    const nameRegex = /^[A-Za-z0-9]{2,}$/;
+    if (!nameRegex.test(username)) {
       throw new RangeError(
         "username must be at least 2 characters long and contain no special characters"
       );
@@ -266,9 +253,9 @@ const exportedMethods = {
   },
 
   emailValidation(email) {
-    this.stringCheck(email);
-    email = email.trim();
-    const emailCheck = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+    email = this.stringCheck(email);
+    // Email trimmed in stringCheck
+    const emailCheck = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/i;
     if (!emailCheck.test(email)) {
       throw new RangeError("emailAddress is not a valid email");
     }
@@ -279,7 +266,7 @@ const exportedMethods = {
     if (/\s/.test(password)) {
       throw new RangeError("password cannot contain empty spaces");
     }
-    password = password.trim();
+    // No trim
     const passRegex =
       /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^\&*\)\(+=._-])[a-zA-Z0-9!@#\$%\^\&*\)\(+=._-]{8,}$/;
     if (!passRegex.test(password)) {
@@ -288,6 +275,20 @@ const exportedMethods = {
       );
     }
     return password;
+  },
+
+  pfpValidation(pfpId) {
+    pfpId = this.stringCheck(pfpId);
+    // pfpId trimmed in stringCheck
+    if (pfpId.length !== 1) {
+      throw new RangeError(`${pfpId} is not an integer between 1 to 5`);
+    }
+    const parsedPfp = parseInt(pfpId, 10);
+    if (!Number.isInteger(parsedPfp)) {
+      throw new RangeError(`${pfpId} is not an integer`);
+    }
+    pfpId = this.integerCheck(parsedPfp, { min: 1, max: 5 });
+    return pfpId;
   },
 
   objectIdValidation(str) {
