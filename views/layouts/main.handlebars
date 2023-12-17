@@ -10,10 +10,17 @@ don't forget to include your css and your client-side script file references in 
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="script-src 'self' 'nonce-{{recListNounce}}' 'sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=' 'sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL' https://kit.fontawesome.com/643c2e6cd9.js https://rawgit.com/leizongmin/js-xss/master/dist/xss.js;"
-    />
+    {{#if (eq title "Recommendation List")}}
+      <meta
+        http-equiv="Content-Security-Policy"
+        content="script-src 'self' 'nonce-{{recListNounce}}' 'sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=' 'sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL' https://kit.fontawesome.com/643c2e6cd9.js https://rawgit.com/leizongmin/js-xss/master/dist/xss.js;"
+      />
+    {{else}}
+      <meta
+        http-equiv="Content-Security-Policy"
+        content="script-src 'self' 'sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=' 'sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL' https://kit.fontawesome.com/643c2e6cd9.js https://rawgit.com/leizongmin/js-xss/master/dist/xss.js;"
+      />
+    {{/if}}
 
     <title>{{{title}}}</title>
     <link
