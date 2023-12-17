@@ -8,6 +8,7 @@ import validation, {
   errorToStatus,
   IMAGE_PATHS,
   getUserByEmail,
+  friendRoute,
 } from "../helpers.js";
 import {
   acceptFriendRequest,
@@ -213,11 +214,7 @@ router.route("/recommendations/review/:recId").post(async (req, res) => {
 
 router.route("/accounts/friend/:username").post(async (req, res) => {
   try {
-    let userName = validation.stringCheck(req.params.username);
-    if (userName == req.session.user?.username)
-      throw new RangeError("You can't friend yourself.");
-    let ownUserName = validation.stringCheck(req.session.user.username);
-    await sendFriendRequest(ownUserName, userName);
+    await friendRoute(req,res,sendFriendRequest);
     return res.redirect("/accounts/friends");
   } catch (err) {
     return res.redirect(
@@ -228,11 +225,7 @@ router.route("/accounts/friend/:username").post(async (req, res) => {
 
 router.route("/accounts/friend/reject/:username").post(async (req, res) => {
   try {
-    let userName = validation.stringCheck(req.params.username);
-    if (userName == req.session.user?.username)
-      throw new RangeError("You can't have a friend request from yourself.");
-    let ownUserName = validation.stringCheck(req.session.user.username);
-    await rejectFriendRequest(ownUserName, userName);
+    await friendRoute(req,res,rejectFriendRequest);
     return res.redirect("/accounts/friends");
   } catch (err) {
     return res.redirect(
@@ -243,11 +236,7 @@ router.route("/accounts/friend/reject/:username").post(async (req, res) => {
 
 router.route("/accounts/friend/accept/:username").post(async (req, res) => {
   try {
-    let userName = validation.stringCheck(req.params.username);
-    if (userName == req.session.user?.username)
-      throw new RangeError("You can't have a friend request from yourself.");
-    let ownUserName = validation.stringCheck(req.session.user.username);
-    await acceptFriendRequest(ownUserName, userName);
+    await friendRoute(req,res,acceptFriendRequest);
     return res.redirect("/accounts/friends");
   } catch (err) {
     return res.redirect(
@@ -258,11 +247,7 @@ router.route("/accounts/friend/accept/:username").post(async (req, res) => {
 
 router.route("/accounts/friend/unfriend/:username").post(async (req, res) => {
   try {
-    let userName = validation.stringCheck(req.params.username);
-    if (userName == req.session.user?.username)
-      throw new RangeError("You can't be friends with yourself.");
-    let ownUserName = validation.stringCheck(req.session.user.username);
-    await removeFriend(ownUserName, userName);
+    await friendRoute(req,res,removeFriend);
     return res.redirect("/accounts/friends");
   } catch (err) {
     return res.redirect(
@@ -477,5 +462,10 @@ router.route("/accounts/friends").get(async (req, res) => {
     sentRequests: req.session.user.sentRequests,
   });
 });
+
+router.route("/logout").get(async (req,res) =>{
+  req.session.destroy();
+  res.redirect("/login");
+})
 
 export default router;

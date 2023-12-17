@@ -8,7 +8,9 @@ export const sendFriendRequest = async (senderName, recipientName) => {
     const recipientData = userData.recipient
     const senderUsername = senderData.username
     const recipientUsername = recipientData.username
-
+    //Check for auto accepting when you already have a request from another user
+    //This check was gone post refactoring, so I added it back.
+    if (await isFriendOrPending(recipientUsername, senderUsername)) return await acceptFriendRequest(senderUsername, recipientUsername);
     let pendingRequests = recipientData.pendingRequests;
     let sentRequests = senderData.sentRequests;
     if(sentRequests && pendingRequests){

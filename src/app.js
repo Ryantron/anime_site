@@ -94,6 +94,11 @@ app.use("/signup", (req, res, next) => {
   res.redirect("/main");
 });
 
+app.use("/logout", (req, res, next) => {
+  if (req.session.user) return next();
+  res.redirect("/login");
+});
+
 // Middlewares END
 
 routes(app);

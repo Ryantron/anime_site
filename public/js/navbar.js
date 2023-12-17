@@ -16,10 +16,10 @@ const createLi = (aHref, aId, aContent) => `
 </li>
 `;
 
-const accountsItemHTML = createLi(
-  "/accounts",
-  "navbar_accounts-anchor",
-  "Accounts"
+const logoutItemHTML = createLi(
+  "/logout",
+  "navbar_logout-anchor",
+  "Logout"
 );
 
 const menuHTML = `
@@ -28,7 +28,7 @@ const menuHTML = `
   class='position-absolute end-0 top-100 secondary-bg-color flex-center flex-column px-2 flex-align-stretch border-bottom border-dark'>
   ${createLi("/main", "navbar_main-anchor", "Main")}
   ${createLi("/accounts/friends", "navbar_friends_anchor", "Friends")}
-  ${navbarUsername === undefined ? "" : accountsItemHTML}
+  ${navbarUsername === null ? "" : logoutItemHTML}
 </ul>
 `;
 
