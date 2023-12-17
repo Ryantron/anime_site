@@ -3,6 +3,7 @@ import {
   deleteError,
   addClassToArr,
   removeClassFromArr,
+  ajaxPost,
 } from "./helpers.js";
 
 /**
@@ -16,20 +17,6 @@ const fillStars = (stars, maxStarValue) => {
   removeClassFromArr(stars, "fa-solid");
   addClassToArr(filledStars, "fa-solid");
   addClassToArr(unfilledStars, "fa-regular");
-};
-
-const ajaxPost = async (url, parentEl) => {
-  return await $.ajax({
-    method: "POST",
-    url,
-  })
-    .then(() => {
-      location.reload();
-    })
-    .fail((xhr, _, err) => {
-      const errEl = createErrorList([`Status ${xhr.status}: ${err}`]);
-      parentEl.appendChild(errEl);
-    });
 };
 
 /**

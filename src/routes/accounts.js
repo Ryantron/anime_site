@@ -20,18 +20,18 @@ import {
 
 router.route("/friend/:username").post(async (req, res) => {
   try {
-    await friendRoute(req,res,sendFriendRequest);
-    return res.redirect("/accounts/friends");
+    await friendRoute(req, res, sendFriendRequest);
+    return res.status(200).send();
   } catch (err) {
-    return res.redirect(
-      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
-    );
+    return res.status(errorToStatus(err)).send({
+      message: err.message ?? "Unknown Error",
+    });
   }
 });
 
 router.route("/friend/reject/:username").post(async (req, res) => {
   try {
-    await friendRoute(req,res,rejectFriendRequest);
+    await friendRoute(req, res, rejectFriendRequest);
     return res.redirect("/accounts/friends");
   } catch (err) {
     return res.redirect(
@@ -42,7 +42,7 @@ router.route("/friend/reject/:username").post(async (req, res) => {
 
 router.route("/friend/accept/:username").post(async (req, res) => {
   try {
-    await friendRoute(req,res,acceptFriendRequest);
+    await friendRoute(req, res, acceptFriendRequest);
     return res.redirect("/accounts/friends");
   } catch (err) {
     return res.redirect(
@@ -53,7 +53,7 @@ router.route("/friend/accept/:username").post(async (req, res) => {
 
 router.route("/friend/unfriend/:username").post(async (req, res) => {
   try {
-    await friendRoute(req,res,removeFriend);
+    await friendRoute(req, res, removeFriend);
     return res.redirect("/accounts/friends");
   } catch (err) {
     return res.redirect(

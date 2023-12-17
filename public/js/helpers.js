@@ -169,3 +169,17 @@ export const addClassToArr = (elArr, className) => {
 export const removeClassFromArr = (elArr, className) => {
   elArr.forEach((el) => el.classList.remove(className));
 };
+
+export const ajaxPost = async (url, parentEl) => {
+  return $.ajax({
+    method: "POST",
+    url,
+  })
+    .then(() => {
+      location.reload();
+    })
+    .fail((xhr, _, err) => {
+      const errEl = createErrorList([`Status ${xhr.status}: ${err}`]);
+      parentEl.appendChild(errEl);
+    });
+};

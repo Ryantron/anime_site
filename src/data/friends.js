@@ -9,14 +9,15 @@ import validation, {
 } from "../helpers.js";
 
 export const sendFriendRequest = async (senderName, recipientName) => {
-  const userData = await getUserInfo(senderName, recipientName)
-  const senderData = userData.sender
-  const recipientData = userData.recipient
-  const senderUsername = senderData.username
-  const recipientUsername = recipientData.username
+  const userData = await getUserInfo(senderName, recipientName);
+  const senderData = userData.sender;
+  const recipientData = userData.recipient;
+  const senderUsername = senderData.username;
+  const recipientUsername = recipientData.username;
   //Check for auto accepting when you already have a request from another user
   //This check was gone post refactoring, so I added it back.
-  if (await isFriendOrPending(recipientUsername, senderUsername)) return await acceptFriendRequest(senderUsername, recipientUsername);
+  if (await isFriendOrPending(recipientUsername, senderUsername))
+    return await acceptFriendRequest(senderUsername, recipientUsername);
   let pendingRequests = recipientData.pendingRequests;
   let sentRequests = senderData.sentRequests;
   if (sentRequests && pendingRequests) {
