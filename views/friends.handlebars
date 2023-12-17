@@ -1,128 +1,154 @@
-<header>
-  <h1 tabindex="0" class="text-center">Your Friends</h1>
-  <p class="font-weight-light">{{friendCount}} Friends</p>
+<header class="text-center mb-4">
+  <h1 tabindex="0">Your Friends</h1>
+  <p tabindex="0">{{friendCount}} Friends</p>
+  <a tabindex="0" class="header" href="/accounts">Go Back to Your Account</a>
 </header>
 
 <main class="mx-5">
-  {{! TODO: tab buttons here: friend list, Pending Requests, Sent Requests }}
-  <h3 class="my-2" tabindex="0">Friend List</h3>
-  {{!-- <ul class="list-group">
-    {{#each friendList}}
-      <li class="list-group-item">{{this}}</li>
-    {{/each}}
-  </ul> --}}
-
-  {{! Reset Account }}
-  <h3 class="my-2" tabindex="0">Edit Account Info:</h3>
-  {{! Middleware changes this form to PATCH }}
-  <form
-    action="/accounts/reset"
-    method="post"
-    id="resetForm"
-    class="flex-center flex-column"
+  {{! Button for tabbing to friend list, pending requests, and sent requests }}
+  {{! Related article: https://getbootstrap.com/docs/5.3/components/navs-tabs/
+  In line with the ARIA Authoring Practices pattern, only the
+  currently active tab receives keyboard focus. Once the currently active tab
+  has focus, the cursor keys activate the previous/next tab (not tabbing through) }}
+  <div
+    class="btn-group pb-3"
+    role="group"
+    aria-label="Radio toggle button group of friend list, pending requests, and sent requests"
   >
-    {{! Trigger rewriteUnsupportedBrowserMethods middleware }}
-    <input type="hidden" name="_method" value="PATCH" />
+    <input
+      type="radio"
+      class="btn-check"
+      name="btnradio"
+      id="friendList"
+      autocomplete="off"
+      checked
+    />
+    <label class="btn btn-outline-danger radio-btn" for="friendList">Friend List</label>
 
-    <div class="flex-center flex-column py-2">
-      <label for="usernameInput">Username</label>
-      <input name="usernameInput" id="usernameInput" type="text" />
-    </div>
+    <input
+      type="radio"
+      class="btn-check"
+      name="btnradio"
+      id="pendingRequests"
+      autocomplete="off"
+    />
+    <label
+      class="btn btn-outline-danger radio-btn"
+      for="pendingRequests"
+    >Pending Requests</label>
 
-    <div class="flex-center flex-column py-2">
-      <label for="emailAddressInput">Email Address</label>
-      <input name="emailAddressInput" id="emailAddressInput" type="email" />
-    </div>
-
-    <div class="flex-center flex-column py-2">
-      <label for="passwordInput">Password</label>
-      <input name="passwordInput" id="passwordInput" type="password" />
-    </div>
-
-    {{! TODO: reconsider pfp? Upload own pfp? See options? }}
-    <div class="flex-center flex-column py-2">
-      <label for="pfpInput">Profile Picture</label>
-      <input name="pfpInput" id="pfpInput" type="text" />
-    </div>
-
-    <div class="flex-center flex-column py-2">
-      <label for="submitResetInput" hidden>Update Account</label>
-      <button
-        name="submitResetInput"
-        id="submitResetInput"
-        class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
-        type="submit"
-      >
-        Update Account
-      </button>
-    </div>
-  </form>
-
-  {{! Error div }}
-  <div id="errorList" class="py-2">
+    <input
+      type="radio"
+      class="btn-check"
+      name="btnradio"
+      id="sentRequests"
+      autocomplete="off"
+    />
+    <label class="btn btn-outline-danger radio-btn" for="sentRequests">Sent
+      Requests</label>
   </div>
 
-  {{! Link MAL if not linked }}
-  {{#unless hasLinked}}
-    <h3 tabindex="0">Link Your MyAnimeList Account:</h3>
-    <form
-      action="/accounts/mal/link"
-      method="post"
-      id="malForm"
-      class="flex-center flex-column"
-    >
-      {{! Session provides the email }}
-      <div class="flex-center flex-column py-2">
-        <label for="malUsernameInput">MyAnimeList Username</label>
-        <input name="malUsernameInput" id="malUsernameInput" type="text" />
-      </div>
+  {{! Show friend list, unfriend form button submission }}
+  <div class="friendListInfo">
+    <h3 tabindex="0">Friend List:</h3>
+    <ul class="list-group">
+      {{#unless friendList}}
+        <p class="fw-bold text-center" tabindex="0">No Friends...</p>
+      {{/unless}}
 
-      <div class="flex-center flex-column py-2">
-        <label for="submitMalInput" hidden>Link MyAnimeList</label>
-        <button
-          name="submitMalInput"
-          id="submitMalInput"
-          class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
-          type="submit"
-        >
-          Link MyAnimeList
-        </button>
-      </div>
-    </form>
-  {{/unless}}
+      {{#each friendList}}
+        <li class="list-group-item">
+          <span tabindex="0">{{this.username}}</span>
+          <form
+            action="/accounts/friend/unfriend/{{this.username}}"
+            method="POST"
+          >
+            <label class="hiddenLabel" for="removeFriend">Remove Friend</label>
+            <button
+              type="submit"
+              id="removeFriend"
+              class="btn btn-outline-danger mx-4"
+            >
+              <img
+                src="/public/resources/person-x.svg"
+                alt="Person X Icon"
+                width="16"
+                height="16"
+              />
+              Remove
+            </button>
+          </form>
+        </li>
+      {{/each}}
+    </ul>
+  </div>
 
-  {{! Unlink MAL }}
-  {{#if hasLinked}}
-    <h3 tabindex="0">Unlink Your MyAnimeList Account:</h3>
-    <form
-      action="/accounts/mal/unlink"
-      method="post"
-      id="unlinkMal"
-      class="flex-center flex-column my-3"
-    >
-      <label for="unlinkMalButton" hidden>Unlink Your MyAnimeList Account</label>
-      <button
-        name="unlinkMalButton"
-        id="unlinkMalButton"
-        class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2"
-        type="submit"
-      >
-        Unlink Your MyAnimeList Account
-      </button>
-    </form>
-  {{/if}}
+  {{! Show pending requests, reject/accept form button submission }}
+  <div class="pendingRequestsInfo hidden">
+    <h3 tabindex="0">Pending Friend Requests:</h3>
+    {{#unless pendingRequests}}
+      <p class="fw-bold text-center" tabindex="0">No Pending Friend Requests...</p>
+    {{/unless}}
 
-  {{! History of recommendation lists sorted by generated date (reverse inserted order) }}
-  <button
-    name="toggleRecHistory"
-    id="toggleRecHistory"
-    class="primary-bg-color primary-text-color rounded-pill border-0 px-5 py-2 my-3"
-  >
-    Toggle Recommendation History
-  </button>
-  <ul id="rec-list">
-    {{#each recommendations}}
-      <li>{{this}}</li>
-    {{/each}}
-  </ul>
+    <ul class="list-group">
+      {{#each pendingRequests}}
+        <li class="list-group-item">
+          <span tabindex="0">{{this}}</span>
+          <form action="/accounts/friend/reject/{{this}}" method="POST">
+            <label class="hiddenLabel" for="rejectPending">Reject Pending Friend
+              Request</label>
+            <button
+              type="submit"
+              id="rejectPending"
+              class="btn btn-outline-danger mx-4"
+            >
+              <img
+                src="/public/resources/person-x.svg"
+                alt="Person X Icon"
+                width="16"
+                height="16"
+              />
+              Reject
+            </button>
+          </form>
+
+          <form action="/accounts/friend/accept/{{this}}" method="POST">
+            <label class="hiddenLabel" for="acceptPending">Accept Pending Friend
+              Request</label>
+            <button
+              type="submit"
+              id="acceptPending"
+              class="btn btn-success mx-4"
+            >
+              <img
+                src="/public/resources/person-x.svg"
+                alt="Person X Icon"
+                width="16"
+                height="16"
+              />
+              Accept
+            </button>
+          </form>
+        </li>
+      {{/each}}
+    </ul>
+  </div>
+
+  {{! Show sent requests }}
+  <div class="sentRequestsInfo hidden">
+    <h3 tabindex="0">Friend Requests Sent:</h3>
+    {{#unless sentRequests}}
+      <p class="fw-bold text-center" tabindex="0">No Friend Request Sent...</p>
+    {{/unless}}
+
+    <ul class="list-group">
+      {{#each sentRequests}}
+        <li class="list-group-item">
+          <span tabindex="0">{{this}}</span>
+        </li>
+      {{/each}}
+    </ul>
+  </div>
 </main>
+
+<script defer src="/public/js/friends.js"></script>

@@ -27,14 +27,37 @@ const stringValidation = (str, { minLen = 1, maxLen = Infinity } = {}) => {
 };
 
 /**
+ * @param {any} username
+ * @returns {string}
+ */
+const usernameValidation = (username) => {
+  username = stringValidation(username, {
+    minLen: 2,
+    maxLen: 25,
+  });
+  // Username trimmed in stringValidation
+  if (typeof username === "object") return username;
+  if (/\s/.test(username)) {
+    return errorConstructor(`Username cannot contain empty spaces`);
+  }
+  const nameRegex = /^[A-Za-z0-9]{2,}$/;
+  if (!nameRegex.test(username)) {
+    return errorConstructor(
+      "Username must be at least 2 characters long and contain no special characters"
+    );
+  }
+  return username;
+};
+
+/**
  * @param {any} email
  * @returns {string}
  */
 const emailValidation = (email) => {
   const res = stringValidation(email);
+  // Email trimmed in stringValidation
   if (typeof res === "object") return res;
   const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/i;
-
   if (emailRegex.test(res)) return res;
   else return errorConstructor(`Invalid email ${res}`);
 };
@@ -75,7 +98,13 @@ const integerCheck = (arg, { min = -Infinity, max = Infinity } = {}) => {
 };
 
 const pfpValidation = (pfpId) => {
-  pfpId = integerCheck(pfpId, { min: 1, max: 5 });
+  if (typeof pfpId !== "string" || pfpId.trim().length !== 1) {
+    return errorConstructor(`${pfpId} is not an integer between 1 to 5`);
+  }
+  const parsedPfp = parseInt(pfpId, 10);
+  if (!Number.isInteger(parsedPfp))
+    return errorConstructor(`${pfpId} is not an integer`);
+  pfpId = integerCheck(parsedPfp, { min: 1, max: 5 });
   return pfpId;
 };
 
@@ -112,20 +141,13 @@ const toggleRecHistory = document.querySelector("#toggleRecHistory");
 const usernameInput = document.querySelector("#usernameInput");
 const emailAddressInput = document.querySelector("#emailAddressInput");
 const passwordInput = document.querySelector("#passwordInput");
-const pfpInput = document.querySelector("#pfpInput");
+const pfpIdInput = document.querySelector("#pfpIdInput");
 const malUsernameInput = document.querySelector("#malUsernameInput");
-const recList = document.querySelectorAll(".rec-list");
-const listHeader = document.querySelectorAll(".fw-bold");
+const recHistory = document.querySelector("#recHistory");
 
 // Toggle button event listeners
 toggleRecHistory.addEventListener("click", (e) => {
-  recList.forEach((element) => {
-    element.classList.toggle("hidden");
-  });
-
-  listHeader.forEach((element) => {
-    element.classList.toggle("hidden");
-  });
+  recHistory.classList.toggle("hidden");
 });
 
 // Form event listeners
@@ -141,10 +163,7 @@ resetForm.addEventListener("submit", (e) => {
     typeof usernameInput.value === "string" &&
     usernameInput.value.trim() !== ""
   ) {
-    username = stringValidation(usernameInput.value, {
-      minLen: 2,
-      maxLen: 25,
-    });
+    username = usernameValidation(usernameInput.value);
   }
   if (
     typeof emailAddressInput.value === "string" &&
@@ -158,8 +177,8 @@ resetForm.addEventListener("submit", (e) => {
   ) {
     password = passwordValidation(passwordInput.value);
   }
-  if (typeof pfpInput.value === "string" && pfpInput.value.trim() !== "") {
-    pfp = pfpValidation(parseInt(pfpInput.value, 10));
+  if (typeof pfpIdInput.value === "string" && pfpIdInput.value.trim() !== "") {
+    pfp = pfpValidation(pfpIdInput.value);
   }
 
   if (typeof username === "object")
@@ -169,6 +188,16 @@ resetForm.addEventListener("submit", (e) => {
   if (typeof password === "object")
     errors.push("(Password) " + password.message);
   if (typeof pfp === "object") errors.push("(Profile Picture) " + pfp.message);
+
+  // Error: no input provided
+  if (
+    !usernameInput.value &&
+    !emailAddressInput.value &&
+    !passwordInput.value &&
+    !pfpIdInput.value
+  ) {
+    errors.push("Must provide at least one input!");
+  }
 
   if (errors.length > 0) {
     e.preventDefault();

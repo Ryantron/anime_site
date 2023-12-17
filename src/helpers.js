@@ -1,6 +1,7 @@
 //You can add and export any helper functions you want here. If you aren't using any, then you can just leave this file as is.
 import { ObjectId } from "mongodb";
-import {users} from "./config/mongoCollections.js"
+import { users } from "./config/mongoCollections.js";
+
 /**
  * Errors
  * TypeError (wrong type) -> 400
@@ -56,6 +57,17 @@ export function removeObjectIdFromUser(user) {
   });
 }
 
+export async function getUserByEmail(emailAddress) {
+  if (!emailAddress) throw new Error("Need to provide emailAddress");
+  const usersCollection = await users();
+  const user = await usersCollection.findOne({ emailAddress });
+  if (user === null)
+    throw new Error(`User not found by email: ${emailAddress}`);
+
+  removeObjectIdFromUser(user);
+  return user;
+}
+
 export const IMAGE_PATHS = {
   1: "/public/images/pfp/1-apple-istock.png",
   2: "/public/images/pfp/2-pen-vecteezy.png",
@@ -64,7 +76,7 @@ export const IMAGE_PATHS = {
   5: "/public/images/pfp/5-anime_boy-wallpapers_clan.png",
 };
 
-export async function updateFriendsList(senderData, recipientData){
+export async function updateFriendsList(senderData, recipientData) {
   const usersCollection = await users();
   let recipientFriends = recipientData.friendList;
   if (!recipientFriends) {
@@ -112,11 +124,16 @@ export async function updateFriendsList(senderData, recipientData){
   if (updateRecipientFriendsList.modifiedCount === 0)
     throw new DBError("Could not update friendList successfully");
 
-    return true;
+  return true;
 }
-export async function updateSentPendingRequests(yourUsername, sentRequests, targetUsername, pendingRequests){
+export async function updateSentPendingRequests(
+  yourUsername,
+  sentRequests,
+  targetUsername,
+  pendingRequests
+) {
   const usersCollection = await users();
-  
+
   const insertPending = {
     pendingRequests: pendingRequests,
   };
@@ -142,27 +159,33 @@ export async function updateSentPendingRequests(yourUsername, sentRequests, targ
   if (updatedSent.modifiedCount === 0)
     throw new DBError("Could not update sentRequests successfully");
 
-  return true
+  return true;
 }
 export async function getUserInfo(senderName, recipientName) {
-    senderName = exportedMethods.stringCheck(senderName)
-    recipientName = exportedMethods.stringCheck(recipientName)
+  senderName = exportedMethods.stringCheck(senderName);
+  recipientName = exportedMethods.stringCheck(recipientName);
 
-    senderName = senderName.toLowerCase();
-    recipientName = recipientName.toLowerCase();
+  senderName = senderName.toLowerCase();
+  recipientName = recipientName.toLowerCase();
 
-    const usersCollection = await users();
-    const sender = await usersCollection.findOne({
-        username: senderName
-      });
-    const recipient = await usersCollection.findOne({
-        username: recipientName
-    })
-    if(!sender){throw new RangeError("Could not find your username")}
-    if(!recipient){throw new RangeError("The person you are trying to add does not exist. Double check their username for spelling errors")}
+  const usersCollection = await users();
+  const sender = await usersCollection.findOne({
+    username: senderName,
+  });
+  const recipient = await usersCollection.findOne({
+    username: recipientName,
+  });
+  if (!sender) {
+    throw new RangeError("Could not find your username");
+  }
+  if (!recipient) {
+    throw new RangeError(
+      "The person you are trying to add does not exist. Double check their username for spelling errors"
+    );
+  }
 
-    return {sender, recipient}
-} 
+  return { sender, recipient };
+}
 
 const exportedMethods = {
   integerCheck(arg, { min = -Infinity, max = Infinity } = {}) {
@@ -195,7 +218,6 @@ const exportedMethods = {
     if (!username || !emailAddress || !password) {
       throw new TypeError("All inputs must be non-empty strings");
     }
-
     if (
       typeof username !== "string" ||
       typeof emailAddress !== "string" ||
@@ -204,37 +226,25 @@ const exportedMethods = {
       throw new TypeError("All inputs must be a string");
     }
 
-    if (/\s/.test(username)) {
-      throw new RangeError("username cannot contain empty spaces");
-    }
-    if (/\s/.test(password)) {
-      throw new RangeError("password cannot contain empty spaces");
-    }
-
-    username = username.trim();
-    emailAddress = emailAddress.trim();
-    password = password.trim();
-
-    const nameRegex = /^[A-Za-z0-9]{2}$/;
-    if (nameRegex.test(username)) {
-      throw new RangeError(
-        "username must be at least 2 characters long and contain no special characters"
-      );
-    }
-
-    this.passwordValidation(password);
-
+    username = this.usernameValidation(username);
+    password = this.passwordValidation(password);
     emailAddress = this.emailValidation(emailAddress);
   },
 
   usernameValidation(username) {
-    this.stringCheck(username);
+    username = this.stringCheck(username);
+    // Username trimmed in stringCheck
+    if (username.length < 2) {
+      throw new RangeError("username cannot be less than 2 characters long");
+    }
+    if (username.length > 25) {
+      throw new RangeError("username cannot be more than 25 characters long");
+    }
     if (/\s/.test(username)) {
       throw new RangeError("username cannot contain empty spaces");
     }
-    username = username.trim();
-    const nameRegex = /^[A-Za-z0-9]{2}$/;
-    if (nameRegex.test(username)) {
+    const nameRegex = /^[A-Za-z0-9]{2,}$/;
+    if (!nameRegex.test(username)) {
       throw new RangeError(
         "username must be at least 2 characters long and contain no special characters"
       );
@@ -243,9 +253,9 @@ const exportedMethods = {
   },
 
   emailValidation(email) {
-    this.stringCheck(email);
-    email = email.trim();
-    const emailCheck = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+    email = this.stringCheck(email);
+    // Email trimmed in stringCheck
+    const emailCheck = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/i;
     if (!emailCheck.test(email)) {
       throw new RangeError("emailAddress is not a valid email");
     }
@@ -256,7 +266,7 @@ const exportedMethods = {
     if (/\s/.test(password)) {
       throw new RangeError("password cannot contain empty spaces");
     }
-    password = password.trim();
+    // No trim
     const passRegex =
       /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^\&*\)\(+=._-])[a-zA-Z0-9!@#\$%\^\&*\)\(+=._-]{8,}$/;
     if (!passRegex.test(password)) {
@@ -265,6 +275,20 @@ const exportedMethods = {
       );
     }
     return password;
+  },
+
+  pfpValidation(pfpId) {
+    pfpId = this.stringCheck(pfpId);
+    // pfpId trimmed in stringCheck
+    if (pfpId.length !== 1) {
+      throw new RangeError(`${pfpId} is not an integer between 1 to 5`);
+    }
+    const parsedPfp = parseInt(pfpId, 10);
+    if (!Number.isInteger(parsedPfp)) {
+      throw new RangeError(`${pfpId} is not an integer`);
+    }
+    pfpId = this.integerCheck(parsedPfp, { min: 1, max: 5 });
+    return pfpId;
   },
 
   objectIdValidation(str) {

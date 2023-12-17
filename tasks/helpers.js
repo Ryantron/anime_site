@@ -3,21 +3,12 @@ import bcrypt from "bcrypt";
 
 import validation, {
   convertIdToStrArr,
+  getUserByEmail,
   removeObjectIdFromUser,
 } from "../src/helpers.js";
 import { users } from "../src/config/mongoCollections.js";
 const saltRounds = 16;
-
-export async function getUserByEmail(emailAddress) {
-  if (!emailAddress) throw new Error("Need to provide emailAddress");
-  const usersCollection = await users();
-  const user = await usersCollection.findOne({ emailAddress });
-  if (user === null)
-    throw new Error(`User not found by email: ${emailAddress}`);
-
-  removeObjectIdFromUser(user);
-  return user;
-}
+export { getUserByEmail } from "../src/helpers.js";
 
 export async function addRecommendation({
   emailAddress,
@@ -62,6 +53,7 @@ export async function insertUser({
   sentRequests = [],
   pendingRequests = [],
   friendList = [],
+  friendCount = 0,
 } = {}) {
   username = validation.stringCheck(username);
   emailAddress = validation.emailValidation(emailAddress);
@@ -75,9 +67,10 @@ export async function insertUser({
       sentRequests,
       pendingRequests,
       friendList,
+      friendCount,
       recommendations: [],
+      malUsername: malUsername || "",
     },
-    ...(malUsername ? { malUsername } : {}),
   };
   const usersCollection = await users();
   const result = await usersCollection.insertOne(res);

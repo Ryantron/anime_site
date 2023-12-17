@@ -27,6 +27,7 @@ const menuHTML = `
   id='navbar_menu-popup' 
   class='position-absolute end-0 top-100 secondary-bg-color flex-center flex-column px-2 flex-align-stretch border-bottom border-dark'>
   ${createLi("/main", "navbar_main-anchor", "Main")}
+  ${createLi("/accounts/friends", "navbar_friends_anchor", "Friends")}
   ${navbarUsername === undefined ? "" : accountsItemHTML}
 </ul>
 `;

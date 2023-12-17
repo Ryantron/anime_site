@@ -7,6 +7,7 @@ import validation, {
   ResourcesError,
   errorToStatus,
   IMAGE_PATHS,
+  getUserByEmail,
 } from "../helpers.js";
 import {
   acceptFriendRequest,
@@ -217,7 +218,7 @@ router.route("/accounts/friend/:username").post(async (req, res) => {
       throw new RangeError("You can't friend yourself.");
     let ownUserName = validation.stringCheck(req.session.user.username);
     await sendFriendRequest(ownUserName, userName);
-    return res.status(200).send({ message: "Ok" });
+    return res.redirect("/accounts/friends");
   } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
@@ -232,7 +233,7 @@ router.route("/accounts/friend/reject/:username").post(async (req, res) => {
       throw new RangeError("You can't have a friend request from yourself.");
     let ownUserName = validation.stringCheck(req.session.user.username);
     await rejectFriendRequest(ownUserName, userName);
-    return res.status(200).send({ message: "Ok" });
+    return res.redirect("/accounts/friends");
   } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
@@ -247,7 +248,7 @@ router.route("/accounts/friend/accept/:username").post(async (req, res) => {
       throw new RangeError("You can't have a friend request from yourself.");
     let ownUserName = validation.stringCheck(req.session.user.username);
     await acceptFriendRequest(ownUserName, userName);
-    return res.status(200).send({ message: "Ok" });
+    return res.redirect("/accounts/friends");
   } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
@@ -262,7 +263,7 @@ router.route("/accounts/friend/unfriend/:username").post(async (req, res) => {
       throw new RangeError("You can't be friends with yourself.");
     let ownUserName = validation.stringCheck(req.session.user.username);
     await removeFriend(ownUserName, userName);
-    return res.status(200).send({ message: "Ok" });
+    return res.redirect("/accounts/friends");
   } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
@@ -372,9 +373,9 @@ router.route("/accounts").get(async (req, res) => {
     title: "Your Account",
     username: username,
     emailAddress: emailAddress,
-    malUsername: malUsername ?? "N/A",
+    malUsername: malUsername || "N/A",
     recommendations: recommendations,
-    hasLinked: malUsername !== undefined,
+    hasLinked: malUsername !== "",
     image: IMAGE_PATHS[pfpId],
   });
 });
@@ -392,7 +393,7 @@ router.route("/accounts/mal/link").post(async (req, res) => {
       );
     }
     // Update session: set malUsername
-    req.session.user.malUsername = malUsernameInput;
+    req.session.user.malUsername = malUsernameInput.trim();
     return res.redirect("/accounts");
   } catch (err) {
     return res.redirect(
@@ -410,8 +411,8 @@ router.route("/accounts/mal/unlink").post(async (req, res) => {
       );
     }
     // Update session: clear malUsername
-    req.session.user.malUsername = undefined;
-    res.redirect("/accounts");
+    req.session.user.malUsername = "";
+    return res.redirect("/accounts");
   } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
@@ -429,12 +430,21 @@ router.route("/accounts/reset").patch(async (req, res) => {
       !body.pfpIdInput
     )
       throw new RangeError("Must provide at least one input");
-    if (body.usernameInput) validation.usernameValidation(body.usernameInput);
-    if (body.emailAddressInput)
+    if (body.usernameInput) {
+      validation.usernameValidation(body.usernameInput);
+    }
+    if (body.emailAddressInput) {
       validation.emailValidation(body.emailAddressInput);
-    if (body.passwordInput) validation.passwordValidation(body.passwordInput);
-    if (body.pfpIdInput)
-      validation.integerCheck(body.pfpIdInput, { min: 1, max: 5 });
+    }
+    if (body.passwordInput) {
+      validation.passwordValidation(body.passwordInput);
+    }
+    if (body.pfpIdInput) {
+      body.pfpIdInput = validation.pfpValidation(body.pfpIdInput, {
+        min: 1,
+        max: 5,
+      });
+    }
 
     const user = await changeUserInfo(
       req.session.user._id,
@@ -455,20 +465,17 @@ router.route("/accounts/reset").patch(async (req, res) => {
   }
 });
 
-// TODO: handlebars for friends (maybe 1 page with 2 tabs)
-// FIXME: getFriendInfo that returns {friendList, friendCount, pendingRequests, sentRequests}
-router.route("/friends").get(async (req, res) => {
+router.route("/accounts/friends").get(async (req, res) => {
+  // Update session: all of user (for friend info, other user performs asynchronous change)
+  const user = await getUserByEmail(req.session.user.emailAddress);
+  req.session.user = user;
   return res.render("friends", {
-    title: "Friends",
-    friendList: [],
-    friendCount: 2,
+    title: "Your Friends",
+    friendCount: req.session.user.friendCount,
+    friendList: req.session.user.friendList,
+    pendingRequests: req.session.user.pendingRequests,
+    sentRequests: req.session.user.sentRequests,
   });
 });
-
-// router.route("/friends/pending").get(async (req, res) => {
-//   return res.render("friends", {
-//     title: "Friends",
-//   });
-// });
 
 export default router;
