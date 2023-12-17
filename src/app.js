@@ -60,6 +60,17 @@ app.engine("handlebars", handlebarsInstance.engine);
 app.set("view engine", "handlebars");
 app.set("views", __viewPath);
 
+app.get("/", (req, res, next) => {
+  const defaultSrc =
+    "default-src 'self' https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js https://kit.fontawesome.com https://ka-f.fontawesome.com https://rawgit.com/leizongmin/js-xss/master/dist/xss.js;";
+  const styleSrc =
+    "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css;";
+  const fontSrc =
+    "font-src 'self' https://kit.fontawesome.com/643c2e6cd9.js https://ka-f.fontawesome.com;";
+  res.set("Content-Security-Policy", `${defaultSrc}${styleSrc}${fontSrc}`);
+  next();
+});
+
 app.use("/accounts", (req, res, next) => {
   if (req.session.user) return next();
   res.redirect("/login");
