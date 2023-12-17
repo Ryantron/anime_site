@@ -6,6 +6,7 @@ import validation, {
   ResourcesError,
   errorToStatus,
   IMAGE_PATHS,
+  getUserByEmail,
 } from "../helpers.js";
 import {
   acceptFriendRequest,
@@ -215,7 +216,7 @@ router.route("/accounts/friend/:username").post(async (req, res) => {
       throw new RangeError("You can't friend yourself.");
     let ownUserName = validation.stringCheck(req.session.user.username);
     await sendFriendRequest(ownUserName, userName);
-    return res.status(200).send({ message: "Ok" });
+    return res.redirect("/accounts/friends");
   } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
@@ -230,7 +231,7 @@ router.route("/accounts/friend/reject/:username").post(async (req, res) => {
       throw new RangeError("You can't have a friend request from yourself.");
     let ownUserName = validation.stringCheck(req.session.user.username);
     await rejectFriendRequest(ownUserName, userName);
-    return res.status(200).send({ message: "Ok" });
+    return res.redirect("/accounts/friends");
   } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
@@ -245,7 +246,7 @@ router.route("/accounts/friend/accept/:username").post(async (req, res) => {
       throw new RangeError("You can't have a friend request from yourself.");
     let ownUserName = validation.stringCheck(req.session.user.username);
     await acceptFriendRequest(ownUserName, userName);
-    return res.status(200).send({ message: "Ok" });
+    return res.redirect("/accounts/friends");
   } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
@@ -260,7 +261,7 @@ router.route("/accounts/friend/unfriend/:username").post(async (req, res) => {
       throw new RangeError("You can't be friends with yourself.");
     let ownUserName = validation.stringCheck(req.session.user.username);
     await removeFriend(ownUserName, userName);
-    return res.status(200).send({ message: "Ok" });
+    return res.redirect("/accounts/friends");
   } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
@@ -409,7 +410,7 @@ router.route("/accounts/mal/unlink").post(async (req, res) => {
     }
     // Update session: clear malUsername
     req.session.user.malUsername = undefined;
-    res.redirect("/accounts");
+    return res.redirect("/accounts");
   } catch (err) {
     return res.redirect(
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
@@ -453,19 +454,16 @@ router.route("/accounts/reset").patch(async (req, res) => {
   }
 });
 
-// The DB + cookie should have {friendList, friendCount, pendingRequests, sentRequests}
-// TODO: other accounts/friends routes modify the session to update the 4 things above?
 router.route("/accounts/friends").get(async (req, res) => {
+  // Update session: all of user (for friend info, other user performs asynchronous change)
+  const user = await getUserByEmail(req.session.user.emailAddress);
+  req.session.user = user;
   return res.render("friends", {
     title: "Your Friends",
     friendCount: req.session.user.friendCount,
-    // FIXME: TESTING
-    // friendList: req.session.user.friendList,
-    // pendingRequests: req.session.user.pendingRequests,
-    // sentRequests: req.session.user.sentRequests,
-    friendList: ["Elon Musk", "Keanu Reeves"],
-    pendingRequests: ["testuser2", "testuser3"],
-    sentRequests: ["testuser2", "testuser3"],
+    friendList: req.session.user.friendList,
+    pendingRequests: req.session.user.pendingRequests,
+    sentRequests: req.session.user.sentRequests,
   });
 });
 
