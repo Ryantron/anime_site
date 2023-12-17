@@ -60,6 +60,17 @@ app.engine("handlebars", handlebarsInstance.engine);
 app.set("view engine", "handlebars");
 app.set("views", __viewPath);
 
+app.get("/", (req, res, next) => {
+  const defaultSrc =
+    "default-src 'self' sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN https://kit.fontawesome.com https://ka-f.fontawesome.com;";
+  const styleSrc =
+    "style-src 'self' 'unsafe-inline' sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN;";
+  const fontSrc =
+    "font-src 'self' https://kit.fontawesome.com/643c2e6cd9.js https://ka-f.fontawesome.com;";
+  res.set("Content-Security-Policy", `${defaultSrc}${styleSrc}${fontSrc}`);
+  next();
+});
+
 app.use("/accounts", (req, res, next) => {
   if (req.session.user) return next();
   res.redirect("/login");

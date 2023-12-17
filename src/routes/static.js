@@ -1,5 +1,6 @@
 import express from "express";
 const router = express.Router();
+import crypto from "crypto";
 import validation, {
   AuthError,
   DBError,
@@ -166,6 +167,7 @@ router.route("/recommendations/:recId").get(async (req, res) => {
     }
     return res.render("recommendationList", {
       title: "Recommendation List",
+      recListNounce: crypto.randomUUID(),
       image: authorRec.authorPfpPath,
       isAuthor: isAuthor,
       authorName: authorRec.authorName,
