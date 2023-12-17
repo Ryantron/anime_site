@@ -1,12 +1,8 @@
 import express from "express";
 const router = express.Router();
 import crypto from "crypto";
-import validation, {
-  errorToStatus,
-} from "../helpers.js";
-import {
-  isFriendOrPending,
-} from "../data/friends.js";
+import validation, { errorToStatus } from "../helpers.js";
+import { isFriendOrPending } from "../data/friends.js";
 import {
   getRecommendationListAndAuthor,
   getHistory,
@@ -73,7 +69,7 @@ router.route("/review/:recId").post(async (req, res) => {
       recId,
       rating
     );
-    return res.status(200).send("Ok");
+    return res.status(200).send();
   } catch (err) {
     console.log(err);
     return res.status(errorToStatus(err)).send({

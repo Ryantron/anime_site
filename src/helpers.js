@@ -175,6 +175,7 @@ export async function getUserInfo(senderName, recipientName) {
   const recipient = await usersCollection.findOne({
     username: recipientName,
   });
+
   if (!sender) {
     throw new RangeError("Could not find your username");
   }
