@@ -6,6 +6,7 @@
     {{#each Result}}
       {{#this}}
         <li><a
+            class="regular"
             tabindex="0"
             href="https://myanimelist.net/anime/{{this.id}}"
           >{{this.title}}</a></li>
@@ -14,5 +15,5 @@
   </ol>
 </main>
 <footer>
-  <a tabindex="0" href="/main">Go back to main page!</a>
+  <a class="regular" tabindex="0" href="/main">Go back to main page!</a>
 </footer>
