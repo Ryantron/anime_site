@@ -3,12 +3,9 @@ const router = express.Router();
 import validation, {
   errorToStatus,
   getUserByUsername,
-  IMAGE_PATHS
+  IMAGE_PATHS,
 } from "../helpers.js";
-import {
-  registerUser,
-  loginUser,
-} from "../data/users.js";
+import { registerUser, loginUser } from "../data/users.js";
 
 router.route("/").get(async (req, res) => {
   return res.render("aboutus", {
@@ -116,22 +113,27 @@ router
     }
   });
 
-
-router.route("/logout").get(async (req,res) =>{
+router.route("/logout").get(async (req, res) => {
   req.session.destroy();
   res.redirect("/login");
-})
+});
 
 router.route("/profile/:username").get(async (req, res) => {
-  const user = await getUserByUsername(req.params.username);
-  return res.render("profile", {
-    title: `${user.username}'s Profile`,
-    username: user.username,
-    emailAddress: user.emailAddress,
-    malUsername: user.malUsername || "N/A",
-    recommendations: user.recommendations,
-    image: IMAGE_PATHS[user.pfpId],
-  });
+  try {
+    const user = await getUserByUsername(req.params.username);
+    return res.render("profile", {
+      title: `${user.username}'s Profile`,
+      username: user.username,
+      emailAddress: user.emailAddress,
+      malUsername: user.malUsername || "N/A",
+      recommendations: user.recommendations,
+      image: IMAGE_PATHS[user.pfpId],
+    });
+  } catch (err) {
+    return res.redirect(
+      `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
+    );
+  }
 });
 
 export default router;
