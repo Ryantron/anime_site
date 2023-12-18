@@ -77,9 +77,9 @@
 
       {{#each friendList}}
         <li class="list-group-item">
-          <span tabindex="0"><a class="regular" href="/profile/{{this.username}}">{{this.username}}</a></span>
+          <span tabindex="0"><a class="regular" href="/profile/{{this}}">{{this}}</a></span>
           <form
-            action="/accounts/friend/unfriend/{{this.username}}"
+            action="/accounts/friend/unfriend/{{this}}"
             method="POST"
           >
             <label class="hiddenLabel" for="removeFriend">Remove Friend</label>
@@ -169,5 +169,13 @@
     </ul>
   </div>
 </main>
+
+<script defer nonce="{{friendsNonce}}">
+  const handlebars = { 
+    USERNAME: '{{username}}', 
+    FRIEND_LIST: '{{friendList}}',
+    SENT_REQUESTS: '{{sentRequests}}', 
+  };
+</script>
 
 <script defer type="module" src="/public/js/friends.js"></script>

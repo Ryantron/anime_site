@@ -35,7 +35,7 @@ router.route("/:recId").get(async (req, res) => {
     }
     return res.render("recommendationList", {
       title: "Recommendation List",
-      recListNounce: crypto.randomUUID(),
+      recListNonce: crypto.randomUUID(),
       image: authorRec.authorPfpPath,
       isAuthor: isAuthor,
       authorName: authorRec.authorName,
