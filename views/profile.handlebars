@@ -48,9 +48,9 @@
         <p class="fw-bold text-center" tabindex="0">Recommendation List
           {{increment @index}}</p>
           {{#if (eq this.rating 0)}}
-          <p class="text-center">Rating: N/A</p>
+          <p class="text-center" tabindex="0">Rating: N/A</p>
           {{else}}
-          <p class="text-center">Rating: {{this.rating}}/5</p>
+          <p class="text-center" tabindex="0">Rating: {{this.rating}}/5</p>
           {{/if}}
         <ul>
           {{#each this.recommendation}}
