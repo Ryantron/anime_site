@@ -150,6 +150,10 @@ export const linkMalAccount = async (emailAddress, malUsername) => {
   if (typeof malUsername !== "string") {
     throw new TypeError("malUsername must be a string input");
   }
+  malUsername = malUsername.trim();
+  if (malUsername.length === 0) {
+    throw new RangeError("malUsername cannot be empty");
+  }
 
   const MAL_API_URL =
     "https://api.myanimelist.net/v2/users/" + malUsername + "/animelist";
@@ -223,7 +227,7 @@ export const unlinkMalAccount = async (emailAddress) => {
 
   const updatedInfo = await usersCollection.updateOne(
     { emailAddress: emailAddress },
-    { $set: {malUsername: ""} },
+    { $set: { malUsername: "" } },
     { returnDocument: "after" }
   );
   if (updatedInfo.modifiedCount === 0) {

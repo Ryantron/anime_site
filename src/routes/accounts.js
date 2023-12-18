@@ -81,11 +81,12 @@ router.route("/").get(async (req, res) => {
 });
 
 router.route("/mal/link").post(async (req, res) => {
-  const { malUsernameInput } = req.body;
   try {
+    const { malUsernameInput } = req.body;
+    const malUsername = validation.stringCheck(malUsernameInput);
     const updateInfo = await linkMalAccount(
       req.session.user.emailAddress,
-      malUsernameInput
+      malUsername
     );
     if (!updateInfo.linkedAccount) {
       return res.redirect(
@@ -93,7 +94,7 @@ router.route("/mal/link").post(async (req, res) => {
       );
     }
     // Update session: set malUsername
-    req.session.user.malUsername = malUsernameInput.trim();
+    req.session.user.malUsername = malUsername.trim();
     return res.redirect("/accounts");
   } catch (err) {
     return res.redirect(

@@ -72,8 +72,7 @@ export async function getUserByUsername(username) {
   if (!username) throw new Error("Need to provide username");
   const usersCollection = await users();
   const user = await usersCollection.findOne({ username });
-  if (user === null)
-    throw new Error(`User not found by username: ${username}`);
+  if (user === null) throw new Error(`User not found by username: ${username}`);
 
   removeObjectIdFromUser(user);
   return user;
@@ -201,7 +200,7 @@ export async function getUserInfo(senderName, recipientName) {
 
 const exportedMethods = {
   integerCheck(arg, { min = -Infinity, max = Infinity } = {}) {
-    if (arg == undefined)
+    if (arg === undefined)
       throw new TypeError(`No value passed to integerCheck: ${arg}`);
     if (typeof arg !== "number") throw new TypeError(`${arg} must be a number`);
     if (!Number.isInteger(arg))
@@ -214,13 +213,13 @@ const exportedMethods = {
     return arg;
   },
   stringCheck(arg) {
-    if (arg == undefined) {
+    if (arg === undefined) {
       throw new TypeError(
         `You must provide a string input for your parameter ${arg}`
       );
     } else if (typeof arg !== "string") {
       throw new TypeError(`${arg} must be a string`);
-    } else if (arg.trim().length == 0) {
+    } else if (arg.trim().length === 0) {
       throw new RangeError(`string inputs cannot be empty space`);
     }
     return arg.trim();
