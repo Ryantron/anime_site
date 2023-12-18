@@ -16,7 +16,6 @@ const usernameInput = document.querySelector("#usernameInput");
 const emailAddressInput = document.querySelector("#emailAddressInput");
 const passwordInput = document.querySelector("#passwordInput");
 const confirmPasswordInput = document.querySelector("#confirmPasswordInput");
-const submitInput = document.querySelector("#submitInput");
 
 /**
  * EVENT LISTENERS
@@ -50,6 +49,7 @@ if (form.id === "loginForm") {
       maxLen: 25,
     });
     let emailAddress = emailValidation(emailAddressInput.value);
+    const passwordCopy = passwordInput.value;
     let password = passwordValidation(passwordInput.value);
     const confirmPassword = confirmPasswordInput.value.trim();
 
@@ -57,12 +57,12 @@ if (form.id === "loginForm") {
     else errors.push("(Username) " + username.error);
 
     if (emailAddress.success) emailAddress = emailAddress.data;
-    else errors.push("(Email Address) " + emailAddress.message);
+    else errors.push("(Email Address) " + emailAddress.error);
 
     if (password.success) password = password.data;
-    else errors.push("(Password) " + password.message);
+    else errors.push("(Password) " + password.error);
 
-    if (password !== confirmPassword)
+    if (passwordCopy !== confirmPassword)
       errors.push("Password and Confirm Password do not match.");
 
     if (errors.length > 0) {

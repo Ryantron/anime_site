@@ -84,16 +84,8 @@
   box-shadow: 10px 10px gray;
 }
 
-.width-auto {
-  width: auto;
-}
-
-.min-width-200 {
-  min-width: 200;
-}
-
-.min-width-300 {
-  min-width: 300;
+.max-width-400 {
+  max-width: 400px;
 }
 
 .max-width-500 {
@@ -160,10 +152,6 @@ a.regular:visited {
 
 a.regular:hover {
   color: red;
-}
-
-.max-width-history {
-  max-width: 400px;
 }
 
 .radio-btn {
