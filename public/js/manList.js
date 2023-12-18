@@ -1,45 +1,49 @@
-$(document).ready(function () {
-  $("#manual-form").submit((event) => {
-    let input = $("#animeInput").val().trim();
-    let hasErred = false;
-    if (typeof input != "string" && !hasErred) {
-      //case
-      $("#csverr").html("Your input must be a string!");
-      event.preventDefault();
-      hasErred = true;
-    }
-    if (input === "" && !hasErred) {
-      //case
-      $("#csverr").html("Your input cannot be empty!");
-      event.preventDefault();
-      hasErred = true;
-    }
-    input = input.split(",");
-    let inputArr = [];
-    for (let x of input) {
-      if (x.trim() != "") {
-        inputArr.push(x.trim());
-      }
-    }
-    if (inputArr.length === 0 && !hasErred) {
-      //case
-      $("#csverr").html("Your input does not contain any valid values!");
-      event.preventDefault();
-      hasErred = true;
-    }
-    let count = 0;
-    for (let x of inputArr) {
-      if (isNaN(x) && !hasErred) {
-        //case
-        $("#csverr").html("Your input contains a non-number attribute!");
-        event.preventDefault();
-        hasErred = true;
-        break;
-      } else inputArr[count] = parseInt(x);
-      count++;
-    }
-    if (!hasErred) {
-      $("#csverr").html("");
-    }
-  });
+import { stringValidation, createErrorList, deleteError } from "./helpers.js";
+
+/**
+ * DOM ELEMENTS
+ */
+
+const manualForm = document.querySelector("#manual-form");
+const animeInput = document.querySelector("#animeInput");
+const errorContainer = document.querySelector("#errorContainer");
+
+/**
+ * EVENT LISTENERS
+ */
+
+manualForm.addEventListener("submit", (e) => {
+  deleteError();
+  const errors = [];
+  let animeValue = stringValidation(animeInput.value);
+  if (animeValue.success) animeValue = animeValue.data;
+  else errors.push("(Anime List) An empty list was provided.");
+
+  if (typeof animeValue === "string") {
+    const animeList = animeValue
+      .split(",")
+      .map((el) => el.trim())
+      .filter((el) => el !== "");
+
+    if (animeList.length === 0)
+      errors.push("(Anime List) Anime List is empty.");
+    if (
+      animeList.length !=
+      animeList.filter((el) => isNaN(Number(el)) === false).length
+    )
+      errors.push(
+        "(Anime List) No non-ID values are accepted. Examples of ID: 1, 40148, 49889."
+      );
+    if (animeList.length != [...new Set(animeList)].length)
+      errors.push(
+        "(Anime List) Duplicate IDs found. Please remove before submission."
+      );
+  }
+
+  if (errors.length > 0) {
+    e.preventDefault();
+    const errLi = createErrorList(errors);
+    errorContainer.appendChild(errLi);
+  }
 });
+
