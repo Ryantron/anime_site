@@ -18,6 +18,34 @@ import {
   unlinkMalAccount,
 } from "../data/users.js";
 
+router.route("/").get(async (req, res) => {
+  // Middleware requires req.session.user, else redirect to /login
+  const { username, emailAddress, malUsername, recommendations, pfpId } =
+    req.session.user;
+  return res.render("accounts", {
+    title: "Your Account",
+    username: username,
+    emailAddress: emailAddress,
+    malUsername: malUsername || "N/A",
+    recommendations: recommendations,
+    hasLinked: malUsername !== "",
+    image: IMAGE_PATHS[pfpId],
+  });
+});
+
+router.route("/friends").get(async (req, res) => {
+  // Update session: all of user (for friend info, other user performs asynchronous change)
+  const user = await getUserByEmail(req.session.user.emailAddress);
+  req.session.user = user;
+  return res.render("friends", {
+    title: "Your Friends",
+    friendCount: req.session.user.friendCount,
+    friendList: req.session.user.friendList,
+    pendingRequests: req.session.user.pendingRequests,
+    sentRequests: req.session.user.sentRequests,
+  });
+});
+
 router.route("/friend/:username").post(async (req, res) => {
   try {
     await friendRoute(req, res, sendFriendRequest);
@@ -62,21 +90,6 @@ router.route("/friend/unfriend/:username").post(async (req, res) => {
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
     );
   }
-});
-
-router.route("/").get(async (req, res) => {
-  // Middleware requires req.session.user, else redirect to /login
-  const { username, emailAddress, malUsername, recommendations, pfpId } =
-    req.session.user;
-  return res.render("accounts", {
-    title: "Your Account",
-    username: username,
-    emailAddress: emailAddress,
-    malUsername: malUsername || "N/A",
-    recommendations: recommendations,
-    hasLinked: malUsername !== "",
-    image: IMAGE_PATHS[pfpId],
-  });
 });
 
 router.route("/mal/link").post(async (req, res) => {
@@ -162,19 +175,6 @@ router.route("/reset").patch(async (req, res) => {
       `/errors?errorStatus=${errorToStatus(err)}&message=${err}`
     );
   }
-});
-
-router.route("/friends").get(async (req, res) => {
-  // Update session: all of user (for friend info, other user performs asynchronous change)
-  const user = await getUserByEmail(req.session.user.emailAddress);
-  req.session.user = user;
-  return res.render("friends", {
-    title: "Your Friends",
-    friendCount: req.session.user.friendCount,
-    friendList: req.session.user.friendList,
-    pendingRequests: req.session.user.pendingRequests,
-    sentRequests: req.session.user.sentRequests,
-  });
 });
 
 export default router;
