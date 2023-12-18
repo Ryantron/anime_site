@@ -37,7 +37,6 @@ if (form.id === "loginForm") {
 
     if (errors.length > 0) {
       e.preventDefault();
-      console.log(errors);
       const errLi = createErrorList(errors);
       main.appendChild(errLi);
     }

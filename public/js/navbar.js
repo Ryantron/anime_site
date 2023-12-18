@@ -20,11 +20,7 @@ const createLi = (aHref, aId, aContent) => `
 </li>
 `;
 
-const logoutItemHTML = createLi(
-  "/logout",
-  "navbar_logout-anchor",
-  "Logout"
-);
+const logoutItemHTML = createLi("/logout", "navbar_logout-anchor", "Logout");
 
 const menuHTML = `
 <ul 
