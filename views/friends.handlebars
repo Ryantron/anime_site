@@ -39,7 +39,6 @@
       class="btn-check"
       name="btnradio"
       id="friendList"
-      autocomplete="off"
       checked
     />
     <label class="btn btn-outline-danger radio-btn" for="friendList">Friend List</label>
@@ -49,7 +48,6 @@
       class="btn-check"
       name="btnradio"
       id="pendingRequests"
-      autocomplete="off"
     />
     <label
       class="btn btn-outline-danger radio-btn"
@@ -61,7 +59,6 @@
       class="btn-check"
       name="btnradio"
       id="sentRequests"
-      autocomplete="off"
     />
     <label class="btn btn-outline-danger radio-btn" for="sentRequests">Sent
       Requests</label>
@@ -70,11 +67,10 @@
   {{! Show friend list, unfriend form button submission }}
   <div class="friendListInfo">
     <h3 tabindex="0">Friend List:</h3>
-    <ul class="list-group">
-      {{#unless friendList}}
+    {{#unless friendList}}
         <p class="fw-bold text-center" tabindex="0">No Friends...</p>
-      {{/unless}}
-
+    {{/unless}}
+    <ul class="list-group">
       {{#each friendList}}
         <li class="list-group-item">
           <span tabindex="0"><a class="regular" href="/profile/{{this}}">{{this}}</a></span>
@@ -170,7 +166,7 @@
   </div>
 </main>
 
-<script defer nonce="{{friendsNonce}}">
+<script nonce="{{friendsNonce}}">
   const handlebars = { 
     USERNAME: '{{username}}', 
     FRIEND_LIST: '{{friendList}}',
@@ -178,4 +174,4 @@
   };
 </script>
 
-<script defer type="module" src="/public/js/friends.js"></script>
+<script type="module" src="/public/js/friends.js"></script>
