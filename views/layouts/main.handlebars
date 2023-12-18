@@ -13,7 +13,12 @@ don't forget to include your css and your client-side script file references in 
     {{#if (eq title "Recommendation List")}}
       <meta
         http-equiv="Content-Security-Policy"
-        content="script-src 'self' 'nonce-{{recListNounce}}' 'sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=' 'sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL' https://kit.fontawesome.com/643c2e6cd9.js https://rawgit.com/leizongmin/js-xss/master/dist/xss.js;"
+        content="script-src 'self' 'nonce-{{recListNonce}}' 'sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=' 'sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL' https://kit.fontawesome.com/643c2e6cd9.js https://rawgit.com/leizongmin/js-xss/master/dist/xss.js;"
+      />
+    {{else if (eq title "Your Friends")}}
+      <meta
+        http-equiv="Content-Security-Policy"
+        content="script-src 'self' 'nonce-{{friendsNonce}}' 'sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=' 'sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL' https://kit.fontawesome.com/643c2e6cd9.js https://rawgit.com/leizongmin/js-xss/master/dist/xss.js;"
       />
     {{else}}
       <meta
