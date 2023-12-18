@@ -49,7 +49,6 @@ router
       validation.emailValidation(body.emailAddressInput);
       validation.passwordValidation(body.passwordInput);
     } catch (err) {
-      console.log(err);
       return res.redirect(
         `/errors?errorStatus=${errorToStatus(err)}&message=${err.message}`
       );
@@ -60,7 +59,6 @@ router
       req.session.user = user;
       return res.redirect("/accounts");
     } catch (err) {
-      console.log(err);
       return res.redirect(
         `/login?wasErrored=${true}&errorStatus=${errorToStatus(
           err

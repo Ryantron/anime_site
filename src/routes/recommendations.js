@@ -73,7 +73,6 @@ router.route("/review/:recId").post(async (req, res) => {
       message: "Success",
     });
   } catch (err) {
-    console.log(err);
     return res.status(errorToStatus(err)).send({
       message: err.message ?? "Unknown Error",
     });
