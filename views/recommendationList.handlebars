@@ -1,6 +1,5 @@
 <header>
   <h1 tabindex="0" class="text-center">Recommendation List</h1>
-  <a tabindex="0" class="header" href="/main">Go back to main page!</a>
 </header>
 
 <main class="mx-5">
@@ -121,18 +120,20 @@
       {{/if}}
     </div>
 
-    <ol>
-      {{#each recommendations}}
-        <li><a
-            tabindex="0"
-            class="regular"
-            href="https://myanimelist.net/anime/{{this.id}}"
-          >{{this.title}}</a> (Frequency: {{this.frequency}})</li>
-        <!-- <li><p tabindex="0">{{this.title}}</p></li> -->
-      {{/each}}
-    </ol>
+    <div class="flex-center flex-column max-width-history my-3">
+      <ol>
+        {{#each recommendations}}
+          <li><a
+              tabindex="0"
+              class="regular"
+              href="https://myanimelist.net/anime/{{this.id}}"
+            >{{this.title}}</a> (Frequency: {{this.frequency}})</li>
+        {{/each}}
+      </ol>
+    </div>
   </section>
 </main>
+<footer><a tabindex="0" class="regular flex-center mb-3" href="/main">Go back to main page!</a></footer>
 <script nonce="{{recListNounce}}">
   const handlebars = { IS_AUTHOR: '{{isAuthor}}', AUTHOR_NAME: '{{authorName}}',
   REC_ID: '{{recId}}', REVIEW_RATING: '{{reviewRating}}', FRIEND_FORM: '{{showFriendButton}}'
