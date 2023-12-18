@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import express from "express";
 const router = express.Router();
 import validation, {
@@ -170,8 +171,10 @@ router.route("/friends").get(async (req, res) => {
   req.session.user = user;
   return res.render("friends", {
     title: "Your Friends",
+    username: req.session.user.username,
+    friendsNonce: crypto.randomUUID(),
     friendCount: req.session.user.friendCount,
-    friendList: req.session.user.friendList,
+    friendList: req.session.user.friendList.map((obj) => obj.username),
     pendingRequests: req.session.user.pendingRequests,
     sentRequests: req.session.user.sentRequests,
   });
