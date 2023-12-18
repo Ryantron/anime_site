@@ -58,7 +58,9 @@ friendRequestByTextForm.addEventListener("submit", (e) => {
   if (targetUsername.success) targetUsername = targetUsername.data;
   else errors.push("(Username) " + targetUsername.error);
 
-  if (targetUsername === handlebars.username)
+  console.log(targetUsername);
+  console.log(handlebars.USERNAME);
+  if (targetUsername === handlebars.USERNAME)
     errors.push("(Username) Sad. Unable to friend yourself.");
 
   handlebars.FRIEND_LIST.split(",").forEach((username) => {
