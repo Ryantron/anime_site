@@ -351,6 +351,7 @@ export const getRecommendationListAndAuthor = async (recListId) => {
   };
 };
 
+/*
 export const likeRecAnimeList = async (currentUserId, recListId) => {
   if (!ObjectId.isValid(currentUserId))
     throw new TypeError("currentUserId is not a valid ObjectId type");
@@ -401,3 +402,4 @@ export const likeRecAnimeList = async (currentUserId, recListId) => {
     return { addedLike: true };
   }
 };
+*/
