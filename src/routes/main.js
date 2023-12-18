@@ -76,7 +76,7 @@ router
       } else {
         let result = await getManualListRecs(finalAnimeArr);
         return res.render("manualList", {
-          title: "Recommendation List",
+          title: "Manual Recommendation List",
           Result: result, //This will be some form of the returned list/Object list instead in the final, for now it just returns the list the user put it (with valid values)
         });
       }
