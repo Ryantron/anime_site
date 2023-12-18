@@ -1,9 +1,6 @@
 import express from "express";
 const router = express.Router();
-import {
-  AuthError,
-  errorToStatus,
-} from "../helpers.js";
+import { AuthError, errorToStatus } from "../helpers.js";
 import {
   getManualListUsers,
   getUserRecs,
