@@ -171,7 +171,8 @@ export const removeClassFromArr = (elArr, className) => {
 };
 
 export const ajaxPost = async (url, parentEl) => {
-  return $.ajax({
+  try {
+  await $.ajax({
     method: "POST",
     contentType: "application/json",
     url,
@@ -180,7 +181,9 @@ export const ajaxPost = async (url, parentEl) => {
       location.reload();
     })
     .fail((xhr, _, err) => {
-      const errEl = createErrorList([`Status ${xhr.status}: ${err}`]);
+      const errEl = createErrorList([`${xhr.responseText}`]);
       parentEl.appendChild(errEl);
     });
+  }
+  catch (err) {}
 };
