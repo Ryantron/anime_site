@@ -13,17 +13,17 @@ don't forget to include your css and your client-side script file references in 
     {{#if (eq title "Recommendation List")}}
       <meta
         http-equiv="Content-Security-Policy"
-        content="script-src 'self' 'nonce-{{recListNonce}}' 'sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=' 'sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL' https://kit.fontawesome.com/643c2e6cd9.js https://rawgit.com/leizongmin/js-xss/master/dist/xss.js;"
+        content="script-src 'self' 'nonce-{{recListNonce}}' 'sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=' 'sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL' https://kit.fontawesome.com/643c2e6cd9.js https://rawgit.com/leizongmin/js-xss/master/dist/xss.js;"
       />
     {{else if (eq title "Your Friends")}}
       <meta
         http-equiv="Content-Security-Policy"
-        content="script-src 'self' 'nonce-{{friendsNonce}}' 'sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=' 'sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL' https://kit.fontawesome.com/643c2e6cd9.js https://rawgit.com/leizongmin/js-xss/master/dist/xss.js;"
+        content="script-src 'self' 'nonce-{{friendsNonce}}' 'sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=' 'sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL' https://kit.fontawesome.com/643c2e6cd9.js https://rawgit.com/leizongmin/js-xss/master/dist/xss.js;"
       />
     {{else}}
       <meta
         http-equiv="Content-Security-Policy"
-        content="script-src 'self' 'sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=' 'sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL' https://kit.fontawesome.com/643c2e6cd9.js https://rawgit.com/leizongmin/js-xss/master/dist/xss.js;"
+        content="script-src 'self' 'sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=' 'sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL' https://kit.fontawesome.com/643c2e6cd9.js https://rawgit.com/leizongmin/js-xss/master/dist/xss.js;"
       />
     {{/if}}
 
@@ -93,8 +93,8 @@ don't forget to include your css and your client-side script file references in 
       </div>
     </div>
     <script
-      src="https://code.jquery.com/jquery-3.7.1.min.js"
-      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      src="https://code.jquery.com/jquery-2.2.4.min.js"
+      integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
       crossorigin="anonymous"
     ></script>
     <script type="module" src="/public/js/navbar.js"></script>

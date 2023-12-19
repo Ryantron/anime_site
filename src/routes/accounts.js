@@ -56,9 +56,9 @@ router.route("/friend/:username").post(async (req, res) => {
       message: "success",
     });
   } catch (err) {
-    return res.status(errorToStatus(err)).send({
-      message: err.message ?? "Unknown Error",
-    });
+    return res.status(errorToStatus(err)).send(
+      err.toString() ?? "Unknown Error",
+    );
   }
 });
 
