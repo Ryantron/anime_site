@@ -2,17 +2,19 @@
   <h1 tabindex="0" class="text-center">Recommendation List</h1>
 </header>
 <main class="mx-5">
-  <ol>
-    {{#each Result}}
-      {{#this}}
-        <li><a
-            class="regular"
-            tabindex="0"
-            href="https://myanimelist.net/anime/{{this.id}}"
-          >{{this.title}}</a> (Frequency: {{this.frequency}})</li>
-      {{/this}}
-    {{/each}}
-  </ol>
+  <div class="flex-center flex-column max-width-400 my-3">
+    <ol>
+      {{#each Result}}
+        {{#this}}
+          <li><a
+              class="regular"
+              tabindex="0"
+              href="https://myanimelist.net/anime/{{this.id}}"
+            >{{this.title}}</a> (Frequency: {{this.frequency}})</li>
+        {{/this}}
+      {{/each}}
+    </ol>
+  </div>
 </main>
 <footer>
   <a class="regular" tabindex="0" href="/main">Go back to main page!</a>
