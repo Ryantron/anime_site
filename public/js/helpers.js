@@ -32,15 +32,15 @@ export const stringValidation = (
   { minLen = 1, maxLen = Infinity } = {}
 ) => {
   if (typeof str !== "string")
-    return errorConstructor(`${str} is not of type string`);
+    return errorConstructor(`${str} is not of type string.`);
 
   str = str.trim();
 
   if (minLen && str.length < minLen)
-    return errorConstructor(`Length is less than ${minLen}`);
+    return errorConstructor(`Length is less than ${minLen}.`);
 
   if (maxLen && str.length > maxLen)
-    return errorConstructor(`Length is more than ${maxLen}`);
+    return errorConstructor(`Length is more than ${maxLen}.`);
 
   return dataConstructor(str);
 };
@@ -58,14 +58,14 @@ export const integerValidation = (
   { min = -Infinity, max = Infinity } = {}
 ) => {
   if (num === undefined)
-    return errorConstructor(`No value passed to integerCheck: ${num}`);
+    return errorConstructor(`No value passed to integerCheck: ${num}.`);
   num = Number(num);
   if (!Number.isInteger(num))
     return errorConstructor(`${num} is not an integer`);
   if (num < min)
-    return errorConstructor(`${num} is below min allowed value (${min})`);
+    return errorConstructor(`${num} is below min allowed value (${min}).`);
   if (num > max)
-    return errorConstructor(`${num} is above max allowed value (${max})`);
+    return errorConstructor(`${num} is above max allowed value (${max}).`);
 
   return dataConstructor(num);
 };
@@ -81,10 +81,10 @@ export const usernameValidation = (username) => {
   else return res;
 
   if (/\s/.test(username))
-    return errorConstructor(`Username cannot contain empty spaces`);
+    return errorConstructor(`Username cannot contain empty spaces.`);
   if (!nameRegex.test(username)) {
     return errorConstructor(
-      "Username must be at least 2 characters long and contain no special characters"
+      "Username must be at least 2 characters long and contain no special characters."
     );
   }
   return dataConstructor(username);
@@ -97,12 +97,12 @@ export const usernameValidation = (username) => {
  */
 export const emailValidation = (email) => {
   const res = stringValidation(email);
-  if (typeof res.success === false) return res;
+  if (!res.success) return res;
   const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/i;
   email = res.data;
 
   if (emailRegex.test(email)) return dataConstructor(email);
-  else return errorConstructor(`Invalid email ${email}`);
+  else return errorConstructor(`Invalid email: ${email}`);
 };
 
 /**
@@ -112,14 +112,14 @@ export const emailValidation = (email) => {
  */
 export const passwordValidation = (password) => {
   if (/\s/.test(password)) {
-    return errorConstructor("Password cannot contain empty spaces");
+    return errorConstructor("Password cannot contain empty spaces.");
   }
   password = password.trim();
   const passRegex =
     /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^\&*\)\(+=._-])[a-zA-Z0-9!@#\$%\^\&*\)\(+=._-]{8,}$/;
   if (!passRegex.test(password)) {
     return errorConstructor(
-      "Password must be at least 8 characters long and contain 1 special character, number, and uppercase letter"
+      "Password must be at least 8 characters long and contain 1 special character, number, and uppercase letter."
     );
   }
 
@@ -133,6 +133,7 @@ export const passwordValidation = (password) => {
 export const createErrorList = (errors) => {
   const ul = document.createElement("ul");
   ul.classList.add("clienterror");
+  ul.classList.add("max-width-400");
   for (const error of errors) {
     const errorLi = document.createElement("li");
     errorLi.classList.add("no-bullet");

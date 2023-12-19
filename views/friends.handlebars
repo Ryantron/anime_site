@@ -12,18 +12,20 @@
   currently active tab receives keyboard focus. Once the currently active tab
   has focus, the cursor keys activate the previous/next tab (not tabbing through) }}
 
-  <div class="flex-center mb-4">
-    <form action="/accounts/friend/:username" method="post" id="friendRequestByTextForm">
-      <label for="friendRequestInput" class="hiddenLabel">Username: </label>
-      <input type="text" name="friendRequestInput" id="friendRequestInput" placeholder="username"  />
-      <label class="hiddenLabel" for="manualSubmit">Submit</label>
-      <button
-        type="submit"
-        id="manualSubmit"
-        class="primary-bg-color primary-text-color rounded-pill border-0 no-underline px-2 py-1"
-      >
-        Submit
-      </button>
+  <div class="flex-center mb-3">
+    <form action="/accounts/friend/:username" method="post" id="friendRequestByTextForm" class="flex-column">
+        <div class="flex-center flex-column">
+        <label for="friendRequestInput" >Send Friend Request:</label>
+        <input type="text" name="friendRequestInput" id="friendRequestInput" placeholder="username"  />
+        <label class="hiddenLabel" for="manualSubmit">Submit</label>
+        <button
+          type="submit"
+          id="manualSubmit"
+          class="primary-bg-color primary-text-color rounded-pill border-0 no-underline px-3 py-1 mt-2"
+        >
+          Submit
+        </button>
+      </div>
     </form>
   </div>
 

@@ -13,7 +13,7 @@
     unique recommendations, meaning you won't see anime recommended that you've
     been recommended before!
   </p>
-  <div class="flex-center pb-5">
+  <div class="flex-center pb-3">
     <form method="POST" id="manual-form">
       <label for="animeInput">Enter Anime:</label>
       <input type="text" name="animeInput" id="animeInput" />
@@ -25,7 +25,7 @@
       >Submit</button>
     </form>
   </div>
-  <div class="text-center mb-3" id="errorContainer"></div>
+  <div class="flex-center" id="errorContainer"></div>
   <div class="flex-center pb-5">
     {{#if MalLinked}}
       <form
