@@ -191,7 +191,7 @@ export async function getUserInfo(senderName, recipientName) {
   }
   if (!recipient) {
     throw new RangeError(
-      "The person you are trying to add does not exist. Double check their username for spelling errors"
+      "The person you are trying to add does not exist. Double check their username for spelling errors."
     );
   }
 
